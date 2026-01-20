@@ -1,20 +1,69 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
 
-import { HapticTab } from "@/components/haptic-tab";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
+      backBehavior="history"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarStyle: {
+          borderTopWidth: 0,
+          elevation: 0,
+          height: 80,
+        },
       }}
-    ></Tabs>
+    >
+      <Tabs.Screen
+        name="care"
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name="paw" size={24} color={focused ? "blue" : "black"} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="running"
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="walk"
+              size={24}
+              color={focused ? "blue" : "black"}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="home"
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="home"
+              size={24}
+              color={focused ? "blue" : "black"}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="guide"
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="book"
+              size={24}
+              color={focused ? "blue" : "black"}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen name="mypage" options={{ href: null }} />
+    </Tabs>
   );
 }
