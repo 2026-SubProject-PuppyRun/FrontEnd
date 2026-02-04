@@ -5,18 +5,33 @@ import { Text, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Spinner } from "../ui/spinner";
 
+interface Region {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+}
+
+const DEFAULT_REGION: Region = {
+  latitude: 37.78825,
+  longitude: -122.4324,
+  latitudeDelta: 0.005,
+  longitudeDelta: 0.005,
+};
+
 const GoogleMap = () => {
   const [coordinates, setCoordinates] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
+    latitude: DEFAULT_REGION.latitude,
+    longitude: DEFAULT_REGION.longitude,
   });
   const permission = useLocationPermission();
   const mapRef = React.useRef<MapView>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
+  const isLocationInitialized = React.useRef(false);
   useEffect(() => {
     const initLocation = async () => {
+      if (permission === null || isLocationInitialized.current) return;
       try {
         if (permission !== true) {
           if (permission === false) setErrorMsg("위치 권한이 거부되었습니다.");
@@ -30,13 +45,15 @@ const GoogleMap = () => {
         }
 
         const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
+          accuracy: Location.Accuracy.High,
         });
         setCoordinates({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
+        isLocationInitialized.current = true;
       } catch (error) {
+        isLocationInitialized.current = true;
         console.error("위치 조회 실패:", error);
         setErrorMsg(
           "현재 위치를 가져올 수 없습니다. 잠시 후 다시 시도해 주세요.",
@@ -45,10 +62,24 @@ const GoogleMap = () => {
         setIsLoading(false);
       }
     };
-    if (permission !== null && isLoading) initLocation();
-  }, [permission, isLoading]);
+    console.log("Permission status:", permission);
+    if (permission === true && !isLocationInitialized.current) initLocation();
+  }, [permission]);
 
-  if (isLoading || permission === null) {
+  useEffect(() => {
+    if (!mapRef.current || !isLocationInitialized.current) return;
+    mapRef.current.animateToRegion(
+      {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        latitudeDelta: DEFAULT_REGION.latitudeDelta,
+        longitudeDelta: DEFAULT_REGION.longitudeDelta,
+      },
+      500,
+    );
+  }, [coordinates]);
+
+  if (isLoading === true) {
     return (
       <View className="flex-1 items-center justify-center">
         <Spinner size="large" color="#BFB8AA" />
@@ -69,12 +100,7 @@ const GoogleMap = () => {
       <MapView
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
-        initialRegion={{
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        }}
+        initialRegion={DEFAULT_REGION}
         provider={PROVIDER_GOOGLE}
         showsCompass
         showsScale
