@@ -100,7 +100,12 @@ const GoogleMap = () => {
       <MapView
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
-        initialRegion={DEFAULT_REGION}
+        initialRegion={{
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+          latitudeDelta: DEFAULT_REGION.latitudeDelta,
+          longitudeDelta: DEFAULT_REGION.longitudeDelta,
+        }}
         provider={PROVIDER_GOOGLE}
         showsCompass
         showsScale
