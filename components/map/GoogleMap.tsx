@@ -19,7 +19,7 @@ const DEFAULT_REGION: Region = {
   longitudeDelta: 0.005,
 };
 
-const GoogleMap = () => {
+const GoogleMap = ({ onMapLoad }: { onMapLoad: () => void }) => {
   const [coordinates, setCoordinates] = useState({
     latitude: DEFAULT_REGION.latitude,
     longitude: DEFAULT_REGION.longitude,
@@ -52,6 +52,7 @@ const GoogleMap = () => {
           longitude: location.coords.longitude,
         });
         isLocationInitialized.current = true;
+        onMapLoad();
       } catch (error) {
         isLocationInitialized.current = true;
         console.error("위치 조회 실패:", error);
@@ -62,9 +63,8 @@ const GoogleMap = () => {
         setIsLoading(false);
       }
     };
-    console.log("Permission status:", permission);
     if (permission === true && !isLocationInitialized.current) initLocation();
-  }, [permission]);
+  }, [permission]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!mapRef.current || !isLocationInitialized.current) return;

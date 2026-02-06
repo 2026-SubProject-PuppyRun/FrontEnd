@@ -1,12 +1,19 @@
+import RunStartButton from "@/components/button/RunStartButton";
 import Header from "@/components/header/Header";
 import GoogleMap from "@/components/map/GoogleMap";
 import React from "react";
+import { View } from "react-native";
 
 const Index = () => {
+  const [isMapLoaded, setIsMapLoaded] = React.useState(false);
+
   return (
     <>
       <Header />
-      <GoogleMap />
+      <View className="relative flex-1">
+        <GoogleMap onMapLoad={() => setIsMapLoaded(true)} />
+        <RunStartButton disabled={!isMapLoaded} />
+      </View>
     </>
   );
 };
