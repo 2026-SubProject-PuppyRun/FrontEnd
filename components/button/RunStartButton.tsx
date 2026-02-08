@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { Center } from "../ui/center";
 
 const RunStartButton = ({ disabled }: { disabled: boolean }) => {
+  if (disabled) return null;
   return (
     <Center className="absolute bottom-12 right-1/2 h-1/5 w-96 translate-x-1/2 rounded-3xl bg-primary-400">
       <Button
