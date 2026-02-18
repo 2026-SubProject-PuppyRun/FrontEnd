@@ -1,7 +1,8 @@
 import { useLocationPermission } from "@/hooks/use-location-permission";
+import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Spinner } from "../ui/spinner";
 
@@ -29,6 +30,19 @@ const GoogleMap = ({ onMapLoad }: { onMapLoad: () => void }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const isLocationInitialized = React.useRef(false);
+  const moveToMyLocation = async () => {
+    try {
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+      setCoordinates({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    } catch (error) {
+      console.error("위치 이동 실패:", error);
+    }
+  };
   useEffect(() => {
     const initLocation = async () => {
       if (permission === null || isLocationInitialized.current) return;
@@ -113,7 +127,15 @@ const GoogleMap = ({ onMapLoad }: { onMapLoad: () => void }) => {
         showsUserLocation
         followsUserLocation
         zoomEnabled
+        showsMyLocationButton={false}
       />
+      <TouchableOpacity
+        onPress={moveToMyLocation}
+        className="absolute bottom-2 right-2 rounded-full bg-white p-2 shadow"
+        activeOpacity={0.7}
+      >
+        <Ionicons name="location" size={24} color="#26170F" />
+      </TouchableOpacity>
     </View>
   );
 };
