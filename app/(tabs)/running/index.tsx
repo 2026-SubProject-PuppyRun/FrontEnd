@@ -24,9 +24,10 @@ const Index = () => {
       <View className="relative flex-1">
         <RecRouteSwiper
           disabled={!isMapLoaded}
-          selectedRoute={(route: SelectedRoute[] | null) =>
+          setSelectedRoute={(route: SelectedRoute[] | null) =>
             setSelectedRoute(route)
           }
+          selectedRoute={selectedRoute}
         />
         <GoogleMap
           onMapLoad={() => setIsMapLoaded(true)}
@@ -40,7 +41,12 @@ const Index = () => {
             />
           )}
         </GoogleMap>
-        <RunStartButton disabled={!isMapLoaded} />
+        <RunStartButton
+          disabled={!isMapLoaded}
+          selectedRoute={(route: SelectedRoute[] | null) =>
+            setSelectedRoute(route)
+          }
+        />
       </View>
     </View>
   );

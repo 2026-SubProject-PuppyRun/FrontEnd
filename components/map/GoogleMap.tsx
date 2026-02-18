@@ -112,7 +112,15 @@ const GoogleMap = ({ onMapLoad, children, selectedRoute }: GoogleMapProps) => {
       mapRef.current &&
       isLocationInitialized.current
     ) {
-      // 경로 선택 취소 시 내 위치 복귀 로직 (필요하다면)
+      mapRef.current.animateToRegion(
+        {
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+          latitudeDelta: DEFAULT_REGION.latitudeDelta,
+          longitudeDelta: DEFAULT_REGION.longitudeDelta,
+        },
+        500,
+      );
     }
 
     if (selectedRoute === undefined) {

@@ -16,7 +16,7 @@ interface DummyRoute {
 
 // const dummyRoutes: DummyRoute[][] | null = null;
 
-const dummyRoutes: DummyRoute[][] = [
+export const dummyRoutes: DummyRoute[][] = [
   // Route 1
   [
     { latitude: 37.16024976004391, longitude: 127.05596863884455 },
@@ -73,12 +73,17 @@ const dummyRoutes: DummyRoute[][] = [
 ];
 interface RecRouteSwiperProps {
   disabled: boolean;
-  selectedRoute: (
+  setSelectedRoute: (
     route: { latitude: number; longitude: number }[] | null,
   ) => void;
+  selectedRoute?: { latitude: number; longitude: number }[] | null;
 }
 
-function RecRouteSwiper({ disabled, selectedRoute }: RecRouteSwiperProps) {
+function RecRouteSwiper({
+  disabled,
+  setSelectedRoute,
+  selectedRoute,
+}: RecRouteSwiperProps) {
   const progress = useSharedValue<number>(0);
   const width = Dimensions.get("window").width;
   const ref = React.useRef<ICarouselInstance>(null);
@@ -91,11 +96,11 @@ function RecRouteSwiper({ disabled, selectedRoute }: RecRouteSwiperProps) {
   };
   useEffect(() => {
     if (dummyRoutes && dummyRoutes.length > 0 && disabled === false) {
-      selectedRoute(dummyRoutes[0]);
+      setSelectedRoute(dummyRoutes[0]);
     }
   }, [disabled]);
 
-  if (disabled || dummyRoutes === null) {
+  if (disabled || dummyRoutes === null || selectedRoute === null) {
     return null;
   }
 
@@ -124,7 +129,7 @@ function RecRouteSwiper({ disabled, selectedRoute }: RecRouteSwiperProps) {
         onSnapToItem={(index) => {
           console.log("current index:", index);
           const routeIndex = index % dummyRoutes.length;
-          selectedRoute(dummyRoutes[routeIndex]);
+          setSelectedRoute(dummyRoutes[routeIndex]);
         }}
         renderItem={({ index }) => <RecRouteSwiperItem index={index} />}
       />
