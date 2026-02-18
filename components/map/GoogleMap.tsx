@@ -88,17 +88,15 @@ const GoogleMap = ({ onMapLoad, children, selectedRoute }: GoogleMapProps) => {
   useEffect(() => {
     if (!mapRef.current || !isLocationInitialized.current) return;
 
-    if (!selectedRoute) {
-      mapRef.current.animateToRegion(
-        {
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude,
-          latitudeDelta: DEFAULT_REGION.latitudeDelta,
-          longitudeDelta: DEFAULT_REGION.longitudeDelta,
-        },
-        500,
-      );
-    }
+    mapRef.current.animateToRegion(
+      {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        latitudeDelta: DEFAULT_REGION.latitudeDelta,
+        longitudeDelta: DEFAULT_REGION.longitudeDelta,
+      },
+      500,
+    );
   }, [coordinates, selectedRoute]);
 
   useEffect(() => {
