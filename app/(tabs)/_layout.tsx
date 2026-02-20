@@ -35,6 +35,7 @@ export default function TabLayout() {
               color={focused ? "blue" : "black"}
             />
           ),
+          href: "/(tabs)/running",
         }}
       />
       <Tabs.Screen

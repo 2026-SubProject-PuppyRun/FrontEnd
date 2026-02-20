@@ -99,6 +99,7 @@ function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
       await setRecommendedRoutes(dummyRoutes);
     };
     getRecommendedRoutes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (
