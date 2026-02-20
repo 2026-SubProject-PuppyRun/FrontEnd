@@ -1,3 +1,4 @@
+import { useRunStore } from "@/store/useRunStore";
 import * as React from "react";
 import { useEffect } from "react";
 import { Dimensions, View } from "react-native";
@@ -73,20 +74,14 @@ export const dummyRoutes: DummyRoute[][] = [
 ];
 interface RecRouteSwiperProps {
   disabled: boolean;
-  setSelectedRoute: (
-    route: { latitude: number; longitude: number }[] | null,
-  ) => void;
-  selectedRoute?: { latitude: number; longitude: number }[] | null;
 }
 
-function RecRouteSwiper({
-  disabled,
-  setSelectedRoute,
-  selectedRoute,
-}: RecRouteSwiperProps) {
+function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
   const progress = useSharedValue<number>(0);
   const width = Dimensions.get("window").width;
   const ref = React.useRef<ICarouselInstance>(null);
+  const setSelectedRoute = useRunStore((state) => state.setSelectedRoute);
+  const selectedRoute = useRunStore((state) => state.selectedRoute);
 
   const onPressPagination = (index: number) => {
     ref.current?.scrollTo({
@@ -98,6 +93,7 @@ function RecRouteSwiper({
     if (dummyRoutes && dummyRoutes.length > 0 && disabled === false) {
       setSelectedRoute(dummyRoutes[0]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [disabled]);
 
   if (disabled || dummyRoutes === null || selectedRoute === null) {
@@ -110,7 +106,7 @@ function RecRouteSwiper({
       className="absolute top-12 z-10 h-32 w-full items-center justify-center"
     >
       <Carousel
-        ref={ref} // ref 연결 추가
+        ref={ref}
         loop={true}
         width={width}
         height={(2 * width) / 5}
@@ -127,7 +123,6 @@ function RecRouteSwiper({
           progress.value = absoluteProgress;
         }}
         onSnapToItem={(index) => {
-          console.log("current index:", index);
           const routeIndex = index % dummyRoutes.length;
           setSelectedRoute(dummyRoutes[routeIndex]);
         }}

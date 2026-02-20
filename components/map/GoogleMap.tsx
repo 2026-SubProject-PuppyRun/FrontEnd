@@ -1,4 +1,5 @@
 import { useLocationPermission } from "@/hooks/use-location-permission";
+import { useRunStore } from "@/store/useRunStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
@@ -22,10 +23,9 @@ const DEFAULT_REGION: Region = {
 interface GoogleMapProps {
   onMapLoad: () => void;
   children?: React.ReactNode;
-  selectedRoute?: { latitude: number; longitude: number }[] | null;
 }
 
-const GoogleMap = ({ onMapLoad, children, selectedRoute }: GoogleMapProps) => {
+const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
   const [coordinates, setCoordinates] = useState({
     latitude: DEFAULT_REGION.latitude,
     longitude: DEFAULT_REGION.longitude,
@@ -35,6 +35,7 @@ const GoogleMap = ({ onMapLoad, children, selectedRoute }: GoogleMapProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const isLocationInitialized = React.useRef(false);
+  const selectedRoute = useRunStore((state) => state.selectedRoute);
   const moveToMyLocation = async () => {
     try {
       const location = await Location.getCurrentPositionAsync({
@@ -126,6 +127,7 @@ const GoogleMap = ({ onMapLoad, children, selectedRoute }: GoogleMapProps) => {
     if (selectedRoute === undefined) {
       console.log("⚠️ selectedRoute가 undefined 입니다. 초기화 대기 중");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRoute]);
 
   if (isLoading === true) {
