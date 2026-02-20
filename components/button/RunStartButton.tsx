@@ -1,7 +1,6 @@
 import { useRunStore } from "@/store/useRunStore";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { dummyRoutes } from "../swiper/RecRouteSwiper";
 import { Button } from "../ui/button";
 import { Center } from "../ui/center";
 
@@ -12,6 +11,7 @@ interface RunStartButtonProps {
 const RunStartButton = ({ disabled }: RunStartButtonProps) => {
   const [disabledRoute, setDisabledRoute] = useState(false);
   const selectedRoute = useRunStore((state) => state.setSelectedRoute);
+  const recommendedRoutes = useRunStore((state) => state.recommendedRoutes);
   if (disabled) return null;
   return (
     <Center className="absolute bottom-12 right-1/2 h-1/5 w-96 translate-x-1/2 flex-row rounded-3xl bg-primary-400">
@@ -25,7 +25,7 @@ const RunStartButton = ({ disabled }: RunStartButtonProps) => {
         onPress={() => {
           setDisabledRoute((prev) => !prev);
           if (disabledRoute) {
-            selectedRoute(dummyRoutes[0]);
+            selectedRoute(recommendedRoutes ? recommendedRoutes[0] : null);
           } else {
             selectedRoute(null);
           }

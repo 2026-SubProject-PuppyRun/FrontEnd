@@ -17,7 +17,7 @@ interface DummyRoute {
 
 // const dummyRoutes: DummyRoute[][] | null = null;
 
-export const dummyRoutes: DummyRoute[][] = [
+const dummyRoutes: DummyRoute[][] = [
   // Route 1
   [
     { latitude: 37.16024976004391, longitude: 127.05596863884455 },
@@ -82,6 +82,10 @@ function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
   const ref = React.useRef<ICarouselInstance>(null);
   const setSelectedRoute = useRunStore((state) => state.setSelectedRoute);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
+  const setRecommendedRoutes = useRunStore(
+    (state) => state.setRecommendedRoutes,
+  );
+  const recommendedRoutes = useRunStore((state) => state.recommendedRoutes);
 
   const onPressPagination = (index: number) => {
     ref.current?.scrollTo({
@@ -89,14 +93,25 @@ function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
       animated: true,
     });
   };
+
   useEffect(() => {
-    if (dummyRoutes && dummyRoutes.length > 0 && disabled === false) {
-      setSelectedRoute(dummyRoutes[0]);
+    const getRecommendedRoutes = async () => {
+      await setRecommendedRoutes(dummyRoutes);
+    };
+    getRecommendedRoutes();
+  }, []);
+  useEffect(() => {
+    if (
+      recommendedRoutes &&
+      recommendedRoutes.length > 0 &&
+      disabled === false
+    ) {
+      setSelectedRoute(recommendedRoutes[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [disabled]);
 
-  if (disabled || dummyRoutes === null || selectedRoute === null) {
+  if (disabled || recommendedRoutes === null || selectedRoute === null) {
     return null;
   }
 
@@ -112,7 +127,7 @@ function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
         height={(2 * width) / 5}
         pagingEnabled={true}
         snapEnabled={true}
-        data={dummyRoutes} // 더미 데이터 연결
+        data={recommendedRoutes} // 더미 데이터 연결
         scrollAnimationDuration={1000}
         mode="parallax"
         modeConfig={{
@@ -123,8 +138,8 @@ function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
           progress.value = absoluteProgress;
         }}
         onSnapToItem={(index) => {
-          const routeIndex = index % dummyRoutes.length;
-          setSelectedRoute(dummyRoutes[routeIndex]);
+          const routeIndex = index % recommendedRoutes.length;
+          setSelectedRoute(recommendedRoutes[routeIndex]);
         }}
         renderItem={({ index }) => <RecRouteSwiperItem index={index} />}
       />
