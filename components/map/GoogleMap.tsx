@@ -1,10 +1,11 @@
 import { useLocationPermission } from "@/hooks/use-location-permission";
+import { useRunStore } from "@/store/useRunStore";
+import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Spinner } from "../ui/spinner";
-
 interface Region {
   latitude: number;
   longitude: number;
@@ -19,7 +20,12 @@ const DEFAULT_REGION: Region = {
   longitudeDelta: 0.005,
 };
 
-const GoogleMap = ({ onMapLoad }: { onMapLoad: () => void }) => {
+interface GoogleMapProps {
+  onMapLoad: () => void;
+  children?: React.ReactNode;
+}
+
+const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
   const [coordinates, setCoordinates] = useState({
     latitude: DEFAULT_REGION.latitude,
     longitude: DEFAULT_REGION.longitude,
@@ -29,6 +35,20 @@ const GoogleMap = ({ onMapLoad }: { onMapLoad: () => void }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const isLocationInitialized = React.useRef(false);
+  const selectedRoute = useRunStore((state) => state.selectedRoute);
+  const moveToMyLocation = async () => {
+    try {
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+      setCoordinates({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    } catch (error) {
+      console.error("위치 이동 실패:", error);
+    }
+  };
   useEffect(() => {
     const initLocation = async () => {
       if (permission === null || isLocationInitialized.current) return;
@@ -68,6 +88,7 @@ const GoogleMap = ({ onMapLoad }: { onMapLoad: () => void }) => {
 
   useEffect(() => {
     if (!mapRef.current || !isLocationInitialized.current) return;
+
     mapRef.current.animateToRegion(
       {
         latitude: coordinates.latitude,
@@ -77,7 +98,37 @@ const GoogleMap = ({ onMapLoad }: { onMapLoad: () => void }) => {
       },
       500,
     );
-  }, [coordinates]);
+  }, [coordinates, selectedRoute]);
+
+  useEffect(() => {
+    if (selectedRoute && selectedRoute.length > 0 && mapRef.current) {
+      setTimeout(() => {
+        mapRef.current?.fitToCoordinates(selectedRoute, {
+          edgePadding: { top: 100, right: 50, bottom: 50, left: 50 },
+          animated: true,
+        });
+      }, 500);
+    } else if (
+      selectedRoute === null &&
+      mapRef.current &&
+      isLocationInitialized.current
+    ) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+          latitudeDelta: DEFAULT_REGION.latitudeDelta,
+          longitudeDelta: DEFAULT_REGION.longitudeDelta,
+        },
+        500,
+      );
+    }
+
+    if (selectedRoute === undefined) {
+      console.log("⚠️ selectedRoute가 undefined 입니다. 초기화 대기 중");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoute]);
 
   if (isLoading === true) {
     return (
@@ -113,7 +164,17 @@ const GoogleMap = ({ onMapLoad }: { onMapLoad: () => void }) => {
         showsUserLocation
         followsUserLocation
         zoomEnabled
-      />
+        showsMyLocationButton={false}
+      >
+        {children}
+      </MapView>
+      <TouchableOpacity
+        onPress={moveToMyLocation}
+        className="absolute bottom-2 right-2 rounded-full bg-white p-2 shadow"
+        activeOpacity={0.7}
+      >
+        <Ionicons name="location" size={24} color="#26170F" />
+      </TouchableOpacity>
     </View>
   );
 };
