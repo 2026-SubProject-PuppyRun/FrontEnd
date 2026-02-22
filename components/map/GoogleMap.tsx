@@ -36,6 +36,7 @@ const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const isLocationInitialized = React.useRef(false);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
+  const { isRunning } = useRunStore();
   const moveToMyLocation = async () => {
     try {
       const location = await Location.getCurrentPositionAsync({
@@ -98,7 +99,7 @@ const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
       },
       500,
     );
-  }, [coordinates, selectedRoute]);
+  }, [coordinates]);
 
   useEffect(() => {
     if (selectedRoute && selectedRoute.length > 0 && mapRef.current) {
@@ -162,9 +163,24 @@ const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
         showsScale
         mapType="standard"
         showsUserLocation
-        followsUserLocation
         zoomEnabled
         showsMyLocationButton={false}
+        onUserLocationChange={(e) => {
+          if (isRunning && mapRef.current) {
+            const { coordinate } = e.nativeEvent;
+            if (coordinate) {
+              mapRef.current.animateToRegion(
+                {
+                  latitude: coordinate.latitude,
+                  longitude: coordinate.longitude,
+                  latitudeDelta: DEFAULT_REGION.latitudeDelta,
+                  longitudeDelta: DEFAULT_REGION.longitudeDelta,
+                },
+                500,
+              );
+            }
+          }
+        }}
       >
         {children}
       </MapView>

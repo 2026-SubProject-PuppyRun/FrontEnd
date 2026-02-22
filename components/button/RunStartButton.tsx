@@ -96,6 +96,7 @@ const RunStartButton = ({ disabled }: RunStartButtonProps) => {
               size="sm"
               onPress={() => {
                 handleClose();
+                useRunStore.getState().startRun();
                 router.replace("/running/tracking");
               }}
             >
