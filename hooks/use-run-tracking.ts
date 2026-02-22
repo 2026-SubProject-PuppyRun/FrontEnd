@@ -1,4 +1,5 @@
 import { useRunStore } from "@/store/useRunStore";
+import { calculatePace } from "@/util/calcPace";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import { useEffect } from "react";
@@ -15,16 +16,28 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     const { locations } = data as { locations: Location.LocationObject[] };
 
     if (locations && locations.length > 0) {
-      console.log(
-        `📍 [Background Task] ${new Date().toLocaleTimeString()} - 위치 수신: ${locations.length}개`,
-        locations[0].coords,
-      );
-
       locations.forEach((location) => {
         useRunStore.getState().addActualLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
+      });
+
+      const lastLocation = locations[locations.length - 1];
+      const speed = lastLocation.coords.speed; // m/s 단위
+
+      if (speed !== null && speed >= 0) {
+        const currentPace = calculatePace(speed); // "5'30''" 형식
+
+        useRunStore.getState().addRunData({
+          pace: currentPace,
+        });
+      }
+      console.log("📍 [Background Task] 위치 업데이트:", {
+        latitude: lastLocation.coords.latitude,
+        longitude: lastLocation.coords.longitude,
+        speed: lastLocation.coords.speed,
+        pace: useRunStore.getState().runData?.pace,
       });
     }
   }

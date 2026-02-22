@@ -21,12 +21,26 @@ interface RunState {
   // 4. 러닝 상태
   isRunning: boolean;
 
+  // 5. 페이스, 거리, 시간 등 러닝 관련 정보 (추후 확장 가능)
+  runData?: {
+    pace?: string; // min/km
+    distance?: number; // m
+    duration?: number; // s
+    averagePace?: string; // min/km
+    startTime?: number; // 타이머 시작 시간 (밀리초)
+  };
+  // 6. 일시정지 상태
+  isPaused: boolean;
+
   setRecommendedRoutes: (routes: Coordinate[][] | null) => void;
   setSelectedRoute: (route: Coordinate[] | null) => void;
   setCurrentLocation: (location: Coordinate) => void;
   startRun: () => void;
   stopRun: () => void;
+  pauseRun: () => void;
+  resumeRun: () => void;
   addActualLocation: (location: Coordinate) => void;
+  addRunData: (data: Partial<RunState["runData"]>) => void;
 }
 
 export const useRunStore = create<RunState>((set) => ({
@@ -35,6 +49,14 @@ export const useRunStore = create<RunState>((set) => ({
   actualRoute: [],
   currentLocation: null,
   isRunning: false,
+  runData: {
+    pace: "0'00''",
+    distance: 0,
+    duration: 0,
+    averagePace: "0'00''",
+    startTime: undefined,
+  },
+  isPaused: false,
 
   setRecommendedRoutes: (routes) => set({ recommendedRoutes: routes }),
 
@@ -42,13 +64,35 @@ export const useRunStore = create<RunState>((set) => ({
 
   setCurrentLocation: (location) => set({ currentLocation: location }),
 
-  startRun: () => set({ isRunning: true, actualRoute: [] }),
+  startRun: () =>
+    set({
+      isRunning: true,
+      actualRoute: [],
+      runData: { ...useRunStore.getState().runData, startTime: Date.now() },
+    }),
 
-  stopRun: () => set({ isRunning: false }),
+  stopRun: () =>
+    set({
+      isRunning: false,
+      actualRoute: [],
+      runData: { ...useRunStore.getState().runData, startTime: undefined },
+    }),
 
   addActualLocation: (location) =>
     set((state) => {
       if (!state.isRunning) return state;
       return { actualRoute: [...state.actualRoute, location] };
     }),
+
+  addRunData: (data: Partial<RunState["runData"]>) =>
+    set((state) => ({
+      runData: {
+        ...(state.runData || {}),
+        ...data,
+      },
+    })),
+
+  pauseRun: () => set({ isPaused: true }),
+
+  resumeRun: () => set({ isPaused: false }),
 }));

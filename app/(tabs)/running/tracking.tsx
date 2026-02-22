@@ -1,3 +1,4 @@
+import RunDataBoard from "@/components/board/RunDataBoard";
 import GoogleMap from "@/components/map/GoogleMap";
 import { useRunTracking } from "@/hooks/use-run-tracking";
 import { useRunStore } from "@/store/useRunStore";
@@ -30,8 +31,9 @@ const Tracking = () => {
   return (
     <View
       style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-      className="flex-1 bg-white"
+      className="relative flex-1 bg-white"
     >
+      <RunDataBoard isMapLoaded={isMapLoaded} />
       <GoogleMap onMapLoad={() => setIsMapLoaded(true)}>
         {selectedRoute && (
           <Polyline
