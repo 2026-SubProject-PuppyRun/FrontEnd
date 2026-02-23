@@ -1,10 +1,12 @@
 import RunDataBoard from "@/components/board/RunDataBoard";
+import TipBoard from "@/components/board/TipBoard";
+import RunControlButton from "@/components/button/RunControlButton";
 import GoogleMap from "@/components/map/GoogleMap";
 import { useRunTracking } from "@/hooks/use-run-tracking";
 import { useRunStore } from "@/store/useRunStore";
-import { useNavigation } from "expo-router";
-import React, { useLayoutEffect, useState } from "react";
-import { View } from "react-native";
+import { useNavigation, useRouter } from "expo-router";
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import { Alert, View } from "react-native";
 import { Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -14,6 +16,30 @@ const Tracking = () => {
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const actualRoute = useRunStore((state) => state.actualRoute);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const router = useRouter();
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      if (!useRunStore.getState().isRunning) return;
+      e.preventDefault();
+
+      Alert.alert(
+        "러닝 종료",
+        "러닝을 정말 종료하시겠습니까? 기록이 저장되지 않을 수 있습니다.",
+        [
+          { text: "취소", style: "cancel", onPress: () => {} },
+          {
+            text: "종료",
+            style: "destructive",
+            onPress: () => {
+              useRunStore.getState().stopRun();
+              router.replace("/");
+            },
+          },
+        ],
+      );
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   useLayoutEffect(() => {
     navigation.getParent()?.setOptions({
@@ -50,6 +76,8 @@ const Tracking = () => {
           />
         )}
       </GoogleMap>
+      <RunControlButton isMapLoaded={isMapLoaded} />
+      <TipBoard isMapLoaded={isMapLoaded} />
     </View>
   );
 };
