@@ -15,6 +15,7 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
   const actualRoute = useRunStore((state) => state.actualRoute);
   const startTime = useRunStore((state) => state.runData?.startTime);
   const isRunning = useRunStore((state) => state.isRunning);
+  const flatRoute = actualRoute.flat();
 
   const [elapsedTime, setElapsedTime] = useState(0);
 
@@ -34,7 +35,7 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
     }
 
     return () => clearInterval(intervalId);
-  }, [isRunning, startTime]); 
+  }, [isRunning, startTime]);
 
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -49,7 +50,7 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
 
   if (!isMapLoaded) return null;
 
-  const totalDistance = getPathLength(actualRoute);
+  const totalDistance = getPathLength(flatRoute);
 
   return (
     <View className="top-safe-offset-12 absolute z-10 w-full items-center">

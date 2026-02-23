@@ -1,5 +1,6 @@
 import { useRunStore } from "@/store/useRunStore";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Button } from "../ui/button";
 import { View } from "../ui/view";
@@ -13,6 +14,7 @@ const RunControlButton = ({ isMapLoaded }: RunControlButtonProps) => {
   const resumeRun = useRunStore((state) => state.resumeRun);
   const stopRun = useRunStore((state) => state.stopRun);
   const isPaused = useRunStore((state) => state.isPaused);
+  const router = useRouter();
   if (!isMapLoaded) return null;
 
   return (
@@ -30,7 +32,13 @@ const RunControlButton = ({ isMapLoaded }: RunControlButtonProps) => {
           <Button onPress={resumeRun} className="h-28 w-28 rounded-full">
             <Ionicons name="play" size={30} color="white" />
           </Button>
-          <Button onPress={stopRun} className="h-28 w-28 rounded-full">
+          <Button
+            onPress={() => {
+              stopRun();
+              router.replace("/running/summary");
+            }}
+            className="h-28 w-28 rounded-full"
+          >
             <Ionicons name="stop" size={30} color="white" />
           </Button>
         </View>

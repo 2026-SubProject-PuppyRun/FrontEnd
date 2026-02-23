@@ -68,13 +68,36 @@ const Tracking = () => {
             strokeColor="#FF0000"
           />
         )}
-        {actualRoute.length > 0 && (
-          <Polyline
-            coordinates={actualRoute}
-            strokeWidth={4}
-            strokeColor="#0000FF"
-          />
+        {actualRoute.map(
+          (segment, index) =>
+            segment.length > 0 && (
+              <Polyline
+                key={`run-${index}`}
+                coordinates={segment}
+                strokeWidth={4}
+                strokeColor="#0000FF"
+              />
+            ),
         )}
+
+        {actualRoute.map((segment, index) => {
+          if (index >= actualRoute.length - 1) return null;
+
+          const currentEnd = segment[segment.length - 1];
+          const nextStart = actualRoute[index + 1][0];
+
+          if (!currentEnd || !nextStart) return null;
+
+          return (
+            <Polyline
+              key={`gap-${index}`}
+              coordinates={[currentEnd, nextStart]}
+              strokeWidth={3}
+              strokeColor="#999999"
+              lineDashPattern={[5, 5]}
+            />
+          );
+        })}
       </GoogleMap>
       <RunControlButton isMapLoaded={isMapLoaded} />
       <TipBoard isMapLoaded={isMapLoaded} />

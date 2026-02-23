@@ -16,6 +16,12 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     const { locations } = data as { locations: Location.LocationObject[] };
 
     if (locations && locations.length > 0) {
+      if (useRunStore.getState().isPaused) {
+        console.log(
+          "⏸️ [Background Task] 러닝 일시정지 상태, 위치 업데이트 중지",
+        );
+        return;
+      }
       locations.forEach((location) => {
         useRunStore.getState().addActualLocation({
           latitude: location.coords.latitude,

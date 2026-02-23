@@ -13,7 +13,7 @@ interface RunState {
   selectedRoute: Coordinate[] | null;
 
   // 2. 실제 내가 뛴 경로 (기록용)
-  actualRoute: Coordinate[];
+  actualRoute: Coordinate[][];
 
   // 3. 현재 내 위치 (지도 중심용)
   currentLocation: Coordinate | null;
@@ -46,7 +46,7 @@ interface RunState {
 export const useRunStore = create<RunState>((set) => ({
   recommendedRoutes: null,
   selectedRoute: null,
-  actualRoute: [],
+  actualRoute: [[]],
   currentLocation: null,
   isRunning: false,
   runData: {
@@ -67,21 +67,29 @@ export const useRunStore = create<RunState>((set) => ({
   startRun: () =>
     set({
       isRunning: true,
-      actualRoute: [],
+      isPaused: false,
+      actualRoute: [[]],
       runData: { ...useRunStore.getState().runData, startTime: Date.now() },
     }),
 
   stopRun: () =>
     set({
       isRunning: false,
-      actualRoute: [],
+      isPaused: false,
+      actualRoute: [[]],
       runData: { ...useRunStore.getState().runData, startTime: undefined },
     }),
 
   addActualLocation: (location) =>
     set((state) => {
-      if (!state.isRunning) return state;
-      return { actualRoute: [...state.actualRoute, location] };
+      if (!state.isRunning || state.isPaused) return state;
+
+      const routes =
+        state.actualRoute.length > 0 ? [...state.actualRoute] : [[]];
+      const lastIndex = routes.length - 1;
+
+      routes[lastIndex] = [...routes[lastIndex], location];
+      return { actualRoute: routes };
     }),
 
   addRunData: (data: Partial<RunState["runData"]>) =>
@@ -94,5 +102,13 @@ export const useRunStore = create<RunState>((set) => ({
 
   pauseRun: () => set({ isPaused: true }),
 
-  resumeRun: () => set({ isPaused: false }),
+  resumeRun: () =>
+    set((state) => {
+      const routes = [...state.actualRoute];
+      const lastSegment = routes[routes.length - 1];
+      if (lastSegment.length === 0 && lastSegment) {
+        return { isPaused: false };
+      }
+      return { isPaused: false, actualRoute: [...routes, []] };
+    }),
 }));
