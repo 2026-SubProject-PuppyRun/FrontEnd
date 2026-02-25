@@ -15,6 +15,10 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
   const actualRoute = useRunStore((state) => state.actualRoute);
   const startTime = useRunStore((state) => state.runData?.startTime);
   const isRunning = useRunStore((state) => state.isRunning);
+  const accumulatedMs = useRunStore(
+    (state) => state.runData?.accumulatedMs ?? 0,
+  );
+  const isPaused = useRunStore((state) => state.isPaused);
   const flatRoute = actualRoute.flat();
 
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -22,20 +26,23 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
 
-    if (isRunning && startTime) {
-      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
-
-      intervalId = setInterval(() => {
+    if (isRunning && !isPaused && startTime) {
+      const updateTimer = () => {
         const now = Date.now();
-        const seconds = Math.floor((now - startTime) / 1000);
-        setElapsedTime(seconds);
-      }, 1000);
+        const currentSegmentMs = now - startTime;
+        setElapsedTime(Math.floor((accumulatedMs + currentSegmentMs) / 1000));
+      };
+
+      updateTimer();
+      intervalId = setInterval(updateTimer, 1000);
+    } else if (isRunning && isPaused) {
+      setElapsedTime(Math.floor(accumulatedMs / 1000));
     } else {
       setElapsedTime(0);
     }
 
     return () => clearInterval(intervalId);
-  }, [isRunning, startTime]);
+  }, [isRunning, startTime, accumulatedMs, isPaused]);
 
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);

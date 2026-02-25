@@ -28,6 +28,7 @@ interface RunState {
     duration?: number; // s
     averagePace?: string; // min/km
     startTime?: number; // 타이머 시작 시간 (밀리초)
+    accumulatedMs?: number; // 일시정지 동안 누적된 시간 (밀리초)
   };
   // 6. 일시정지 상태
   isPaused: boolean;
@@ -55,6 +56,7 @@ export const useRunStore = create<RunState>((set) => ({
     duration: 0,
     averagePace: "0'00''",
     startTime: undefined,
+    accumulatedMs: 0,
   },
   isPaused: false,
 
@@ -65,20 +67,27 @@ export const useRunStore = create<RunState>((set) => ({
   setCurrentLocation: (location) => set({ currentLocation: location }),
 
   startRun: () =>
-    set({
+    set((state) => ({
       isRunning: true,
       isPaused: false,
-      actualRoute: [[]],
-      runData: { ...useRunStore.getState().runData, startTime: Date.now() },
-    }),
+      runData: {
+        ...state.runData,
+        startTime: Date.now(),
+        accumulatedMs: 0,
+      },
+    })),
 
   stopRun: () =>
-    set({
+    set((state) => ({
       isRunning: false,
       isPaused: false,
       actualRoute: [[]],
-      runData: { ...useRunStore.getState().runData, startTime: undefined },
-    }),
+      runData: {
+        ...state.runData,
+        startTime: undefined,
+        accumulatedMs: 0,
+      },
+    })),
 
   addActualLocation: (location) =>
     set((state) => {
@@ -100,15 +109,39 @@ export const useRunStore = create<RunState>((set) => ({
       },
     })),
 
-  pauseRun: () => set({ isPaused: true }),
+  pauseRun: () =>
+    set((state) => {
+      const currentStartTime = state.runData?.startTime ?? Date.now();
+      const currentAccumulated = state.runData?.accumulatedMs ?? 0;
+      const addedMs = Date.now() - currentStartTime;
+
+      return {
+        isPaused: true,
+        runData: {
+          ...state.runData,
+          accumulatedMs: currentAccumulated + addedMs,
+          startTime: undefined,
+        },
+      };
+    }),
 
   resumeRun: () =>
     set((state) => {
       const routes = [...state.actualRoute];
       const lastSegment = routes[routes.length - 1];
-      if (lastSegment.length === 0 && lastSegment) {
-        return { isPaused: false };
+
+      const newRunData = {
+        ...state.runData,
+        startTime: Date.now(),
+      };
+
+      if (lastSegment && lastSegment.length === 0) {
+        return { isPaused: false, runData: newRunData };
       }
-      return { isPaused: false, actualRoute: [...routes, []] };
+      return {
+        isPaused: false,
+        actualRoute: [...routes, []],
+        runData: newRunData,
+      };
     }),
 }));
