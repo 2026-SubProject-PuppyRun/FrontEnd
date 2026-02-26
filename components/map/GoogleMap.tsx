@@ -23,9 +23,10 @@ const DEFAULT_REGION: Region = {
 interface GoogleMapProps {
   onMapLoad: () => void;
   children?: React.ReactNode;
+  isSummary?: boolean;
 }
 
-const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
+const GoogleMap = ({ onMapLoad, children, isSummary }: GoogleMapProps) => {
   const [coordinates, setCoordinates] = useState({
     latitude: DEFAULT_REGION.latitude,
     longitude: DEFAULT_REGION.longitude,
@@ -37,6 +38,7 @@ const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
   const isLocationInitialized = React.useRef(false);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const { isRunning } = useRunStore();
+  const finalRoute = useRunStore((state) => state.runData?.route);
   const moveToMyLocation = async () => {
     try {
       const location = await Location.getCurrentPositionAsync({
@@ -131,6 +133,18 @@ const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRoute]);
 
+  useEffect(() => {
+    const watchedRoute = finalRoute || [];
+    if (isSummary && watchedRoute.length > 0 && mapRef.current) {
+      setTimeout(() => {
+        mapRef.current?.fitToCoordinates(watchedRoute, {
+          edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+          animated: true,
+        });
+      }, 500);
+    }
+  }, [isSummary, finalRoute]);
+
   if (isLoading === true) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -162,8 +176,11 @@ const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
         showsCompass
         showsScale
         mapType="standard"
-        showsUserLocation
-        zoomEnabled
+        showsUserLocation={!isSummary}
+        zoomEnabled={!isSummary}
+        scrollEnabled={!isSummary}
+        pitchEnabled={!isSummary}
+        rotateEnabled={!isSummary}
         showsMyLocationButton={false}
         onUserLocationChange={(e) => {
           if (isRunning && mapRef.current) {
@@ -184,13 +201,15 @@ const GoogleMap = ({ onMapLoad, children }: GoogleMapProps) => {
       >
         {children}
       </MapView>
-      <TouchableOpacity
-        onPress={moveToMyLocation}
-        className="absolute bottom-2 right-2 rounded-full bg-white p-2 shadow"
-        activeOpacity={0.7}
-      >
-        <Ionicons name="location" size={24} color="#26170F" />
-      </TouchableOpacity>
+      {!isSummary && (
+        <TouchableOpacity
+          onPress={moveToMyLocation}
+          className="absolute bottom-2 right-2 rounded-full bg-white p-2 shadow"
+          activeOpacity={0.7}
+        >
+          <Ionicons name="location" size={24} color="#26170F" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

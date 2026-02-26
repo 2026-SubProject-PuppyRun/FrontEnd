@@ -29,6 +29,7 @@ interface RunState {
     averagePace?: string; // min/km
     startTime?: number; // 타이머 시작 시간 (밀리초)
     accumulatedMs?: number; // 일시정지 동안 누적된 시간 (밀리초)
+    route?: Coordinate[] | null; // 최종 러닝 결과를 저장할 실제 경로
   };
   // 6. 일시정지 상태
   isPaused: boolean;
@@ -57,6 +58,7 @@ export const useRunStore = create<RunState>((set) => ({
     averagePace: "0'00''",
     startTime: undefined,
     accumulatedMs: 0,
+    route: null,
   },
   isPaused: false,
 
@@ -86,6 +88,7 @@ export const useRunStore = create<RunState>((set) => ({
         ...state.runData,
         startTime: undefined,
         accumulatedMs: 0,
+        route: state.actualRoute.flat(),
       },
     })),
 
