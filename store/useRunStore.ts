@@ -1,3 +1,4 @@
+import { getPathLength } from "geolib";
 import { create } from "zustand";
 
 interface Coordinate {
@@ -30,6 +31,7 @@ interface RunState {
     startTime?: number; // 타이머 시작 시간 (밀리초)
     accumulatedMs?: number; // 일시정지 동안 누적된 시간 (밀리초)
     route?: Coordinate[] | null; // 최종 러닝 결과를 저장할 실제 경로
+    totalTime?: number; // 총 러닝 시간 (초)
   };
   // 6. 일시정지 상태
   isPaused: boolean;
@@ -58,6 +60,7 @@ export const useRunStore = create<RunState>((set) => ({
     averagePace: "0'00''",
     startTime: undefined,
     accumulatedMs: 0,
+    totalTime: 0,
     route: null,
   },
   isPaused: false,
@@ -86,8 +89,13 @@ export const useRunStore = create<RunState>((set) => ({
       actualRoute: [[]],
       runData: {
         ...state.runData,
-        startTime: undefined,
-        accumulatedMs: 0,
+        totalTime: Math.floor(
+          (Date.now() -
+            state.runData?.startTime! +
+            state.runData?.accumulatedMs!) /
+            1000,
+        ),
+        distance: getPathLength(state.actualRoute.flat()),
         route: state.actualRoute.flat(),
       },
     })),
