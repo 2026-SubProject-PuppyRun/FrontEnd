@@ -33,6 +33,7 @@ interface RunState {
     route?: Coordinate[] | null; // 최종 러닝 결과를 저장할 실제 경로
     totalTime?: number; // 총 러닝 시간 (초)
     selfie?: string | null; // 인증샷 URI
+    routeImg?: string | null; // 서버에서 받은 PNG 이미지 URI
   };
   // 6. 일시정지 상태
   isPaused: boolean;
@@ -46,6 +47,7 @@ interface RunState {
   resumeRun: () => void;
   addActualLocation: (location: Coordinate) => void;
   addRunData: (data: Partial<RunState["runData"]>) => void;
+  resetRunData: () => void;
 }
 
 export const useRunStore = create<RunState>((set) => ({
@@ -63,6 +65,8 @@ export const useRunStore = create<RunState>((set) => ({
     accumulatedMs: 0,
     totalTime: 0,
     route: null,
+    routeImg: null,
+    selfie: null,
   },
   isPaused: false,
 
@@ -80,6 +84,12 @@ export const useRunStore = create<RunState>((set) => ({
         ...state.runData,
         startTime: Date.now(),
         accumulatedMs: 0,
+        routeImg: null,
+        selfie: null,
+        totalTime: 0,
+        distance: 0,
+        pace: "0'00''",
+        averagePace: "0'00''",
       },
     })),
 
@@ -120,6 +130,22 @@ export const useRunStore = create<RunState>((set) => ({
       runData: {
         ...(state.runData || {}),
         ...data,
+      },
+    })),
+
+  resetRunData: () =>
+    set((state) => ({
+      runData: {
+        pace: "0'00''",
+        distance: 0,
+        duration: 0,
+        averagePace: "0'00''",
+        startTime: undefined,
+        accumulatedMs: 0,
+        route: null,
+        routeImg: null,
+        selfie: null,
+        totalTime: 0,
       },
     })),
 
