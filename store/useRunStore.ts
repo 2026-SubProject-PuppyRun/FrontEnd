@@ -32,6 +32,7 @@ interface RunState {
     accumulatedMs?: number; // 일시정지 동안 누적된 시간 (밀리초)
     route?: Coordinate[] | null; // 최종 러닝 결과를 저장할 실제 경로
     totalTime?: number; // 총 러닝 시간 (초)
+    selfie?: string | null; // 인증샷 URI
   };
   // 6. 일시정지 상태
   isPaused: boolean;
@@ -83,22 +84,24 @@ export const useRunStore = create<RunState>((set) => ({
     })),
 
   stopRun: () =>
-    set((state) => ({
-      isRunning: false,
-      isPaused: false,
-      actualRoute: [[]],
-      runData: {
-        ...state.runData,
-        totalTime: Math.floor(
-          (Date.now() -
-            state.runData?.startTime! +
-            state.runData?.accumulatedMs!) /
-            1000,
-        ),
-        distance: getPathLength(state.actualRoute.flat()),
-        route: state.actualRoute.flat(),
-      },
-    })),
+    set((state) => {
+      const currentStartTime = state.runData?.startTime;
+      const accumulatedMs = state.runData?.accumulatedMs || 0;
+      const activeMs = currentStartTime ? Date.now() - currentStartTime : 0;
+      const totalTime = Math.floor((activeMs + accumulatedMs) / 1000);
+
+      return {
+        isRunning: false,
+        isPaused: false,
+        actualRoute: [[]],
+        runData: {
+          ...state.runData,
+          totalTime,
+          distance: getPathLength(state.actualRoute.flat()),
+          route: state.actualRoute.flat(),
+        },
+      };
+    }),
 
   addActualLocation: (location) =>
     set((state) => {

@@ -1,4 +1,5 @@
 import { useRunStore } from "@/store/useRunStore";
+import { formatTime } from "@/util/formatTime";
 import { getPathLength } from "geolib";
 import React, { useEffect, useState } from "react";
 import { Box } from "../ui/box";
@@ -43,17 +44,6 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
 
     return () => clearInterval(intervalId);
   }, [isRunning, startTime, accumulatedMs, isPaused]);
-
-  const formatTime = (totalSeconds: number) => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-    }
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
 
   if (!isMapLoaded) return null;
 
