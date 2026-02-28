@@ -1,13 +1,12 @@
 import { useRunStore } from "@/store/useRunStore";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { Alert, Text } from "react-native";
 import { Button } from "../ui/button";
 
 const SelfieButton = () => {
   const router = useRouter();
-  const [image, setImage] = useState<string | null>(null);
 
   const takeSelfie = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -23,7 +22,6 @@ const SelfieButton = () => {
       quality: 1,
     });
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
       Alert.alert("인증샷이 저장되었습니다!");
       useRunStore.getState().addRunData({ selfie: result.assets[0].uri });
       router.push("/running/selfie");
