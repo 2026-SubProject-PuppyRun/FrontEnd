@@ -34,6 +34,10 @@ const RunControlButton = ({ isMapLoaded }: RunControlButtonProps) => {
           </Button>
           <Button
             onPress={() => {
+              if (useRunStore.getState().runData?.route?.length === 0) {
+                alert("러닝 경로가 없습니다. 러닝을 종료할 수 없습니다.");
+                return;
+              }
               stopRun();
               router.replace("/running/summary");
             }}
