@@ -33,6 +33,7 @@ const Tracking = () => {
             style: "destructive",
             onPress: () => {
               useRunStore.getState().stopRun();
+              useRunStore.getState().resetRunData();
               router.replace("/");
             },
           },
@@ -40,6 +41,7 @@ const Tracking = () => {
       );
     });
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation]);
 
   useNonNavbar();
