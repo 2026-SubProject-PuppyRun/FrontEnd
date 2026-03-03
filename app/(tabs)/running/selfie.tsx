@@ -1,4 +1,5 @@
 import RunResultBoard from "@/components/board/RunResultBoard";
+import WriteDiaryButton from "@/components/button/WriteDiaryButton";
 import Header from "@/components/header/Header";
 import SelfieAndRouteSwiper from "@/components/swiper/SelfieAndRouteSwiper";
 import useNonNavbar from "@/hooks/use-non-navbar";
@@ -13,6 +14,7 @@ const Selfie = () => {
       <Header />
       <SelfieAndRouteSwiper />
       <RunResultBoard />
+      <WriteDiaryButton />
     </View>
   );
 };
