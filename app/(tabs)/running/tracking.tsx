@@ -2,10 +2,11 @@ import RunDataBoard from "@/components/board/RunDataBoard";
 import TipBoard from "@/components/board/TipBoard";
 import RunControlButton from "@/components/button/RunControlButton";
 import GoogleMap from "@/components/map/GoogleMap";
+import useNonNavbar from "@/hooks/use-non-navbar";
 import { useRunTracking } from "@/hooks/use-run-tracking";
 import { useRunStore } from "@/store/useRunStore";
 import { useNavigation, useRouter } from "expo-router";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 import { Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -41,17 +42,7 @@ const Tracking = () => {
     return unsubscribe;
   }, [navigation]);
 
-  useLayoutEffect(() => {
-    navigation.getParent()?.setOptions({
-      tabBarStyle: { display: "none" },
-    });
-
-    return () => {
-      navigation.getParent()?.setOptions({
-        tabBarStyle: undefined,
-      });
-    };
-  }, [navigation]);
+  useNonNavbar();
 
   useRunTracking();
   return (
