@@ -1,10 +1,16 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-const Header = () => {
+interface HeaderProps {
+  title?: string;
+  children?: React.ReactNode;
+}
+
+const Header = ({ title, children }: HeaderProps) => {
   return (
-    <View className="h-12 items-center justify-center bg-white">
-      <Text>Header</Text>
+    <View className="h-12 flex-row justify-between bg-white px-4">
+      <Text>{title || "Header"}</Text>
+      {children}
     </View>
   );
 };
