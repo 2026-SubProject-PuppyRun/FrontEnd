@@ -44,7 +44,7 @@ const SelfieAndRouteSwiper = () => {
           style={{ width: width, height: width * 0.7 }}
           data={swiperData}
           renderItem={({ index }) => {
-            return index === 0 ? <RouteItem /> : <SelfieItem />;
+            return index === 1 ? <RouteItem /> : <SelfieItem />;
           }}
         />
       </View>

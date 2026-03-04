@@ -15,7 +15,6 @@ const RouteItem = () => {
         quality: 1,
       });
 
-      console.log("캡처 완료! 임시 경로:", uri);
       useRunStore.getState().addRunData({ routeImg: uri });
     } catch (error) {
       console.error("캡처 에러:", error);
@@ -23,7 +22,14 @@ const RouteItem = () => {
   };
 
   useEffect(() => {
-    captureRoute();
+    if (runData?.route && runData.route.length > 0) {
+      const timeoutId = setTimeout(() => {
+        captureRoute();
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (runData?.route && runData.route.length > 0) {

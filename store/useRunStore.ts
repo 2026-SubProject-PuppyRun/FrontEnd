@@ -33,7 +33,10 @@ interface RunState {
     route?: Coordinate[] | null; // 최종 러닝 결과를 저장할 실제 경로
     totalTime?: number; // 총 러닝 시간 (초)
     selfie?: string | null; // 인증샷 URI
-    routeImg?: string | null; // 서버에서 받은 PNG 이미지 URI
+    routeImg?: string | null; // 서버에 보낼 PNG 이미지 URI
+    stopTime?: Date | null; // 러닝 종료 시간, 러닝 날짜 기록용
+    title?: string; // 러닝 기록 제목
+    contents?: string; // 산책 일기
   };
   // 6. 일시정지 상태
   isPaused: boolean;
@@ -48,6 +51,7 @@ interface RunState {
   addActualLocation: (location: Coordinate) => void;
   addRunData: (data: Partial<RunState["runData"]>) => void;
   resetRunData: () => void;
+  submitRunData: (title: string, contents: string) => Promise<void>;
 }
 
 export const useRunStore = create<RunState>((set) => ({
@@ -67,6 +71,9 @@ export const useRunStore = create<RunState>((set) => ({
     route: null,
     routeImg: null,
     selfie: null,
+    stopTime: null,
+    title: "",
+    contents: "",
   },
   isPaused: false,
 
@@ -90,6 +97,8 @@ export const useRunStore = create<RunState>((set) => ({
         distance: 0,
         pace: "0'00''",
         averagePace: "0'00''",
+        title: "",
+        contents: "",
       },
     })),
 
@@ -109,6 +118,7 @@ export const useRunStore = create<RunState>((set) => ({
           totalTime,
           distance: getPathLength(state.actualRoute.flat()),
           route: state.actualRoute.flat(),
+          stopTime: new Date(),
         },
       };
     }),
@@ -146,6 +156,9 @@ export const useRunStore = create<RunState>((set) => ({
         routeImg: null,
         selfie: null,
         totalTime: 0,
+        stopTime: null,
+        title: "",
+        contents: "",
       },
     })),
 
@@ -184,4 +197,10 @@ export const useRunStore = create<RunState>((set) => ({
         runData: newRunData,
       };
     }),
+
+  submitRunData: async (title, contents) => {
+    const { runData } = useRunStore.getState();
+    if (!runData) throw new Error("No run data to submit");
+    console.log("submitData :", { ...runData, title, contents });
+  },
 }));

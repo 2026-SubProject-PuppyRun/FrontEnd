@@ -6,7 +6,6 @@ import { HStack } from "../ui/hstack";
 
 const RunResultBoard = () => {
   const { runData } = useRunStore();
-  console.log("RunResultBoard rendered with runData:", runData);
   return (
     <View className="my-16 h-32 w-full items-center justify-center bg-slate-400">
       <HStack space="xl">
