@@ -4,9 +4,13 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { Alert, Text } from "react-native";
 import { Button } from "../ui/button";
+import { Divider } from "../ui/divider";
+import { CheckCircleIcon, Icon } from "../ui/icon";
+import { Toast, ToastTitle, useToast } from "../ui/toast";
 
 const SelfieButton = () => {
   const router = useRouter();
+  const toast = useToast();
 
   const takeSelfie = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -22,7 +26,25 @@ const SelfieButton = () => {
       quality: 1,
     });
     if (!result.canceled) {
-      Alert.alert("인증샷이 저장되었습니다!");
+      toast.show({
+        placement: "top",
+        render: ({ id }) => {
+          const toastId = "toast-" + id;
+          return (
+            <Toast
+              nativeID={toastId}
+              className="flex-row items-center gap-4 bg-primary-300 px-5 py-3 shadow-soft-1"
+            >
+              <Icon as={CheckCircleIcon} size="xl" className="text-green-500" />
+              <Divider
+                orientation="vertical"
+                className="h-[30px] bg-outline-200"
+              />
+              <ToastTitle size="sm">사진이 저장되었습니다!</ToastTitle>
+            </Toast>
+          );
+        },
+      });
       useRunStore.getState().addRunData({ selfie: result.assets[0].uri });
       router.push("/running/selfie");
     }
