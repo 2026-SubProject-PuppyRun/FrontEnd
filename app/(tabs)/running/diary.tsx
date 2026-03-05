@@ -88,6 +88,7 @@ const Diary = () => {
         title="일기 작성종료"
         description="일기 작성을 정말 종료하시겠습니까? 기록은 임시 저장 됩니다."
         onConfirm={() => {
+          isSubmitRef.current = true;
           useRunStore.getState().submitRunData(title, contents);
           useRunStore.getState().resetRunData();
           router.replace("/");

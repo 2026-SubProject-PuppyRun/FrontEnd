@@ -2,13 +2,12 @@ import RunDataBoard from "@/components/board/RunDataBoard";
 import TipBoard from "@/components/board/TipBoard";
 import RunControlButton from "@/components/button/RunControlButton";
 import GoogleMap from "@/components/map/GoogleMap";
-import CustomAlert from "@/components/modal/CustomAlert";
 import useNonNavbar from "@/hooks/use-non-navbar";
 import { useRunTracking } from "@/hooks/use-run-tracking";
 import { useRunStore } from "@/store/useRunStore";
-import { useNavigation, useRouter } from "expo-router";
+import { useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { BackHandler, View } from "react-native";
 import { Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -18,16 +17,29 @@ const Tracking = () => {
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const actualRoute = useRunStore((state) => state.actualRoute);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const router = useRouter();
-  const [showAlert, setShowAlert] = useState(false);
   useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-      if (!useRunStore.getState().isRunning) return;
-      e.preventDefault();
+    const onBackPress = () => {
+      if (!useRunStore.getState().isRunning) return false;
+      return true;
+    };
 
-      setShowAlert(true);
+    const backHandlerSubscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress,
+    );
+
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      if (!useRunStore.getState().isRunning) {
+        return;
+      }
+
+      e.preventDefault();
     });
-    return unsubscribe;
+
+    return () => {
+      backHandlerSubscription.remove();
+      unsubscribe();
+    };
   }, [navigation]);
 
   useNonNavbar();
@@ -39,7 +51,14 @@ const Tracking = () => {
       className="relative flex-1 bg-white"
     >
       <RunDataBoard isMapLoaded={isMapLoaded} />
-      <GoogleMap onMapLoad={() => setIsMapLoaded(true)}>
+      <GoogleMap
+        onMapLoad={() => {
+          setIsMapLoaded(true);
+          if (!useRunStore.getState().isRunning) {
+            useRunStore.getState().startRun();
+          }
+        }}
+      >
         {selectedRoute && (
           <Polyline
             coordinates={selectedRoute}
@@ -80,19 +99,6 @@ const Tracking = () => {
       </GoogleMap>
       <RunControlButton isMapLoaded={isMapLoaded} />
       <TipBoard isMapLoaded={isMapLoaded} />
-      <CustomAlert
-        showAlertDialog={showAlert}
-        handleClose={() => setShowAlert(false)}
-        title="러닝 종료"
-        description="러닝을 정말 종료하시겠습니까? 기록이 저장되지 않을 수 있습니다."
-        onConfirm={() => {
-          useRunStore.getState().stopRun();
-          useRunStore.getState().resetRunData();
-          router.replace("/");
-        }}
-        confirmText="종료"
-        cancelText="취소"
-      />
     </View>
   );
 };
