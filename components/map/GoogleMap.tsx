@@ -75,7 +75,6 @@ const GoogleMap = ({ onMapLoad, children, isSummary }: GoogleMapProps) => {
           longitude: location.coords.longitude,
         });
         isLocationInitialized.current = true;
-        onMapLoad();
       } catch (error) {
         isLocationInitialized.current = true;
         console.error("위치 조회 실패:", error);
@@ -87,7 +86,7 @@ const GoogleMap = ({ onMapLoad, children, isSummary }: GoogleMapProps) => {
       }
     };
     if (permission === true && !isLocationInitialized.current) initLocation();
-  }, [permission]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [permission]);
 
   useEffect(() => {
     if (!mapRef.current || !isLocationInitialized.current) return;
@@ -164,6 +163,7 @@ const GoogleMap = ({ onMapLoad, children, isSummary }: GoogleMapProps) => {
   return (
     <View className="flex-1">
       <MapView
+        onMapReady={onMapLoad}
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
         initialRegion={{
