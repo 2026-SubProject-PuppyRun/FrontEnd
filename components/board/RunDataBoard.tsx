@@ -25,6 +25,7 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
+    if (!isMapLoaded) return;
     let intervalId: ReturnType<typeof setInterval>;
 
     if (isRunning && !isPaused && startTime) {
@@ -43,7 +44,7 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
     }
 
     return () => clearInterval(intervalId);
-  }, [isRunning, startTime, accumulatedMs, isPaused]);
+  }, [isRunning, startTime, accumulatedMs, isPaused, isMapLoaded]);
 
   if (!isMapLoaded) return null;
 

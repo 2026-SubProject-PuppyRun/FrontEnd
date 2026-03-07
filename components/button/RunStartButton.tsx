@@ -65,7 +65,6 @@ const RunStartButton = ({ disabled }: RunStartButtonProps) => {
             : "추천 경로 없이 산책을 시작합니다."
         }
         onConfirm={() => {
-          useRunStore.getState().startRun();
           router.replace("/running/tracking");
         }}
         confirmText="시작하기"
