@@ -8,8 +8,8 @@ interface HeaderProps {
 
 const Header = ({ title, children }: HeaderProps) => {
   return (
-    <View className="h-12 flex-row justify-between bg-white px-4">
-      <Text>{title || "Header"}</Text>
+    <View className="sticky top-0 z-10 h-12 flex-row items-center justify-between bg-white px-4">
+      {title && <Text>{title}</Text>}
       {children}
     </View>
   );
