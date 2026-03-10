@@ -1,15 +1,14 @@
 import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, View } from "react-native"; // Platform 임포트 추가
+import { ScrollView, Text, View } from "react-native";
+import HomeSummarySwiper from "../swiper/HomeSummarySwiper";
 import { Button, ButtonText } from "../ui/button";
-import RunSummaryBoard from "./HomeDashBoardItem/RunSummaryBoard";
 import WalkScoreBoard from "./HomeDashBoardItem/WalkScoreBoard";
-
 const HomeDashBoard = () => {
   const router = useRouter();
   return (
     <ScrollView className="bg-gray-100">
-      <RunSummaryBoard />
+      <HomeSummarySwiper />
       <View className="flex-row items-center justify-start gap-4 px-4 py-2">
         <View className="rounded-lg " style={{ elevation: 5 }}>
           <Button
