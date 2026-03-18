@@ -1,7 +1,8 @@
 import ChartDateNavigator from "@/components/navigator/ChartDateNavigator";
-import { Spinner } from "@/components/ui/spinner";
+import ChartSkeleton from "@/components/skeleton/ChartSkeleton";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import React, { useEffect } from "react";
+import React from "react";
 import { View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 
@@ -12,20 +13,16 @@ const YearlyData: { label: string; value: number }[] = [
   { label: "2023", value: 4000 },
 ];
 const YearlyChart = () => {
-  const [data, setData] = React.useState(YearlyData);
   const [currentDate, setCurrentDate] = React.useState(dayjs());
-  useEffect(() => {
-    const fetchData = async () => {
-      setData(YearlyData);
-    };
-    fetchData();
-  }, []);
-  if (!data)
-    return (
-      <View className="mb-6 flex-1 items-center justify-center">
-        <Spinner size="large" color="#BFB8AA" />
-      </View>
-    );
+  const yearKey = currentDate.year().toString();
+  const { data, isLoading } = useQuery({
+    queryKey: ["yearlyData", yearKey],
+    queryFn: async () => {
+      console.log("fetching yearly data for", yearKey);
+      return YearlyData;
+    },
+  });
+
   return (
     <View>
       <ChartDateNavigator
@@ -35,18 +32,22 @@ const YearlyChart = () => {
         onNext={() => setCurrentDate((prev) => prev.add(1, "year"))}
         chartType="year"
       />
-      <BarChart
-        data={data}
-        barBorderRadius={4}
-        barWidth={22}
-        hideRules
-        isAnimated
-        showFractionalValues
-        showYAxisIndices
-        noOfSections={4}
-        xAxisThickness={0}
-        yAxisThickness={0}
-      />
+      {isLoading || !data ? (
+        <ChartSkeleton />
+      ) : (
+        <BarChart
+          data={data}
+          barBorderRadius={4}
+          barWidth={22}
+          hideRules
+          isAnimated
+          showFractionalValues
+          showYAxisIndices
+          noOfSections={4}
+          xAxisThickness={0}
+          yAxisThickness={0}
+        />
+      )}
     </View>
   );
 };

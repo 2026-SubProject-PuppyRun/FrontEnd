@@ -1,11 +1,11 @@
 import ChartDateNavigator from "@/components/navigator/ChartDateNavigator";
-import { Spinner } from "@/components/ui/spinner";
+import ChartSkeleton from "@/components/skeleton/ChartSkeleton";
 import { getWeekName } from "@/util/getWeekOfMonth";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
-
 const WeeklyData: { label: string; value: number }[] = [
   { label: "일", value: 70 },
   { label: "월", value: 10 },
@@ -17,12 +17,12 @@ const WeeklyData: { label: string; value: number }[] = [
 ];
 
 const WeeklyChart = () => {
-  const [data, setData] = useState(WeeklyData);
   const [currentDate, setCurrentDate] = useState(dayjs());
   const year = currentDate.year();
   const month = currentDate.month() + 1;
   const weekName = getWeekName(currentDate);
   const dateText = `${year}년 ${month}월 ${weekName} 주`;
+  const weekKey = currentDate.startOf("week").format("YYYY-MM-DD");
 
   const handlePrevWeek = () => {
     setCurrentDate((prev) => prev.subtract(1, "week"));
@@ -30,19 +30,14 @@ const WeeklyChart = () => {
   const handleNextWeek = () => {
     setCurrentDate((prev) => prev.add(1, "week"));
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      setData(WeeklyData);
-    };
-    fetchData();
-  }, []);
+  const { data, isLoading } = useQuery({
+    queryKey: ["weeklyData", weekKey],
+    queryFn: async () => {
+      console.log("fetching weekly data for", weekKey);
+      return WeeklyData;
+    },
+  });
 
-  if (!data)
-    return (
-      <View className="mb-6 flex-1 items-center justify-center">
-        <Spinner size="large" color="#BFB8AA" />
-      </View>
-    );
   return (
     <View>
       <ChartDateNavigator
@@ -52,18 +47,22 @@ const WeeklyChart = () => {
         currentDate={currentDate}
         chartType="week"
       />
-      <BarChart
-        data={data}
-        barBorderRadius={4}
-        barWidth={22}
-        hideRules
-        isAnimated
-        showFractionalValues
-        showYAxisIndices
-        noOfSections={4}
-        xAxisThickness={0}
-        yAxisThickness={0}
-      />
+      {isLoading || !data ? (
+        <ChartSkeleton />
+      ) : (
+        <BarChart
+          data={data}
+          barBorderRadius={4}
+          barWidth={22}
+          hideRules
+          isAnimated
+          showFractionalValues
+          showYAxisIndices
+          noOfSections={4}
+          xAxisThickness={0}
+          yAxisThickness={0}
+        />
+      )}
     </View>
   );
 };
