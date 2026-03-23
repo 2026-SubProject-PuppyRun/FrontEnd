@@ -1,13 +1,18 @@
 import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HomeSummarySwiper from "../swiper/HomeSummarySwiper";
 import { Button, ButtonText } from "../ui/button";
 import WalkScoreBoard from "./HomeDashBoardItem/WalkScoreBoard";
 const HomeDashBoard = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   return (
-    <ScrollView className="bg-gray-100">
+    <ScrollView
+      className="bg-gray-100 "
+      style={{ marginBottom: insets.bottom }}
+    >
       <HomeSummarySwiper />
       <View className="flex-row items-center justify-start gap-4 px-4 py-2">
         <View className="rounded-lg " style={{ elevation: 5 }}>

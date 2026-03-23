@@ -18,7 +18,6 @@ const YearlyChart = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["yearlyData", yearKey],
     queryFn: async () => {
-      console.log("fetching yearly data for", yearKey);
       return YearlyData;
     },
   });

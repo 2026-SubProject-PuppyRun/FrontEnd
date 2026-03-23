@@ -19,7 +19,7 @@ const ChartDateNavigator: React.FC<ChartDateNavigatorProps> = ({
   chartType,
 }) => {
   return (
-    <View className="mx-10 mb-4 flex-row items-center justify-between">
+    <View className="mx-10 mb-8 flex-row items-center justify-between">
       <TouchableOpacity onPress={onPrev}>
         <Ionicons name="caret-back" size={24} color="black" />
       </TouchableOpacity>

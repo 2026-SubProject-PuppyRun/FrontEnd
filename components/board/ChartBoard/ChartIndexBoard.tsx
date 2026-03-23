@@ -1,6 +1,7 @@
 import ChartTapButton from "@/components/button/ChartTapButton";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
+import CompareChart from "./CompareChart";
 import MonthlyChart from "./MonthlyChart";
 import WeeklyChart from "./WeeklyChart";
 import YearlyChart from "./YearlyChart";
@@ -25,9 +26,9 @@ const ChartIndexBoard = () => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-100">
-      <View className=" m-4 rounded-lg bg-white p-4">
-        <View className="flex-row justify-around  ">
+    <ScrollView className="mb-4 flex-1 bg-gray-100">
+      <View className=" m-4 min-h-[400px] justify-around rounded-lg bg-white p-4">
+        <View className="flex-row justify-around">
           <ChartTapButton
             handleSelectChart={handleSelectChart}
             label="주간"
@@ -44,8 +45,9 @@ const ChartIndexBoard = () => {
             isActive={selectedChart === "yearly"}
           />
         </View>
-        <View className="py-4">{renderChart()}</View>
+        <View className="gap-4">{renderChart()}</View>
       </View>
+      <CompareChart />
     </ScrollView>
   );
 };

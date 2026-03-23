@@ -28,7 +28,6 @@ const MonthlyChart = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["monthlyData", monthKey],
     queryFn: async () => {
-      console.log("fetching monthly data for", monthKey);
       return MonthlyData;
     },
   });

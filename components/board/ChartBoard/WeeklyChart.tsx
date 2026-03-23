@@ -100,7 +100,6 @@ const WeeklyChart = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["weeklyData", weekKey],
     queryFn: async () => {
-      console.log("fetching weekly data for", weekKey);
       return WeeklyData;
     },
   });
