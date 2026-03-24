@@ -2,7 +2,9 @@ import ChartTapButton from "@/components/button/ChartTapButton";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import CompareChart from "./BoardItem/CompareChart";
+import GrassChart from "./BoardItem/GrassChart";
 import MonthlyChart from "./BoardItem/MonthlyChart";
+import UserInsight from "./BoardItem/UserInsight";
 import WeeklyChart from "./BoardItem/WeeklyChart";
 import YearlyChart from "./BoardItem/YearlyChart";
 
@@ -27,6 +29,7 @@ const ChartIndexBoard = () => {
 
   return (
     <ScrollView className="mb-4 flex-1 bg-gray-100">
+      <UserInsight />
       <View className=" m-4 min-h-[390px] justify-around rounded-lg bg-white p-4">
         <View className="flex-row justify-around">
           <ChartTapButton
@@ -48,6 +51,7 @@ const ChartIndexBoard = () => {
         <View className="gap-4">{renderChart()}</View>
       </View>
       <CompareChart />
+      <GrassChart />
     </ScrollView>
   );
 };
