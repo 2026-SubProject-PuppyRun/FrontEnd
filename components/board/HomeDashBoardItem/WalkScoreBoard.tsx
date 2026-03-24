@@ -1,4 +1,4 @@
-import { Spinner } from "@/components/ui/spinner";
+import WalkScoreSkeleton from "@/components/skeleton/WalkScoreSkeleton";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useWeatherStore } from "@/store/useWeatherStore";
 import { getDustLevel } from "@/util/getDustLevel";
@@ -74,11 +74,7 @@ const WalkScoreBoard = () => {
   }, [permission]);
 
   if (isLoading) {
-    return (
-      <View className="mb-6 flex-1 items-center justify-center">
-        <Spinner size="large" color="#BFB8AA" />
-      </View>
-    );
+    return <WalkScoreSkeleton />;
   }
   return (
     <View className="m-4 gap-6 pb-4">
