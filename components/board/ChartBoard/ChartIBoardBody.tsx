@@ -8,7 +8,7 @@ import UserInsight from "./BoardItem/UserInsight";
 import WeeklyChart from "./BoardItem/WeeklyChart";
 import YearlyChart from "./BoardItem/YearlyChart";
 
-const ChartIndexBoard = () => {
+const ChartBoardBody = () => {
   const [selectedChart, setSelectedChart] = useState("weekly");
   const handleSelectChart = (chart: string) => {
     setSelectedChart(chart);
@@ -56,4 +56,4 @@ const ChartIndexBoard = () => {
   );
 };
 
-export default ChartIndexBoard;
+export default ChartBoardBody;

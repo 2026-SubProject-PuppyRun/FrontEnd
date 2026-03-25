@@ -1,11 +1,11 @@
-import ChartIndexBoard from "@/components/board/ChartBoard/ChartIndexBoard";
+import ChartBoardBody from "@/components/board/ChartBoard/ChartIBoardBody";
 import React from "react";
 import { View } from "react-native";
 
 const Status = () => {
   return (
     <View className=" flex-1 bg-gray-100">
-      <ChartIndexBoard />
+      <ChartBoardBody />
     </View>
   );
 };
