@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import DayOfWeekChoiceButton from "../button/DayOfWeekChoiceButton";
+import CustomAlert from "../modal/CustomAlert";
 import { Button, ButtonIcon, ButtonText } from "../ui/button";
 import { RepeatIcon } from "../ui/icon";
 
@@ -19,6 +20,7 @@ const AlarmBody = () => {
   const today = new Date().getDay();
   const [dayOfWeek, setDayOfWeek] = useState(daysOfWeek[today].label);
   const [repeat, setRepeat] = useState(false);
+  const [showAlertDialog, setShowAlertDialog] = useState(false);
 
   return (
     <View className="m-4 flex-1 rounded-lg bg-white p-4 ">
@@ -52,12 +54,23 @@ const AlarmBody = () => {
         <Button
           className="ml-2 h-10 rounded-full px-4 py-2"
           onPress={() => {
-            console.log("저징 : ", dayOfWeek, date, repeat);
+            setShowAlertDialog(true);
           }}
         >
           <ButtonText className="text-sm ">저장</ButtonText>
         </Button>
       </View>
+      <CustomAlert
+        showAlertDialog={showAlertDialog}
+        handleClose={() => setShowAlertDialog(false)}
+        title="알림이 저장되었습니다."
+        description={`요일: ${dayOfWeek}, 시간: ${date.toLocaleTimeString()}, 반복: ${repeat ? "예" : "아니오"}`}
+        confirmText="확인"
+        cancelText="취소"
+        onConfirm={() => {
+          console.log("api request");
+        }}
+      />
     </View>
   );
 };
