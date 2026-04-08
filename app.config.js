@@ -23,6 +23,7 @@ module.exports = {
           apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
         },
       },
+      googleServicesFile: "./google-services.json",
     },
     web: {
       output: "static",

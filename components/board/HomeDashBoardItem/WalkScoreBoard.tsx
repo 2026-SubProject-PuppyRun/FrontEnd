@@ -77,7 +77,7 @@ const WalkScoreBoard = () => {
     return <WalkScoreSkeleton />;
   }
   return (
-    <View className="m-4 gap-6 pb-4">
+    <View className="m-4 gap-6 pb-16">
       <View className="rounded-lg bg-white p-4 shadow">
         <View className="flex-row items-center gap-2 self-start rounded-2xl bg-[#737153] px-4 py-2">
           <Ionicons name="location-sharp" size={20} color="white" />
