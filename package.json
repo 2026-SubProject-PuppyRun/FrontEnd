@@ -17,6 +17,7 @@
     "@gluestack-ui/utils": "^3.0.15",
     "@gorhom/bottom-sheet": "^5.2.8",
     "@legendapp/motion": "^2.5.3",
+    "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-firebase/app": "^24.0.0",
     "@react-native-firebase/messaging": "^24.0.0",
