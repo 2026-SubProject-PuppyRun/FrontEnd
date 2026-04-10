@@ -69,6 +69,14 @@ module.exports = {
           androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
         },
       ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            useFirebaseAndroidCore: true,
+          },
+        },
+      ],
     ],
     ignoreWarnings: [
       "SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context",

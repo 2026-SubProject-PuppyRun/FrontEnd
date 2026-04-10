@@ -3,7 +3,6 @@ import {
   AuthorizationStatus,
   getMessaging,
   getToken,
-  onMessage,
   requestPermission,
   setBackgroundMessageHandler,
 } from "@react-native-firebase/messaging";
@@ -39,19 +38,6 @@ setBackgroundMessageHandler(messaging, async (remoteMessage) => {
   console.log("💌 Message handled in the background!", remoteMessage);
 });
 
-// foreground 상태 알림 수신
-onMessage(messaging, async (remoteMessage) => {
-  console.log("💌 messaging ~ remoteMessage:", remoteMessage);
-
-  // if (remoteMessage)
-  // 	Notification.notification(remoteMessage.notification?.title, {
-  // 		onPress: () => {
-  // 			// if (remoteMessage.data) Linking.openURL(remoteMessage.data);
-  // 		},
-  // 	});
-});
-
-// 백엔드로 FCM 토큰을 쏘는 함수 (fcmToken 사용)
 const submitNotificationToBackendTest = async (tokenString: string) => {
   try {
     const response = await fetch(
