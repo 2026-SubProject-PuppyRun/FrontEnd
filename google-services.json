@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "223574755020",
+    "project_id": "puppyrun-48bc4",
+    "storage_bucket": "puppyrun-48bc4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223574755020:android:4456ae957c8c049feb2469",
+        "android_client_info": {
+          "package_name": "com.puppyrun"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGun_C_5HXzMjfJ_oqJLc24DD6gPzU7Yw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,12 +1,13 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import ChartBoardBody from "@/components/board/ChartBoard/ChartIBoardBody";
+import React from "react";
+import { View } from "react-native";
 
 const Status = () => {
   return (
-    <View>
-      <Text>status</Text>
+    <View className=" flex-1 bg-gray-100">
+      <ChartBoardBody />
     </View>
-  )
-}
+  );
+};
 
-export default Status
+export default Status;

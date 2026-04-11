@@ -49,6 +49,7 @@ export default function TabLayout() {
               color={focused ? "blue" : "black"}
             />
           ),
+          href: "/(tabs)/home",
         }}
       />
       <Tabs.Screen
@@ -62,6 +63,7 @@ export default function TabLayout() {
               color={focused ? "blue" : "black"}
             />
           ),
+          href: "/(tabs)/guide",
         }}
       />
       <Tabs.Screen name="mypage" options={{ href: null }} />

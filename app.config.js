@@ -23,6 +23,7 @@ module.exports = {
           apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
         },
       },
+      googleServicesFile: "./google-services.json",
     },
     web: {
       output: "static",
@@ -34,10 +35,12 @@ module.exports = {
       config: {
         googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
       },
+      // googleServicesFile: "./GoogleService-Info.plist",
     },
 
     plugins: [
       "expo-router",
+      "@react-native-firebase/app",
       [
         "expo-splash-screen",
         {
@@ -61,11 +64,19 @@ module.exports = {
           isAndroidForegroundServiceEnabled: true,
         },
       ],
+      // [
+      //   "react-native-maps",
+      //   {
+      //     iosGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+      //     androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+      //   },
+      // ],
       [
-        "react-native-maps",
+        "expo-build-properties",
         {
-          iosGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-          androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+          android: {
+            useFirebaseAndroidCore: true,
+          },
         },
       ],
     ],
