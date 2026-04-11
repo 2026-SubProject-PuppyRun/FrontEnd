@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { TextInput, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import AlarmList from "../board/AlarmListBoard/AlarmList";
@@ -15,15 +16,46 @@ const daysOfWeek = [
   { label: "금", value: "fri" },
   { label: "토", value: "sat" },
 ];
+export interface AlarmItem {
+  title: string;
+  dayOfWeek: string;
+  time: Date;
+}
+const dummyAlarmList: AlarmItem[] = [
+  {
+    title: "산책 시간이에요!",
+    dayOfWeek: "월",
+    time: new Date("2024-01-01T15:00:00"),
+  },
+  {
+    title: "밥 먹을 시간이에요!",
+    dayOfWeek: "화",
+    time: new Date("2024-01-01T18:00:00"),
+  },
+  {
+    title: "약 먹을 시간이에요!",
+    dayOfWeek: "수",
+    time: new Date("2024-01-01T09:00:00"),
+  },
+];
 const AlarmBody = () => {
   const [date, setDate] = useState(new Date());
   const today = new Date().getDay();
   const [dayOfWeek, setDayOfWeek] = useState(daysOfWeek[today].label);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [alarmTitle, setAlarmTitle] = useState("");
-  const [alarmList, setAlarmList] = useState<
-    { dayOfWeek: string; time: string; title: string }[]
-  >([]);
+  const [alarmList, setAlarmList] = useState<AlarmItem[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      //서버에서 알람 리스트를 가져오는 API 호출을 하는 부분입니다.
+
+      setAlarmList(dummyAlarmList);
+      return () => {
+        //서버에 알람 리스트를 저장하는 API 호출을 하는 부분입니다.
+      };
+    }, []),
+  );
 
   return (
     <View className="m-4 flex-1 rounded-lg bg-white p-4 ">
@@ -64,7 +96,7 @@ const AlarmBody = () => {
           <ButtonText className="text-sm ">추가</ButtonText>
         </Button>
       </View>
-      <AlarmList alarmList={alarmList} />
+      <AlarmList alarmList={alarmList} setAlarmList={setAlarmList} />
       <CustomAlert
         showAlertDialog={showAlertDialog}
         handleClose={() => setShowAlertDialog(false)}
@@ -73,14 +105,22 @@ const AlarmBody = () => {
         confirmText="확인"
         cancelText="취소"
         onConfirm={() => {
-          setAlarmList((prev) => [
-            ...prev,
-            {
-              dayOfWeek,
-              time: date.toLocaleTimeString().slice(0, 7),
-              title: alarmTitle,
-            },
-          ]);
+          setAlarmList((prev) => {
+            const dayOrder = ["일", "월", "화", "수", "목", "금", "토"];
+            const newList = [
+              ...prev,
+              {
+                dayOfWeek,
+                time: date,
+                title: alarmTitle,
+              },
+            ];
+            return newList.sort((a, b) => {
+              const dayA = dayOrder.indexOf(a.dayOfWeek);
+              const dayB = dayOrder.indexOf(b.dayOfWeek);
+              return dayA - dayB;
+            });
+          });
           setAlarmTitle("");
           setShowAlertDialog(false);
         }}

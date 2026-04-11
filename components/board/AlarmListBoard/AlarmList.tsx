@@ -1,15 +1,12 @@
+import { AlarmItem } from "@/components/body/AlarmBody";
 import { ScrollView } from "react-native";
 import AlarmListItem from "./AlarmListItem";
 
-interface AlarmItem {
-  title: string;
-  dayOfWeek: string;
-  time: string;
-}
 interface AlarmListProps {
   alarmList: AlarmItem[];
+  setAlarmList: React.Dispatch<React.SetStateAction<AlarmItem[]>>;
 }
-const AlarmList = ({ alarmList }: AlarmListProps) => {
+const AlarmList = ({ alarmList, setAlarmList }: AlarmListProps) => {
   console.log(alarmList);
   return (
     <ScrollView className="mt-4">
@@ -20,6 +17,9 @@ const AlarmList = ({ alarmList }: AlarmListProps) => {
             title={item.title}
             dayOfWeek={item.dayOfWeek}
             time={item.time}
+            onDelete={() => {
+              setAlarmList((prev) => prev.filter((_, i) => i !== index));
+            }}
           />
         ))}
     </ScrollView>
