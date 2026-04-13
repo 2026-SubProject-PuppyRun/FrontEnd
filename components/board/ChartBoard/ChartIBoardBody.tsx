@@ -4,6 +4,7 @@ import { ScrollView, View } from "react-native";
 import CompareChart from "./BoardItem/CompareChart";
 import GrassChart from "./BoardItem/GrassChart";
 import MonthlyChart from "./BoardItem/MonthlyChart";
+import StarChart from "./BoardItem/StarChart";
 import UserInsight from "./BoardItem/UserInsight";
 import WeeklyChart from "./BoardItem/WeeklyChart";
 import YearlyChart from "./BoardItem/YearlyChart";
@@ -51,6 +52,7 @@ const ChartBoardBody = () => {
         <View className="gap-4">{renderChart()}</View>
       </View>
       <CompareChart />
+      <StarChart />
       <GrassChart />
     </ScrollView>
   );
