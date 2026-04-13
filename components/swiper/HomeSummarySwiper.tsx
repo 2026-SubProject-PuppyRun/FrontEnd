@@ -5,7 +5,7 @@ import Carousel, {
   ICarouselInstance,
   Pagination,
 } from "react-native-reanimated-carousel";
-import RunSummaryBoard from "../board/HomeDashBoardItem/RunSummaryBoard";
+import RunSummaryBoard from "../board/HomeDashBoard/RunSummaryBoard";
 const Dummy = [
   {
     imgUrl: "https://i.ifh.cc/jgbhah.jpg",

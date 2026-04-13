@@ -1,4 +1,4 @@
-import RunResultBoard from "@/components/board/RunResultBoard";
+import RunResultBoard from "@/components/board/RunBoard/RunResultBoard";
 import SelfieButton from "@/components/button/SelfieButton";
 import GoogleMap from "@/components/map/GoogleMap";
 import CustomAlert from "@/components/modal/CustomAlert";

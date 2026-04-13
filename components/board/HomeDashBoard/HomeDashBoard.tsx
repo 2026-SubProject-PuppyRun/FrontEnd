@@ -1,9 +1,9 @@
 import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, View } from "react-native";
-import HomeSummarySwiper from "../swiper/HomeSummarySwiper";
-import { Button, ButtonText } from "../ui/button";
-import WalkScoreBoard from "./HomeDashBoardItem/WalkScoreBoard";
+import HomeSummarySwiper from "../../swiper/HomeSummarySwiper";
+import { Button, ButtonText } from "../../ui/button";
+import WalkScoreBoard from "./WalkScoreBoard";
 const HomeDashBoard = () => {
   const router = useRouter();
   return (

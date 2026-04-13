@@ -1,4 +1,4 @@
-import RunResultBoard from "@/components/board/RunResultBoard";
+import RunResultBoard from "@/components/board/RunBoard/RunResultBoard";
 import WriteDiaryButton from "@/components/button/WriteDiaryButton";
 import Header from "@/components/header/Header";
 import SelfieAndRouteSwiper from "@/components/swiper/SelfieAndRouteSwiper";

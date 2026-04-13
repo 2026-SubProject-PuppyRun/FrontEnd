@@ -1,5 +1,5 @@
 import HomeAvatar from "@/components/avatar/HomeAvatar";
-import HomeDashBoard from "@/components/board/HomeDashBoard";
+import HomeDashBoard from "@/components/board/HomeDashBoard/HomeDashBoard";
 import Header from "@/components/header/Header";
 import React from "react";
 import { Text, View } from "react-native";
