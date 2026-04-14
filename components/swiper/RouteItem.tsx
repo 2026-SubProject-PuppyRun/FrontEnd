@@ -1,13 +1,16 @@
 import { useRunStore } from "@/store/useRunStore";
+import { Image } from "expo-image";
 import React, { useEffect, useRef } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { captureRef } from "react-native-view-shot";
 import RouteSvg from "../svg/RouteSvg";
+interface RouteItemProps {
+  routeImgUrl?: string;
+}
 
-const RouteItem = () => {
+const RouteItem = ({ routeImgUrl }: RouteItemProps) => {
   const runData = useRunStore((state) => state.runData);
   const routeRef = useRef(null);
-
   const captureRoute = async () => {
     try {
       const uri = await captureRef(routeRef, {
@@ -22,7 +25,7 @@ const RouteItem = () => {
   };
 
   useEffect(() => {
-    if (runData?.route && runData.route.length > 0) {
+    if (runData?.route && runData.route.length > 0 && !routeImgUrl) {
       const timeoutId = setTimeout(() => {
         captureRoute();
       }, 500);
@@ -32,7 +35,7 @@ const RouteItem = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (runData?.route && runData.route.length > 0) {
+  if (runData?.route && runData.route.length > 0 && !routeImgUrl) {
     return (
       <View className="flex-1 items-center justify-center">
         <View
@@ -48,7 +51,10 @@ const RouteItem = () => {
 
   return (
     <View className="flex-1 items-center justify-center">
-      <Text>서버에서 가져온 PNG 이미지 화면</Text>
+      <Image
+        source={{ uri: routeImgUrl || "" }}
+        style={{ height: "100%", aspectRatio: 4 / 5 }}
+      />
     </View>
   );
 };
