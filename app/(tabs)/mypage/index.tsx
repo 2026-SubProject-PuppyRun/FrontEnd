@@ -1,4 +1,4 @@
-import MyPageBody from "@/components/body/MyPageBody";
+import MyPageBody from "@/components/body/mypage/MyPageBody";
 import Header from "@/components/header/Header";
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { SettingsIcon } from "@/components/ui/icon";

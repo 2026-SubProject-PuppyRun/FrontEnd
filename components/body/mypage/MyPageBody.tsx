@@ -1,11 +1,11 @@
 import { FlashList } from "@shopify/flash-list";
 import { useState } from "react";
 import { View } from "react-native";
-import FeedBoardItem from "../board/MyPageBoard/FeedBoardItem";
-import UserBoard from "../board/MyPageBoard/UserBoard";
-import { Avatar, AvatarImage } from "../ui/avatar";
-import { HStack } from "../ui/hstack";
-import { Text } from "../ui/text";
+import FeedBoardItem from "../../board/MyPageBoard/FeedBoardItem";
+import UserBoard from "../../board/MyPageBoard/UserBoard";
+import { Avatar, AvatarImage } from "../../ui/avatar";
+import { HStack } from "../../ui/hstack";
+import { Text } from "../../ui/text";
 
 const dummyFeedList = [
   {
