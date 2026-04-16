@@ -2,13 +2,14 @@ import { create } from "zustand";
 
 export interface Pet {
   badgeCode: string;
-  birthYear: string;
+  birthYear: string | null;
   breedCode: string;
   color: string;
   name: string;
   petId: string;
   profileImageUrl: string | null;
   weight: number;
+  isNeutered?: boolean;
 }
 
 interface PetStore {
