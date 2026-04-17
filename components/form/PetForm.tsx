@@ -1,6 +1,7 @@
 import { Pet } from "@/store/usePetStore";
 import { BREED_LIST, getBreedDefaultColor } from "@/util/getBreedCode";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import DatePicker from "react-native-date-picker";
@@ -19,6 +20,7 @@ import {
   ActionsheetItem,
   ActionsheetItemText,
 } from "../ui/actionsheet";
+import { Button, ButtonText } from "../ui/button";
 import {
   Checkbox,
   CheckboxIcon,
@@ -27,8 +29,15 @@ import {
 } from "../ui/checkbox";
 import { FormControl, FormControlLabelText } from "../ui/form-control";
 import { HStack } from "../ui/hstack";
-import { CheckIcon, ChevronDownIcon } from "../ui/icon";
+import { CheckIcon, ChevronDownIcon, CircleIcon } from "../ui/icon";
 import { Input, InputField } from "../ui/input";
+import {
+  Radio,
+  RadioGroup,
+  RadioIcon,
+  RadioIndicator,
+  RadioLabel,
+} from "../ui/radio";
 import {
   Select,
   SelectBackdrop,
@@ -64,9 +73,15 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
   const [isNeutered, setIsNeutered] = useState(
     initialData?.isNeutered || false,
   );
+  const [gender, setGender] = useState<"F" | "M" | undefined>(
+    initialData?.gender || undefined,
+  );
+
   const [showActionsheet, setShowActionsheet] = useState(false);
   const [dateModalOpen, setDateModalOpen] = useState(false);
   const [colorModalOpen, setColorModalOpen] = useState(false);
+
+  const router = useRouter();
 
   const handleClose = () => setShowActionsheet(false);
 
@@ -118,7 +133,9 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
       breedCode,
       profileImageUrl,
       isNeutered,
+      gender,
     });
+    router.replace("/mypage/pets");
   };
 
   useMemo(() => {
@@ -130,7 +147,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
     }
   }, [breedCode]);
   return (
-    <View className="m-4 flex-1 rounded-lg bg-gray-200 p-4">
+    <View className="relative m-4 flex-1 rounded-lg bg-gray-200 p-4">
       <View className="mb-6 items-center">
         <Pressable onPress={() => setShowActionsheet(true)}>
           {profileImageUrl ? (
@@ -148,13 +165,37 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
 
       <FormControl className="gap-2">
         <FormControlLabelText className="text-black">이름</FormControlLabelText>
-        <Input size="md" variant="underlined">
-          <InputField
-            className="text-black"
-            value={name}
-            onChange={(e) => setName(e.nativeEvent.text)}
-          />
-        </Input>
+        <HStack className="items-center gap-4">
+          <Input size="md" variant="underlined" className="flex-1">
+            <InputField
+              className="text-black"
+              value={name}
+              onChange={(e) => setName(e.nativeEvent.text)}
+            />
+          </Input>
+          <RadioGroup value={gender} onChange={(value) => setGender(value)}>
+            <HStack space="md">
+              <Radio value="M" size="md">
+                <RadioIndicator>
+                  <RadioIcon as={CircleIcon} />
+                </RadioIndicator>
+                <RadioLabel className="text-black data-[checked=true]:text-primary-600">
+                  수컷
+                </RadioLabel>
+              </Radio>
+
+              <Radio value="F" size="md">
+                <RadioIndicator>
+                  <RadioIcon as={CircleIcon} />
+                </RadioIndicator>
+                <RadioLabel className="text-black data-[checked=true]:text-primary-600">
+                  암컷
+                </RadioLabel>
+              </Radio>
+            </HStack>
+          </RadioGroup>
+        </HStack>
+
         <FormControlLabelText className="text-black">
           생년월일
         </FormControlLabelText>
@@ -294,6 +335,10 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
             value={isNeutered}
           />
         </HStack>
+
+        <Button className="absolute bottom-0 right-0" onPress={handleSubmit}>
+          <ButtonText className="text-lg font-bold text-white">저장</ButtonText>
+        </Button>
 
         <Modal
           visible={colorModalOpen}

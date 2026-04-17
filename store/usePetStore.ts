@@ -10,6 +10,7 @@ export interface Pet {
   profileImageUrl: string | null;
   weight: number;
   isNeutered?: boolean;
+  gender?: "F" | "M";
 }
 
 interface PetStore {
