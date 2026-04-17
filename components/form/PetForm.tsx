@@ -1,3 +1,4 @@
+import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
 import { BREED_LIST, getBreedDefaultColor } from "@/util/getBreedCode";
 import * as ImagePicker from "expo-image-picker";
@@ -76,7 +77,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
   const [weight, setWeight] = useState<string>(
     initialData?.weight?.toString() || "",
   );
-  const [color, setColor] = useState(initialData?.color || "#FFFFFF");
+  const [color, setColor] = useState(initialData?.color || "#F2F2F2");
   const [breedCode, setBreedCode] = useState(initialData?.breedCode || "");
   const [profileImageUrl, setProfileImageUrl] = useState(
     initialData?.profileImageUrl || "",
@@ -94,6 +95,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
   const [colorModalOpen, setColorModalOpen] = useState(false);
 
   const router = useRouter();
+  const { showToast } = useCustomToast();
 
   const handleClose = () => setShowActionsheet(false);
 
@@ -139,7 +141,6 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
     setHasSubmitted(true);
     const weightNum = Number(weight);
     if (
-      !profileImageUrl ||
       !name.trim() ||
       !gender ||
       birthYear === "" ||
@@ -150,6 +151,14 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
       !color ||
       isNeutered === undefined
     ) {
+      return;
+    }
+
+    if (!profileImageUrl) {
+      showToast({
+        message: "반려견 사진을 등록해주세요.",
+        icon: AlertCircleIcon,
+      });
       return;
     }
 
@@ -176,7 +185,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
     }
   }, [breedCode]);
   return (
-    <View className="relative m-4 flex-1 rounded-lg bg-gray-200 p-4">
+    <ScrollView className="relative m-4 flex-1 rounded-lg bg-gray-200 p-4">
       <View className="mb-6 items-center">
         <Pressable onPress={() => setShowActionsheet(true)}>
           {profileImageUrl ? (
@@ -394,12 +403,14 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
               >
                 <Text
                   className={
-                    color === "#FFFFFF" || color.toLowerCase() === "#fff"
+                    color === "#F2F2F2" ||
+                    color.toLowerCase() === "#fff" ||
+                    color.toLowerCase() === "#ffffff"
                       ? "text-black"
                       : "text-white drop-shadow-md"
                   }
                 >
-                  {color === "#FFFFFF" ? "색상 선택" : color}
+                  {color === "#F2F2F2" ? "색상 선택" : color}
                 </Text>
               </View>
             </Pressable>
@@ -493,7 +504,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
           </ActionsheetItem>
         </ActionsheetContent>
       </Actionsheet>
-    </View>
+    </ScrollView>
   );
 };
 
