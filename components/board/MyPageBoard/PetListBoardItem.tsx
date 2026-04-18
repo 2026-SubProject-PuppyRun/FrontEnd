@@ -31,7 +31,7 @@ const PetListBoardItem = ({
         <Pressable
           className=" h-full items-end"
           onPress={() => {
-            router.push(`/mypage/pets/${petId}`);
+            router.push(`/mypage/pets/${petId}/edit`);
           }}
         >
           <Text className="text-blue-500">수정</Text>

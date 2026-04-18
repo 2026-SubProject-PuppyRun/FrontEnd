@@ -25,6 +25,8 @@ export default function RootLayout() {
       profileImageUrl: "https://picsum.photos/200/200?random=1",
       breedCode: "101",
       badgeCode: "000",
+      gender: "M",
+      isNeutered: true,
     },
     {
       petId: "d4563324-17d6-477e-a326-bd3d94ee50cd",
@@ -35,6 +37,8 @@ export default function RootLayout() {
       profileImageUrl: "https://picsum.photos/200/200?random=2",
       breedCode: "101",
       badgeCode: "000",
+      gender: "F",
+      isNeutered: false,
     },
   ];
 

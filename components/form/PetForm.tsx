@@ -1,6 +1,10 @@
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
-import { BREED_LIST, getBreedDefaultColor } from "@/util/getBreedCode";
+import {
+  BREED_LIST,
+  getBreedDefaultColor,
+  getBreedName,
+} from "@/util/getBreedCode";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
@@ -78,7 +82,9 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
     initialData?.weight?.toString() || "",
   );
   const [color, setColor] = useState(initialData?.color || "#F2F2F2");
-  const [breedCode, setBreedCode] = useState(initialData?.breedCode || "");
+  const [breedCode, setBreedCode] = useState(
+    getBreedName(initialData?.breedCode) || "",
+  );
   const [profileImageUrl, setProfileImageUrl] = useState(
     initialData?.profileImageUrl || "",
   );
