@@ -15,12 +15,13 @@ interface ShowToastOptions {
         stroke?: ColorValue;
       }
   >;
+  iconColor?: string;
 }
 
 export const useCustomToast = () => {
   const toast = useToast();
 
-  const showToast = ({ message, icon }: ShowToastOptions) => {
+  const showToast = ({ message, icon, iconColor }: ShowToastOptions) => {
     toast.show({
       placement: "bottom",
       duration: 2000,
@@ -34,7 +35,8 @@ export const useCustomToast = () => {
             <Icon
               as={icon || CheckCircleIcon}
               size="xl"
-              className="text-green-500"
+              className={!iconColor ? "text-typography-black" : ""}
+              color={iconColor}
             />
             <Divider
               orientation="vertical"
