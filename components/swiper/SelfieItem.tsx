@@ -1,26 +1,29 @@
 import { useRunStore } from "@/store/useRunStore";
 import { Image } from "expo-image";
 import React from "react";
-import { Text, View } from "react-native";
-const SelfieItem = () => {
-  const selfieUri = useRunStore((state) => state.runData?.selfie);
+import { View } from "react-native";
 
-  if (!selfieUri) {
+interface SelfieItemProps {
+  selfieImgUrl?: string;
+}
+const SelfieItem = ({ selfieImgUrl }: SelfieItemProps) => {
+  const runSelfieUri = useRunStore((state) => state.runData?.selfie);
+
+  if (selfieImgUrl) {
     return (
       <View className="flex-1 items-center justify-center">
-        {/* <Image
-          source={require("../../assets/images/default_selfie.png")}
+        <Image
+          source={{ uri: selfieImgUrl }}
           style={{ height: "100%", aspectRatio: 4 / 5 }}
           contentFit="contain"
-        /> */}
-        <Text>피드 인증샷 자리</Text>
+        />
       </View>
     );
   }
   return (
     <View className="flex-1 items-center justify-center">
       <Image
-        source={{ uri: selfieUri }}
+        source={{ uri: runSelfieUri || "" }}
         style={{ height: "100%", aspectRatio: 4 / 5 }}
         contentFit="contain"
       />

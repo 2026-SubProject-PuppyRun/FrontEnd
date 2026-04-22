@@ -1,4 +1,4 @@
-import RunResultBoard from "@/components/board/RunResultBoard";
+import RunResultBoard from "@/components/board/RunBoard/RunResultBoard";
 import Header from "@/components/header/Header";
 import CustomAlert from "@/components/modal/CustomAlert";
 import SelfieAndRouteSwiper from "@/components/swiper/SelfieAndRouteSwiper";

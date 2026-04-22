@@ -4,6 +4,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
+import { Pet, usePetStore } from "@/store/usePetStore";
 import { initFCM } from "@/util/initFCM";
 import notifee from "@notifee/react-native";
 import messaging from "@react-native-firebase/messaging"; // ★ 추가
@@ -12,12 +13,45 @@ import * as Device from "expo-device";
 import { useEffect } from "react";
 export default function RootLayout() {
   const queryClient = new QueryClient();
+  const setPetList = usePetStore((state) => state.setPetList);
+
+  const dummyPetList: Pet[] = [
+    {
+      petId: "30f5151a-eb6e-4f15-9ed1-30fd15ed8e09",
+      name: "두부",
+      birthYear: "2021-05-20T00:00:00",
+      weight: 4.5,
+      color: "#FFFFF0",
+      profileImageUrl: "https://picsum.photos/200/200?random=1",
+      breedCode: "101",
+      badgeCode: "000",
+      gender: "M",
+      isNeutered: true,
+    },
+    {
+      petId: "d4563324-17d6-477e-a326-bd3d94ee50cd",
+      name: "누렁이",
+      birthYear: "2024-05-20T00:00:00",
+      weight: 4.2,
+      color: "#CD853F",
+      profileImageUrl: "https://picsum.photos/200/200?random=2",
+      breedCode: "101",
+      badgeCode: "000",
+      gender: "F",
+      isNeutered: false,
+    },
+  ];
 
   useEffect(() => {
+    const fetchPetList = async () => {
+      //Todo API 연동
+      setPetList(dummyPetList, 2);
+    };
     async function requestNotificationPermission() {
       await notifee.requestPermission();
     }
     requestNotificationPermission();
+    fetchPetList();
 
     if (Device.isDevice) {
       initFCM();

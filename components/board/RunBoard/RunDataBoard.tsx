@@ -2,10 +2,10 @@ import { useRunStore } from "@/store/useRunStore";
 import { formatTime } from "@/util/formatTime";
 import { getPathLength } from "geolib";
 import React, { useEffect, useState } from "react";
-import { Box } from "../ui/box";
-import { HStack } from "../ui/hstack";
-import { Text } from "../ui/text";
-import { View } from "../ui/view";
+import { Box } from "../../ui/box";
+import { HStack } from "../../ui/hstack";
+import { Text } from "../../ui/text";
+import { View } from "../../ui/view";
 
 interface RunDataBoardProps {
   isMapLoaded: boolean;

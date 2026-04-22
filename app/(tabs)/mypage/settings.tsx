@@ -1,10 +1,13 @@
+import SettingBody from "@/components/body/mypage/SettingBody";
+import Header from "@/components/header/Header";
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 const Settings = () => {
   return (
-    <View>
-      <Text>settings</Text>
+    <View className="flex-1">
+      <Header title="설정" />
+      <SettingBody />
     </View>
   );
 };

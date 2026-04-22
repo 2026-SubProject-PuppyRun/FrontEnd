@@ -8,9 +8,17 @@ import Carousel, {
 import RouteItem from "./RouteItem";
 import SelfieItem from "./SelfieItem";
 
+interface SelfieAndRouteSwiperProps {
+  routeImgUrl?: string;
+  selfieImgUrl?: string;
+}
+
 const swiperData = ["route", "selfie"];
 
-const SelfieAndRouteSwiper = () => {
+const SelfieAndRouteSwiper = ({
+  routeImgUrl,
+  selfieImgUrl,
+}: SelfieAndRouteSwiperProps) => {
   const progress = useSharedValue<number>(0);
   const baseOptions = {
     vertical: false,
@@ -44,7 +52,11 @@ const SelfieAndRouteSwiper = () => {
           style={{ width: width, height: width * 0.7 }}
           data={swiperData}
           renderItem={({ index }) => {
-            return index === 1 ? <RouteItem /> : <SelfieItem />;
+            return index === 1 ? (
+              <RouteItem routeImgUrl={routeImgUrl} />
+            ) : (
+              <SelfieItem selfieImgUrl={selfieImgUrl} />
+            );
           }}
         />
       </View>
