@@ -1,3 +1,5 @@
+import { getTargetDate } from "@/util/getTargetDate";
+import { scheduleLocalNotification } from "@/util/localNotification";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { TextInput, View } from "react-native";
@@ -20,6 +22,7 @@ export interface AlarmItem {
   title: string;
   dayOfWeek: string;
   time: Date;
+  notificationId?: string;
 }
 const dummyAlarmList: AlarmItem[] = [
   {
@@ -104,7 +107,18 @@ const AlarmBody = () => {
         description={`제목: ${alarmTitle}, 요일: ${dayOfWeek}, 시간: ${date.toLocaleTimeString().slice(0, 7)} `}
         confirmText="확인"
         cancelText="취소"
-        onConfirm={() => {
+        onConfirm={async () => {
+          const newAlarmDate = getTargetDate(dayOfWeek, date);
+
+          const notiId = await scheduleLocalNotification(
+            alarmTitle,
+            newAlarmDate,
+            {
+              body: `퍼피런에서 온 알림입니다!`,
+              smallIcon: "ic_launcher",
+            },
+            "puppyrun_alarm_channel",
+          );
           setAlarmList((prev) => {
             const dayOrder = ["일", "월", "화", "수", "목", "금", "토"];
             const newList = [
@@ -113,6 +127,7 @@ const AlarmBody = () => {
                 dayOfWeek,
                 time: date,
                 title: alarmTitle,
+                notificationId: notiId,
               },
             ];
             return newList.sort((a, b) => {

@@ -14,7 +14,7 @@ export const getFCMToken = async () => {
   try {
     const token = await getToken(messaging);
     console.log("FCM Token:", token);
-    // submitNotificationToBackendTest(token); // 백엔드로 FCM 토큰 전송
+    // submitNotificationToBackend(token); // 백엔드로 FCM 토큰 전송
     return token;
   } catch (error) {
     console.error("FCM Token 가져오기 실패:", error);
@@ -38,7 +38,7 @@ setBackgroundMessageHandler(messaging, async (remoteMessage) => {
   console.log("💌 Message handled in the background!", remoteMessage);
 });
 
-const submitNotificationToBackendTest = async (tokenString: string) => {
+const submitNotificationToBackend = async (tokenString: string) => {
   try {
     const response = await fetch(
       "https://maybell-unelicitable-uninterestingly.ngrok-free.dev/api/admin/notice/send-push?title=푸푸런 알림&body=푸푸런에서 새로운 알림이 도착했습니다.&fcmToken=" +

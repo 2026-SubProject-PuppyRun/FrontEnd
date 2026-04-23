@@ -1,4 +1,5 @@
 import { AlarmItem } from "@/components/body/AlarmBody";
+import { deleteLocalNotification } from "@/util/localNotification";
 import { ScrollView } from "react-native";
 import AlarmListItem from "./AlarmListItem";
 
@@ -19,6 +20,7 @@ const AlarmList = ({ alarmList, setAlarmList }: AlarmListProps) => {
             time={item.time}
             onDelete={() => {
               setAlarmList((prev) => prev.filter((_, i) => i !== index));
+              deleteLocalNotification(item.notificationId!);
             }}
           />
         ))}
