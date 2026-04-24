@@ -1,10 +1,7 @@
+import { BREED_DATA } from "@/constants/breedData";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
-import {
-  BREED_LIST,
-  getBreedDefaultColor,
-  getBreedName,
-} from "@/util/getBreedCode";
+import { getBreedDefaultColor, getBreedName } from "@/util/getBreedCode";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
@@ -184,7 +181,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
 
   useMemo(() => {
     if (breedCode) {
-      const breed = BREED_LIST.find((b) => b.value === breedCode);
+      const breed = BREED_DATA.find((b) => b.code === breedCode);
       if (breed) {
         setColor(getBreedDefaultColor(breedCode));
       }
@@ -379,11 +376,11 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
                 </SelectDragIndicatorWrapper>
 
                 <ScrollView className="w-full">
-                  {BREED_LIST.map((breed) => (
+                  {BREED_DATA.map((breed) => (
                     <SelectItem
-                      key={breed.value}
-                      label={breed.label}
-                      value={breed.value}
+                      key={breed.code}
+                      label={breed.name}
+                      value={breed.code}
                     />
                   ))}
                 </ScrollView>
