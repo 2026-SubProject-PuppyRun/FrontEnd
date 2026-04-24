@@ -7,8 +7,8 @@ import { Text, View } from "react-native";
 const Index = () => {
   return (
     <View>
-      <Header>
-        <Text>로고</Text>
+      <Header disableBack={true}>
+        <Text className="flex-1 self-center">로고</Text>
         <HomeAvatar />
       </Header>
       <HomeDashBoard />
