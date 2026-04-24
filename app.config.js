@@ -79,6 +79,7 @@ module.exports = {
           },
         },
       ],
+      "./withNotifeeBuildGradle.js",
     ],
     ignoreWarnings: [
       "SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context",
