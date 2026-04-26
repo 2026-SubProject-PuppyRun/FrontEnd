@@ -1,10 +1,11 @@
+import LawBody from "@/components/body/guide/LawBody";
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 const Law = () => {
   return (
-    <View>
-      <Text>law</Text>
+    <View className="flex-1 bg-white">
+      <LawBody />
     </View>
   );
 };
