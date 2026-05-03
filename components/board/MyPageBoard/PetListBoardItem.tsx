@@ -9,12 +9,14 @@ interface PetListBoardItemProps {
   petImgUrl: string;
   petName: string;
   petId: string;
+  mbti?: string;
 }
 
 const PetListBoardItem = ({
   petImgUrl,
   petName,
   petId,
+  mbti,
 }: PetListBoardItemProps) => {
   const router = useRouter();
   return (
@@ -23,10 +25,35 @@ const PetListBoardItem = ({
         <Avatar size="xl">
           <AvatarImage source={{ uri: petImgUrl }} />
         </Avatar>
-        <View className="flex-1 items-center">
-          <Text size="2xl" className="font-bold text-black">
-            {petName}
-          </Text>
+        <View className="flex-1 items-start pl-4">
+          <HStack className="items-center space-x-2">
+            <Text size="2xl" className="font-bold text-black">
+              {petName}
+            </Text>
+            {mbti && (
+              <Pressable
+                onPress={() => {
+                  /* 멍BTI 모달 열기 */
+                }}
+              >
+                <View className="rounded-full bg-yellow-100 px-2 py-1">
+                  <Text className="text-xs font-bold text-yellow-600">
+                    {mbti}
+                  </Text>
+                </View>
+              </Pressable>
+            )}
+          </HStack>
+          {!mbti && (
+            <Pressable
+              className="mt-1"
+              onPress={() => router.push(`/mypage/pets/${petId}/mbti`)}
+            >
+              <Text className=" text-gray-500 underline " size="sm">
+                우리 아이 멍BTI는? 🐾
+              </Text>
+            </Pressable>
+          )}
         </View>
         <Pressable
           className=" h-full items-end"

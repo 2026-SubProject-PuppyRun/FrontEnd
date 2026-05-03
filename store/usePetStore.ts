@@ -7,6 +7,7 @@ export interface Pet {
   color: string;
   name: string;
   petId: string;
+  mbti?: string;
   profileImageUrl: string | null;
   weight: number;
   isNeutered?: boolean;

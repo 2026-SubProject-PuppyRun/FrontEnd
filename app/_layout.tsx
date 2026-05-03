@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Device from "expo-device";
 import { useEffect, useState } from "react";
 import { Linking } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 export default function RootLayout() {
   const queryClient = new QueryClient();
   const setPetList = usePetStore((state) => state.setPetList);
@@ -93,19 +94,21 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider mode="dark">
-          <Stack screenOptions={{ headerShown: false }} />
-          <CustomAlert
-            showAlertDialog={modalVisible}
-            handleClose={() => setModalVisible(false)}
-            title="알림 권한이 필요해요"
-            description="푸푸런에서 알림을 받으려면 권한이 필요해요. 설정에서 권한을 허용해주세요."
-            confirmText="설정으로 이동"
-            cancelText="취소"
-            onConfirm={() => {
-              Linking.openSettings();
-              setModalVisible(false);
-            }}
-          />
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack screenOptions={{ headerShown: false }} />
+            <CustomAlert
+              showAlertDialog={modalVisible}
+              handleClose={() => setModalVisible(false)}
+              title="알림 권한이 필요해요"
+              description="푸푸런에서 알림을 받으려면 권한이 필요해요. 설정에서 권한을 허용해주세요."
+              confirmText="설정으로 이동"
+              cancelText="취소"
+              onConfirm={() => {
+                Linking.openSettings();
+                setModalVisible(false);
+              }}
+            />
+          </GestureHandlerRootView>
         </GluestackUIProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
