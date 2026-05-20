@@ -14,17 +14,6 @@ import { ScrollView } from "react-native";
 
 const BreedGuideBody = () => {
   const breedList = BREED_DATA;
-
-  //     {
-  //     name: "말티즈",
-  //     code: "101",
-  //     color: "#FFFFFF",
-  //     weightRange: "2.0 ~ 4.0",
-  //     size: "소형견",
-  //     personality: "활발하고 애교가 많으며 보호자에게 강한 애착을 보입니다.",
-  //     geneticDiseases: ["슬개골 탈구", "유류증(눈물자국)", "기관지 협착증"],
-  //     recommendedExercise: "하루 30분 내외의 가벼운 산책",
-  //   }, data 구조 예시
   return (
     <ScrollView>
       <Accordion

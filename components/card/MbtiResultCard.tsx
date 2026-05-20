@@ -7,22 +7,22 @@ interface MbtiResultCardProps {
   resultMbti: string;
 }
 const mbtiImages: Record<string, any> = {
-  ESTJ: require("@/assets/images/mbti/ESTJ.png"),
-  ESTP: require("@/assets/images/mbti/ESTP.png"),
-  ESFJ: require("@/assets/images/mbti/ESFJ.png"),
-  ESFP: require("@/assets/images/mbti/ESFP.png"),
+  ESTJ: require("@/assets/images/mbti/ESTJ.webp"),
+  ESTP: require("@/assets/images/mbti/ESTP.webp"),
+  ESFJ: require("@/assets/images/mbti/ESFJ.webp"),
+  ESFP: require("@/assets/images/mbti/ESFP.webp"),
   //   ENTJ: require("@/assets/images/mbti/ENTJ.png"),
-  ENTP: require("@/assets/images/mbti/ENTP.png"),
-  ENFJ: require("@/assets/images/mbti/ENFJ.png"),
-  ENFP: require("@/assets/images/mbti/ENFP.png"),
-  ISTJ: require("@/assets/images/mbti/ISTJ.png"),
-  ISTP: require("@/assets/images/mbti/ISTP.png"),
-  ISFJ: require("@/assets/images/mbti/ISFJ.png"),
-  ISFP: require("@/assets/images/mbti/ISFP.png"),
-  INTJ: require("@/assets/images/mbti/INTJ.png"),
-  INTP: require("@/assets/images/mbti/INTP.png"),
-  INFJ: require("@/assets/images/mbti/INFJ.png"),
-  INFP: require("@/assets/images/mbti/INFP.png"),
+  ENTP: require("@/assets/images/mbti/ENTP.webp"),
+  ENFJ: require("@/assets/images/mbti/ENFJ.webp"),
+  ENFP: require("@/assets/images/mbti/ENFP.webp"),
+  ISTJ: require("@/assets/images/mbti/ISTJ.webp"),
+  ISTP: require("@/assets/images/mbti/ISTP.webp"),
+  ISFJ: require("@/assets/images/mbti/ISFJ.webp"),
+  ISFP: require("@/assets/images/mbti/ISFP.webp"),
+  INTJ: require("@/assets/images/mbti/INTJ.webp"),
+  INTP: require("@/assets/images/mbti/INTP.webp"),
+  INFJ: require("@/assets/images/mbti/INFJ.webp"),
+  INFP: require("@/assets/images/mbti/INFP.webp"),
 };
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const IMAGE_SIZE = SCREEN_WIDTH * 0.8;
