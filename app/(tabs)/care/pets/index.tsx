@@ -1,12 +1,13 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import PetBody from "@/components/body/pet/PetBody";
+import React from "react";
+import { View } from "react-native";
 
 const Index = () => {
   return (
     <View>
-      <Text>index</Text>
+      <PetBody />
     </View>
-  )
-}
+  );
+};
 
-export default Index
+export default Index;
