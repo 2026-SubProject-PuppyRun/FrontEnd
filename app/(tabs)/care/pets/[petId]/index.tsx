@@ -1,12 +1,6 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { Redirect } from "expo-router";
 
-const Index = () => {
-  return (
-    <View>
-      <Text>index</Text>
-    </View>
-  )
+/** /care/pets/[petId] → 식단 탭 */
+export default function PetDetailIndex() {
+  return <Redirect href="./diet" />;
 }
-
-export default Index

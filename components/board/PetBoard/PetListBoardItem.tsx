@@ -29,7 +29,7 @@ const PetListBoardItem = ({
   return (
     <Pressable
       className="m-2 flex-row items-center gap-4 rounded-xl border border-gray-200 bg-white px-4 py-6 shadow-md"
-      onPress={() => router.push(`/care/pets/${petId.toString()}`)}
+      onPress={() => router.push(`/care/pets/${petId}/diet`)}
     >
       <View className="h-32 w-32 overflow-hidden rounded-full">
         <Image

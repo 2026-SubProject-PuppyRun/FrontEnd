@@ -1,12 +1,11 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { Text, View } from "react-native";
 
 const Edit = () => {
   return (
-    <View>
-      <Text>edit</Text>
+    <View className="flex-1 p-4">
+      <Text>반려견 정보 수정</Text>
     </View>
-  )
-}
+  );
+};
 
-export default Edit
+export default Edit;
