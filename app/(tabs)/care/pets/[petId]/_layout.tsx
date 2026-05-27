@@ -1,7 +1,12 @@
 import Header from "@/components/header/Header";
 import { Pressable } from "@/components/ui/pressable";
 import { usePetStore } from "@/store/usePetStore";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import {
+  Stack,
+  useLocalSearchParams,
+  usePathname,
+  useRouter,
+} from "expo-router";
 import React from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
@@ -22,11 +27,12 @@ export default function PetLayout() {
   const petId = resolvePetId(params.petId);
   const petList = usePetStore((state) => state.petList);
   const petName = petList?.find((p) => p.petId === petId)?.name;
-
+  const path = usePathname();
+  const isEdit = path.includes("edit");
   return (
     <View className="flex-1 bg-white">
       <Header title={petName ?? "반려견"}>
-        {petId ? (
+        {petId && !isEdit ? (
           <Pressable
             onPress={() => router.push(`/care/pets/${petId}/edit`)}
             className="px-2 py-1"
