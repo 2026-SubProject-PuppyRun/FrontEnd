@@ -1,11 +1,5 @@
-import { Text, View } from "react-native";
+import AllergyTabBody from "@/components/body/pet/AllergyTabBody";
 
-const Allergy = () => {
-  return (
-    <View className="flex-1 bg-white p-4">
-      <Text className="text-base text-gray-800">알러지</Text>
-    </View>
-  );
-};
+const Allergy = () => <AllergyTabBody />;
 
 export default Allergy;

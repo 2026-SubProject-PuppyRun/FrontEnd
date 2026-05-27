@@ -37,6 +37,7 @@ export default function PetCareTabsLayout() {
             tabBarIndicatorStyle: { backgroundColor: "#0D0F1B", height: 2 },
             tabBarLabelStyle: { fontWeight: "700", fontSize: 14 },
             tabBarStyle: styles.tabBar,
+            sceneStyle: styles.scene,
           }}
         >
           <MaterialTopTabs.Screen name="diet" options={{ title: "식단" }} />
@@ -66,5 +67,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     elevation: 0,
     shadowOpacity: 0,
+  },
+  scene: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
   },
 });
