@@ -9,7 +9,7 @@ import {
   getPetSpritePack,
   getSpritePackKey,
   getSpriteSheetMeta,
-} from "@/util/getPetSpritePack";
+} from "@/util/pet";
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";

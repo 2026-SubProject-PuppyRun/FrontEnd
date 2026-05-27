@@ -1,7 +1,7 @@
 import { BREED_DATA } from "@/constants/breedData";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
-import { getBreedDefaultColor, getBreedName } from "@/util/getBreedCode";
+import { getBreedDefaultColor, getBreedName } from "@/util/pet";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";

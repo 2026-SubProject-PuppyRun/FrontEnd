@@ -1,5 +1,5 @@
 import { Pet } from "@/store/usePetStore";
-import { getBreedName } from "@/util/getBreedCode";
+import { getBreedName } from "./getBreedCode";
 
 export interface PetBasicInfo {
   name: string;

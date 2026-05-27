@@ -1,7 +1,7 @@
 import MbtiResultCard from "@/components/card/MbtiResultCard";
 import { Text } from "@/components/ui/text";
 import { mbtiQuestionData } from "@/constants/mbtiQuestionData";
-import { getResultMbti } from "@/util/getResultMbti";
+import { getResultMbti } from "@/util/mbti";
 import React, { useState } from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";

@@ -3,7 +3,7 @@ import {
   formatAllergyDate,
   getCategoryLabel,
   getSeverityLabel,
-} from "@/util/allergyLabels";
+} from "@/util/allergy";
 import { Pressable, Text, View } from "react-native";
 
 interface AllergyCardProps {

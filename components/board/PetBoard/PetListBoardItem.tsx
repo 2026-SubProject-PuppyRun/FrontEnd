@@ -1,6 +1,6 @@
 import { Pressable } from "@/components/ui/pressable";
 import { Pet } from "@/store/usePetStore";
-import { getBreedName } from "@/util/getBreedCode";
+import { getBreedName } from "@/util/pet";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Text, View } from "react-native";

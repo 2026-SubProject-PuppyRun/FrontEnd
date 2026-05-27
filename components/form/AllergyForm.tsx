@@ -4,7 +4,7 @@ import {
   ALLERGY_SEVERITIES,
   getCategoryLabel,
   getSeverityLabel,
-} from "@/util/allergyLabels";
+} from "@/util/allergy";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Button, ButtonText } from "../ui/button";

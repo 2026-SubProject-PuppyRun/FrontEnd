@@ -1,6 +1,6 @@
 import ChartDateNavigator from "@/components/navigator/ChartDateNavigator";
 import ChartSkeleton from "@/components/skeleton/ChartSkeleton";
-import { getWeekName } from "@/util/getWeekOfMonth";
+import { getWeekName } from "@/util/date";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import React, { useState } from "react";

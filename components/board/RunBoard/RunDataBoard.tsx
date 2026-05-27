@@ -1,5 +1,5 @@
 import { useRunStore } from "@/store/useRunStore";
-import { formatTime } from "@/util/formatTime";
+import { formatTime } from "@/util/run";
 import { getPathLength } from "geolib";
 import React, { useEffect, useState } from "react";
 import { Box } from "../../ui/box";

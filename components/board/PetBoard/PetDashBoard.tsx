@@ -1,5 +1,5 @@
 import { Pet } from "@/store/usePetStore";
-import { getPetBasicInfo } from "@/util/getPetBasicInfo";
+import { getPetBasicInfo } from "@/util/pet";
 import { Image } from "expo-image";
 import { Text, View } from "react-native";
 

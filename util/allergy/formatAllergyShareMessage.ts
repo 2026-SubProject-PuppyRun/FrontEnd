@@ -3,7 +3,7 @@ import {
   formatAllergyDate,
   getCategoryLabel,
   getSeverityLabel,
-} from "@/util/allergyLabels";
+} from "./allergyLabels";
 
 const formatRecordLine = (record: AllergyRecord): string => {
   const parts = [

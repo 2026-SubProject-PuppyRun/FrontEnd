@@ -1,9 +1,7 @@
 import { AllergyRecord } from "@/types/allergy";
-import { getCategoryLabel } from "@/util/allergyLabels";
+import { getCategoryLabel } from "./allergyLabels";
 
-export const buildActiveAllergySummary = (
-  records: AllergyRecord[],
-): string => {
+export const buildActiveAllergySummary = (records: AllergyRecord[]): string => {
   const active = records.filter((r) => r.isActive);
   const counts = active.reduce(
     (acc, r) => {
@@ -14,6 +12,9 @@ export const buildActiveAllergySummary = (
   );
 
   return Object.entries(counts)
-    .map(([cat, n]) => `${getCategoryLabel(cat as AllergyRecord["category"])} ${n}`)
+    .map(
+      ([cat, n]) =>
+        `${getCategoryLabel(cat as AllergyRecord["category"])} ${n}`,
+    )
     .join(" · ");
 };

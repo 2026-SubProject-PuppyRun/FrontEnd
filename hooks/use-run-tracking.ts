@@ -1,5 +1,5 @@
 import { useRunStore } from "@/store/useRunStore";
-import { calculatePace } from "@/util/calcPace";
+import { calculatePace } from "@/util/run";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import { useEffect } from "react";

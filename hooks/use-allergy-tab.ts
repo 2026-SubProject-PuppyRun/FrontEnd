@@ -3,9 +3,11 @@ import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useAllergyStore } from "@/store/useAllergyStore";
 import { usePetStore } from "@/store/usePetStore";
 import { AllergyFormValues, AllergyRecord } from "@/types/allergy";
-import { buildActiveAllergySummary } from "@/util/buildActiveAllergySummary";
-import { formatAllergyShareMessage } from "@/util/formatAllergyShareMessage";
-import { resolveRouteParam } from "@/util/resolveRouteParam";
+import {
+  buildActiveAllergySummary,
+  formatAllergyShareMessage,
+} from "@/util/allergy";
+import { resolveRouteParam } from "@/util/navigation";
 import { useGlobalSearchParams } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Share } from "react-native";
