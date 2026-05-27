@@ -56,22 +56,6 @@ const CustomTabBar = ({
             }
           };
 
-          if (isHome) {
-            return (
-              <Pressable
-                key={route.key}
-                onPress={onPress}
-                className="h-16 flex-1 items-center justify-center"
-                accessibilityRole="button"
-                accessibilityState={{ selected: isFocused }}
-              >
-                <View className="h-[52px] w-[52px] items-center justify-center rounded-full bg-white">
-                  <Ionicons name="home" size={26} color="#0D0F1B" />
-                </View>
-              </Pressable>
-            );
-          }
-
           const iconName = TAB_ICONS[route.name as TabRouteName];
 
           return (
@@ -82,11 +66,15 @@ const CustomTabBar = ({
               accessibilityRole="button"
               accessibilityState={{ selected: isFocused }}
             >
-              <Ionicons
-                name={iconName}
-                size={24}
-                color={isFocused ? "#FFFFFF" : "rgba(255,255,255,0.72)"}
-              />
+              <View
+                className={`${isFocused ? "h-[52px] w-[52px] items-center justify-center rounded-full bg-white" : ""}`}
+              >
+                <Ionicons
+                  name={iconName}
+                  size={24}
+                  color={isFocused ? "#0D0F1B" : "white"}
+                />
+              </View>
             </Pressable>
           );
         })}
