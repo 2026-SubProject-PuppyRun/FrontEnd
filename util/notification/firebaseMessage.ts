@@ -7,14 +7,34 @@ import {
   setBackgroundMessageHandler,
 } from "@react-native-firebase/messaging";
 
-const messaging = getMessaging(getApp());
+let messagingInstance: ReturnType<typeof getMessaging> | null = null;
+let backgroundHandlerRegistered = false;
+
+const getFirebaseMessaging = () => {
+  if (!messagingInstance) {
+    messagingInstance = getMessaging(getApp());
+  }
+  return messagingInstance;
+};
+
+const registerBackgroundHandler = () => {
+  if (backgroundHandlerRegistered) return;
+  try {
+    setBackgroundMessageHandler(getFirebaseMessaging(), async (remoteMessage) => {
+      console.log("💌 Message handled in the background!", remoteMessage);
+    });
+    backgroundHandlerRegistered = true;
+  } catch (error) {
+    console.warn("FCM background handler 등록 실패:", error);
+  }
+};
 
 // FCM 토큰 가져오기
 export const getFCMToken = async () => {
   try {
-    const token = await getToken(messaging);
+    registerBackgroundHandler();
+    const token = await getToken(getFirebaseMessaging());
     console.log("FCM Token:", token);
-    // submitNotificationToBackend(token); // 백엔드로 FCM 토큰 전송
     return token;
   } catch (error) {
     console.error("FCM Token 가져오기 실패:", error);
@@ -23,20 +43,21 @@ export const getFCMToken = async () => {
 
 // 알림 권한 요청
 export const requestUserPermission = async () => {
-  const authStatus = await requestPermission(messaging);
-  const enabled =
-    authStatus === AuthorizationStatus.AUTHORIZED ||
-    authStatus === AuthorizationStatus.PROVISIONAL;
+  try {
+    const authStatus = await requestPermission(getFirebaseMessaging());
+    const enabled =
+      authStatus === AuthorizationStatus.AUTHORIZED ||
+      authStatus === AuthorizationStatus.PROVISIONAL;
 
-  if (enabled) {
-    console.log("푸시 알림 권한 승인됨");
+    if (enabled) {
+      console.log("푸시 알림 권한 승인됨");
+    }
+  } catch (error) {
+    console.warn("FCM 권한 요청 실패:", error);
   }
 };
 
-// Background & Quit 상태 알림 수신
-setBackgroundMessageHandler(messaging, async (remoteMessage) => {
-  console.log("💌 Message handled in the background!", remoteMessage);
-});
+export { getFirebaseMessaging };
 
 const submitNotificationToBackend = async (tokenString: string) => {
   try {

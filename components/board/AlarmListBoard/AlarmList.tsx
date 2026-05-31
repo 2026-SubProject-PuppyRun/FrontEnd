@@ -1,5 +1,5 @@
 import { AlarmItem } from "@/components/body/AlarmBody";
-import { deleteLocalNotification } from "@/util/localNotification";
+import { deleteLocalNotification } from "@/util/notification";
 import { ScrollView } from "react-native";
 import AlarmListItem from "./AlarmListItem";
 

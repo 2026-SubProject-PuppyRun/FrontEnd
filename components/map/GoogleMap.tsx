@@ -1,3 +1,5 @@
+import { GOOGLE_MAP_DARK_STYLE } from "@/constants/googleMapDarkStyle";
+import { GOOGLE_MAP_SILVER_STYLE } from "@/constants/googleMapSilverStyle";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useRunStore } from "@/store/useRunStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,9 +26,15 @@ interface GoogleMapProps {
   onMapLoad: () => void;
   children?: React.ReactNode;
   isSummary?: boolean;
+  style?: "dark" | "silver";
 }
 
-const GoogleMap = ({ onMapLoad, children, isSummary }: GoogleMapProps) => {
+const GoogleMap = ({
+  onMapLoad,
+  children,
+  isSummary,
+  style,
+}: GoogleMapProps) => {
   const [coordinates, setCoordinates] = useState({
     latitude: DEFAULT_REGION.latitude,
     longitude: DEFAULT_REGION.longitude,
@@ -173,6 +181,9 @@ const GoogleMap = ({ onMapLoad, children, isSummary }: GoogleMapProps) => {
           longitudeDelta: DEFAULT_REGION.longitudeDelta,
         }}
         provider={PROVIDER_GOOGLE}
+        customMapStyle={
+          style === "dark" ? GOOGLE_MAP_DARK_STYLE : GOOGLE_MAP_SILVER_STYLE
+        }
         showsCompass
         showsScale
         mapType="standard"

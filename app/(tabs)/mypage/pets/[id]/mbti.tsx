@@ -1,9 +1,10 @@
-import { Text, View } from "react-native";
+import MbtiBody from "@/components/body/mypage/MbtiBody";
+import { View } from "react-native";
 
 const Mbti = () => {
   return (
-    <View>
-      <Text>Hello, World!</Text>
+    <View className="flex-1">
+      <MbtiBody />
     </View>
   );
 };

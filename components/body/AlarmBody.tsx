@@ -1,5 +1,5 @@
-import { getTargetDate } from "@/util/getTargetDate";
-import { scheduleLocalNotification } from "@/util/localNotification";
+import { getTargetDate } from "@/util/date";
+import { scheduleLocalNotification } from "@/util/notification";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { TextInput, View } from "react-native";

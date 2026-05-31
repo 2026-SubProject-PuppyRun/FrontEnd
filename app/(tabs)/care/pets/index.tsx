@@ -1,12 +1,15 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import PetBody from "@/components/body/pet/PetBody";
+import Header from "@/components/header/Header";
+import React from "react";
+import { View } from "react-native";
 
 const Index = () => {
   return (
     <View>
-      <Text>index</Text>
+      <Header title="반려견 목록" />
+      <PetBody />
     </View>
-  )
-}
+  );
+};
 
-export default Index
+export default Index;

@@ -1,6 +1,6 @@
 import { FeedDetail } from "@/app/(tabs)/mypage/feed/[id]";
 import { useCustomToast } from "@/hooks/use-custom-toast";
-import { formatTime } from "@/util/formatTime";
+import { formatTime } from "@/util/run";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView } from "react-native";

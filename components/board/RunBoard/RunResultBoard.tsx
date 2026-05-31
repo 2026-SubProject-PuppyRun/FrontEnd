@@ -1,5 +1,5 @@
 import { useRunStore } from "@/store/useRunStore";
-import { formatTime } from "@/util/formatTime";
+import { formatTime } from "@/util/run";
 import React from "react";
 import { Text, View } from "react-native";
 import { HStack } from "../../ui/hstack";

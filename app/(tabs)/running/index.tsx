@@ -18,7 +18,7 @@ const Index = () => {
       <Header />
       <View className="relative flex-1">
         <RecRouteSwiper disabled={!isMapLoaded} />
-        <GoogleMap onMapLoad={() => setIsMapLoaded(true)}>
+        <GoogleMap onMapLoad={() => setIsMapLoaded(true)} style="silver">
           {selectedRoute && (
             <Polyline
               coordinates={selectedRoute}
