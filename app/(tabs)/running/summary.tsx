@@ -38,7 +38,11 @@ const Summary = () => {
   return (
     <View style={{ paddingTop: insets.top }} className="flex-1">
       <View className="h-2/5 bg-white">
-        <GoogleMap onMapLoad={() => setIsMapLoaded(true)} isSummary={true}>
+        <GoogleMap
+          onMapLoad={() => setIsMapLoaded(true)}
+          isSummary={true}
+          style="dark"
+        >
           {isMapLoaded && finalRoute.length > 0 && (
             <Polyline
               coordinates={finalRoute.map((coord) => ({

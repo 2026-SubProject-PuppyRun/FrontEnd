@@ -70,6 +70,7 @@ const Tracking = () => {
         onMapLoad={() => {
           setIsMapLoaded(true);
         }}
+        style="silver"
       >
         {selectedRoute && (
           <Polyline
