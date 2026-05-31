@@ -41,7 +41,10 @@ export default function PetCareTabsLayout() {
           }}
         >
           <MaterialTopTabs.Screen name="diet" options={{ title: "식단" }} />
-          <MaterialTopTabs.Screen name="weight" options={{ title: "체중" }} />
+          <MaterialTopTabs.Screen
+            name="weight"
+            options={{ title: "체중", swipeEnabled: false }}
+          />
           <MaterialTopTabs.Screen name="vaccine" options={{ title: "접종" }} />
           <MaterialTopTabs.Screen
             name="allergy"
