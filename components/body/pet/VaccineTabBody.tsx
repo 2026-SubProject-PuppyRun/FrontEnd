@@ -14,6 +14,7 @@ const VaccineTabBody = () => {
     closeSheet,
     handleSubmit,
     shareVaccine,
+    handleDelete,
   } = useVaccineTab();
 
   return (
@@ -25,6 +26,7 @@ const VaccineTabBody = () => {
         onClose={closeSheet}
         editingRecord={editingRecord}
         onSubmit={handleSubmit}
+        onDelete={handleDelete}
       />
     </View>
   );

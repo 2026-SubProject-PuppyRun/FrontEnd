@@ -8,7 +8,10 @@ import { useGlobalSearchParams } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Share } from "react-native";
 
-const buildVaccineShareMessage = (petName: string, records: VaccineRecord[]) => {
+const buildVaccineShareMessage = (
+  petName: string,
+  records: VaccineRecord[],
+) => {
   if (records.length === 0) return null;
   const lines = records.map(
     (record) =>
@@ -28,9 +31,12 @@ export const useVaccineTab = () => {
   const records = useVaccineStore((state) => state.records);
   const addRecord = useVaccineStore((state) => state.addRecord);
   const updateRecord = useVaccineStore((state) => state.updateRecord);
+  const deleteRecord = useVaccineStore((state) => state.deleteRecord);
 
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<VaccineRecord | null>(null);
+  const [editingRecord, setEditingRecord] = useState<VaccineRecord | null>(
+    null,
+  );
 
   const petRecords = useMemo(
     () => (petId ? records.filter((r) => r.petId === petId) : []),
@@ -47,7 +53,10 @@ export const useVaccineTab = () => {
     setSheetOpen(true);
   };
 
-  const closeSheet = () => setSheetOpen(false);
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setEditingRecord(null);
+  };
 
   const handleSubmit = (values: VaccineFormValues) => {
     if (!petId) return;
@@ -56,6 +65,12 @@ export const useVaccineTab = () => {
       return;
     }
     addRecord({ ...values, petId });
+  };
+
+  const handleDelete = () => {
+    if (!editingRecord) return;
+    deleteRecord(editingRecord.id);
+    closeSheet();
   };
 
   const shareVaccine = useCallback(async () => {
@@ -87,5 +102,6 @@ export const useVaccineTab = () => {
     closeSheet,
     handleSubmit,
     shareVaccine,
+    handleDelete,
   };
 };

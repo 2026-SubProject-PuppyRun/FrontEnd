@@ -15,6 +15,7 @@ interface VaccineFormSheetProps {
   onClose: () => void;
   editingRecord?: VaccineRecord | null;
   onSubmit: (values: VaccineFormValues) => void;
+  onDelete: () => void;
 }
 
 const VaccineFormSheet = ({
@@ -22,6 +23,7 @@ const VaccineFormSheet = ({
   onClose,
   editingRecord,
   onSubmit,
+  onDelete,
 }: VaccineFormSheetProps) => {
   const isEdit = Boolean(editingRecord);
 
@@ -50,6 +52,7 @@ const VaccineFormSheet = ({
               initialValues={editingRecord ?? undefined}
               submitLabel={isEdit ? "수정" : "저장"}
               onSubmit={handleSubmit}
+              onDelete={onDelete}
             />
           ) : null}
         </ActionsheetScrollView>
