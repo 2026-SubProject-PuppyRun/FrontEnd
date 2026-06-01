@@ -155,7 +155,7 @@ const GoogleMap = ({
   if (isLoading === true) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Spinner size="large" color="#BFB8AA" />
+        <Spinner size="large" color="#F25857" />
       </View>
     );
   }
@@ -218,7 +218,7 @@ const GoogleMap = ({
           className="absolute bottom-2 right-2 rounded-full bg-white p-2 shadow"
           activeOpacity={0.7}
         >
-          <Ionicons name="location" size={24} color="#26170F" />
+          <Ionicons name="location" size={24} color="#7D1D1C" />
         </TouchableOpacity>
       )}
     </View>

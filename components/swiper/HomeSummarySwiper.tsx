@@ -84,12 +84,12 @@ const HomeSummarySwiper = () => {
         size={10}
         dotStyle={{
           borderRadius: 100,
-          backgroundColor: "#BFB8AA",
+          backgroundColor: "#FFB3B2",
         }}
         activeDotStyle={{
           borderRadius: 100,
           overflow: "hidden",
-          backgroundColor: "#737153",
+          backgroundColor: "#E03E3D",
         }}
         containerStyle={[
           {

@@ -13,7 +13,7 @@ const HomeDashBoard = () => {
         <View className="rounded-lg " style={{ elevation: 5 }}>
           <Button
             size="xl"
-            className="rounded-lg bg-[#737153] data-[active=true]:bg-[#BFB8AA] "
+            className="rounded-lg bg-primary-600 data-[active=true]:bg-primary-300 "
             onPress={() => router.push("/(tabs)/home/status")}
           >
             <ButtonText className="text-white">통계 보기</ButtonText>
@@ -23,7 +23,7 @@ const HomeDashBoard = () => {
         <View className="rounded-lg " style={{ elevation: 5 }}>
           <Button
             size="xl"
-            className="rounded-lg bg-[#737153] data-[active=true]:bg-[#BFB8AA] "
+            className="rounded-lg bg-primary-600 data-[active=true]:bg-primary-300 "
             onPress={() => router.push("/(tabs)/home/alarm")}
           >
             <ButtonText className="text-white">알람 설정하기</ButtonText>
