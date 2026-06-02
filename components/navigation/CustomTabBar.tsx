@@ -26,8 +26,14 @@ const CustomTabBar = ({
 
   return (
     <View
-      className="min-h-18 items-center justify-center bg-white"
-      style={{ paddingBottom: bottomInset }}
+      className="z-40 items-center justify-center"
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingBottom: bottomInset,
+      }}
       pointerEvents="box-none"
     >
       <View

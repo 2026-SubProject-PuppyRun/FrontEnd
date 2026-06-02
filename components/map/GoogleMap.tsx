@@ -27,6 +27,8 @@ interface GoogleMapProps {
   children?: React.ReactNode;
   isSummary?: boolean;
   style?: "dark" | "silver";
+  /** 지도 위치 버튼 하단 여백 (px). 러닝 화면 액션 바 위에 올릴 때 사용 */
+  locationButtonBottom?: number;
 }
 
 const GoogleMap = ({
@@ -215,7 +217,7 @@ const GoogleMap = ({
       {!isSummary && (
         <TouchableOpacity
           onPress={moveToMyLocation}
-          className="absolute bottom-2 right-2 rounded-full bg-white p-2 shadow"
+          className="bottom-safe-offset-20 absolute right-3 rounded-full bg-white p-2.5 shadow-sm"
           activeOpacity={0.7}
         >
           <Ionicons name="location" size={24} color="#7D1D1C" />

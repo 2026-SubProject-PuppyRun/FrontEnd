@@ -1,24 +1,24 @@
+import MyRouteCard from "@/components/swiper/MyRouteCard";
+import RecRouteSwiperSlide from "@/components/swiper/RecRouteSwiperSlide";
+import RouteGuidanceToggle from "@/components/swiper/RouteGuidanceToggle";
+import {
+  getRouteParallaxOffset,
+  ROUTE_SLIDE_SIZE,
+  ROUTE_SWIPER_INACTIVE,
+} from "@/constants/redButtonEffect";
 import { useRunStore } from "@/store/useRunStore";
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Dimensions, View } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
-import Carousel, {
-  ICarouselInstance,
-  Pagination,
-} from "react-native-reanimated-carousel";
-import RecRouteSwiperItem from "./RecRouteSwiperItem";
+import Carousel, { ICarouselInstance } from "react-native-reanimated-carousel";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const defaultDataWith6Colors = ["#B0604D", "#899F9C", "#B3C680"];
 interface DummyRoute {
   latitude: number;
   longitude: number;
 }
 
-// const dummyRoutes: DummyRoute[][] | null = null;
-
 const dummyRoutes: DummyRoute[][] = [
-  // Route 1
   [
     { latitude: 37.16024976004391, longitude: 127.05596863884455 },
     { latitude: 37.15989961393599, longitude: 127.05762014831095 },
@@ -36,7 +36,6 @@ const dummyRoutes: DummyRoute[][] = [
     { latitude: 37.16012184770064, longitude: 127.05427246142739 },
     { latitude: 37.16027650234487, longitude: 127.05588993045222 },
   ],
-  // Route 2
   [
     { latitude: 37.16020537868832, longitude: 127.05257491725177 },
     { latitude: 37.16013790888155, longitude: 127.05076797487942 },
@@ -52,7 +51,6 @@ const dummyRoutes: DummyRoute[][] = [
     { latitude: 37.160199191882995, longitude: 127.05417682509659 },
     { latitude: 37.16016644321658, longitude: 127.05265043875528 },
   ],
-  // Route 3
   [
     { latitude: 37.15410733528742, longitude: 127.06684226327644 },
     { latitude: 37.152810995193235, longitude: 127.0656009362994 },
@@ -72,35 +70,37 @@ const dummyRoutes: DummyRoute[][] = [
     { latitude: 37.15408777718554, longitude: 127.06676028719721 },
   ],
 ];
+
+const ROUTE_META = [
+  { distanceKm: "3.00km" },
+  { distanceKm: "2.40km" },
+  { distanceKm: "3.20km" },
+];
+
 interface RecRouteSwiperProps {
   disabled: boolean;
 }
 
 function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
-  const progress = useSharedValue<number>(0);
-  const width = Dimensions.get("window").width;
+  const screenWidth = Dimensions.get("window").width;
+  const parallaxOffset = getRouteParallaxOffset(screenWidth);
   const ref = React.useRef<ICarouselInstance>(null);
+  const lastRouteIndexRef = useRef(0);
   const setSelectedRoute = useRunStore((state) => state.setSelectedRoute);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const setRecommendedRoutes = useRunStore(
     (state) => state.setRecommendedRoutes,
   );
   const recommendedRoutes = useRunStore((state) => state.recommendedRoutes);
+  const insets = useSafeAreaInsets();
 
-  const onPressPagination = (index: number) => {
-    ref.current?.scrollTo({
-      count: index - progress.value,
-      animated: true,
-    });
-  };
+  const routeEnabled = selectedRoute !== null;
 
   useEffect(() => {
-    const getRecommendedRoutes = async () => {
-      await setRecommendedRoutes(dummyRoutes);
-    };
-    getRecommendedRoutes();
+    void setRecommendedRoutes(dummyRoutes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   useEffect(() => {
     if (
       recommendedRoutes &&
@@ -112,57 +112,68 @@ function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [disabled]);
 
-  if (disabled || recommendedRoutes === null || selectedRoute === null) {
+  if (disabled || recommendedRoutes === null) {
     return null;
   }
 
   return (
     <View
-      id="carousel-component"
-      className="absolute top-12 z-10 h-32 w-full items-center justify-center"
+      className="absolute top-3 z-10 w-full items-center py-2"
+      style={{ overflow: "visible", paddingTop: insets.top }}
+      pointerEvents="box-none"
     >
-      <Carousel
-        ref={ref}
-        loop={true}
-        width={width}
-        height={(2 * width) / 5}
-        pagingEnabled={true}
-        snapEnabled={true}
-        data={recommendedRoutes} // 더미 데이터 연결
-        scrollAnimationDuration={1000}
-        mode="parallax"
-        modeConfig={{
-          parallaxScrollingScale: 0.8,
-          parallaxScrollingOffset: 95,
-        }}
-        onProgressChange={(_, absoluteProgress) => {
-          progress.value = absoluteProgress;
-        }}
-        onSnapToItem={(index) => {
-          const routeIndex = index % recommendedRoutes.length;
-          setSelectedRoute(recommendedRoutes[routeIndex]);
-        }}
-        renderItem={({ index }) => <RecRouteSwiperItem index={index} />}
-      />
-      <Pagination.Basic<{ color: string }>
-        progress={progress}
-        data={defaultDataWith6Colors.map((color) => ({ color }))}
-        dotStyle={{
-          width: 25,
-          height: 4,
-          backgroundColor: "#BFB8AA",
-        }}
-        activeDotStyle={{
-          overflow: "hidden",
-          backgroundColor: "gray",
-        }}
-        containerStyle={{
-          gap: 10,
-          marginBottom: 10,
-        }}
-        horizontal
-        onPress={onPressPagination}
-      />
+      <View className="absolute right-3 top-1 z-20" style={{ top: insets.top }}>
+        <RouteGuidanceToggle lastRouteIndex={lastRouteIndexRef.current} />
+      </View>
+
+      {routeEnabled ? (
+        <View pointerEvents="box-none">
+          <Carousel
+            ref={ref}
+            loop
+            width={screenWidth}
+            height={ROUTE_SLIDE_SIZE.height}
+            style={{ overflow: "visible" }}
+            containerStyle={{ overflow: "visible" }}
+            pagingEnabled
+            snapEnabled
+            data={recommendedRoutes}
+            scrollAnimationDuration={450}
+            mode="parallax"
+            modeConfig={{
+              parallaxScrollingScale: 1,
+              parallaxAdjacentItemScale: ROUTE_SWIPER_INACTIVE.scale,
+              parallaxScrollingOffset: parallaxOffset,
+            }}
+            onSnapToItem={(index) => {
+              const routeIndex = index % recommendedRoutes.length;
+              lastRouteIndexRef.current = routeIndex;
+              setSelectedRoute(recommendedRoutes[routeIndex]);
+            }}
+            renderItem={({ index, animationValue }) => {
+              const routeIndex = index % recommendedRoutes.length;
+              return (
+                <View
+                  className="items-center justify-center"
+                  style={{
+                    width: screenWidth,
+                    height: ROUTE_SLIDE_SIZE.height,
+                    overflow: "visible",
+                  }}
+                >
+                  <RecRouteSwiperSlide
+                    animationValue={animationValue}
+                    routeNumber={routeIndex + 1}
+                    distanceKm={ROUTE_META[routeIndex]?.distanceKm ?? "3.00km"}
+                  />
+                </View>
+              );
+            }}
+          />
+        </View>
+      ) : (
+        <MyRouteCard />
+      )}
     </View>
   );
 }
