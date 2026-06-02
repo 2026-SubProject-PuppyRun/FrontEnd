@@ -32,15 +32,13 @@ const RouteGuidanceToggle = ({ lastRouteIndex }: RouteGuidanceToggleProps) => {
       className="h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm"
       style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
       accessibilityRole="button"
-      accessibilityLabel={
-        routeEnabled ? "경로 안내 끄기" : "경로 안내 켜기"
-      }
+      accessibilityLabel={routeEnabled ? "경로 안내 끄기" : "경로 안내 켜기"}
       accessibilityState={{ selected: routeEnabled }}
     >
       <Ionicons
         name={routeEnabled ? "flag" : "flag-outline"}
         size={22}
-        color="#7D1D1C"
+        color="#F25857"
       />
     </Pressable>
   );

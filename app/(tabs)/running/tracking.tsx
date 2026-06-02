@@ -60,10 +60,7 @@ const Tracking = () => {
 
   useRunTracking();
   return (
-    <View
-      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-      className="relative flex-1 bg-white"
-    >
+    <View className="relative flex-1 bg-transparent">
       {!isComplete && <CountDown onComplete={() => setIsComplete(true)} />}
       <RunDataBoard isMapLoaded={isMapLoaded} />
       <GoogleMap
@@ -75,8 +72,8 @@ const Tracking = () => {
         {selectedRoute && (
           <Polyline
             coordinates={selectedRoute}
-            strokeWidth={4}
-            strokeColor="#FF0000"
+            strokeWidth={5}
+            strokeColor="#F25857"
           />
         )}
         {actualRoute.map(
@@ -85,8 +82,8 @@ const Tracking = () => {
               <Polyline
                 key={`run-${index}`}
                 coordinates={segment}
-                strokeWidth={4}
-                strokeColor="#0000FF"
+                strokeWidth={5}
+                strokeColor="#F25857"
               />
             ),
         )}
@@ -103,7 +100,7 @@ const Tracking = () => {
             <Polyline
               key={`gap-${index}`}
               coordinates={[currentEnd, nextStart]}
-              strokeWidth={3}
+              strokeWidth={5}
               strokeColor="#999999"
               lineDashPattern={[5, 5]}
             />

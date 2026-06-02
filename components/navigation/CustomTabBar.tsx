@@ -21,6 +21,19 @@ const CustomTabBar = ({
 }: BottomTabBarProps) => {
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, 10);
+  const focusedRoute = state.routes[state.index];
+  const focusedOptions = descriptors[focusedRoute.key]?.options;
+  const focusedTabBarStyle = focusedOptions?.tabBarStyle;
+
+  const isHiddenByOption =
+    typeof focusedTabBarStyle === "object" &&
+    focusedTabBarStyle !== null &&
+    "display" in focusedTabBarStyle &&
+    focusedTabBarStyle.display === "none";
+
+  if (isHiddenByOption) {
+    return null;
+  }
 
   const visibleRoutes = state.routes.filter((route) => isTabRoute(route.name));
 

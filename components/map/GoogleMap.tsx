@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Spinner } from "../ui/spinner";
 interface Region {
   latitude: number;
@@ -27,8 +27,6 @@ interface GoogleMapProps {
   children?: React.ReactNode;
   isSummary?: boolean;
   style?: "dark" | "silver";
-  /** 지도 위치 버튼 하단 여백 (px). 러닝 화면 액션 바 위에 올릴 때 사용 */
-  locationButtonBottom?: number;
 }
 
 const GoogleMap = ({
@@ -45,7 +43,10 @@ const GoogleMap = ({
   const mapRef = React.useRef<MapView>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [heading, setHeading] = useState(0);
   const isLocationInitialized = React.useRef(false);
+  const locationSubscription =
+    React.useRef<Location.LocationSubscription | null>(null);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const { isRunning } = useRunStore();
   const finalRoute = useRunStore((state) => state.runData?.route);
@@ -58,6 +59,13 @@ const GoogleMap = ({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       });
+      if (
+        typeof location.coords.heading === "number" &&
+        Number.isFinite(location.coords.heading) &&
+        location.coords.heading >= 0
+      ) {
+        setHeading(location.coords.heading);
+      }
     } catch (error) {
       console.error("위치 이동 실패:", error);
     }
@@ -84,6 +92,13 @@ const GoogleMap = ({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
+        if (
+          typeof location.coords.heading === "number" &&
+          Number.isFinite(location.coords.heading) &&
+          location.coords.heading >= 0
+        ) {
+          setHeading(location.coords.heading);
+        }
         isLocationInitialized.current = true;
       } catch (error) {
         isLocationInitialized.current = true;
@@ -97,6 +112,54 @@ const GoogleMap = ({
     };
     if (permission === true && !isLocationInitialized.current) initLocation();
   }, [permission]);
+
+  useEffect(() => {
+    if (permission !== true) return;
+
+    const startWatch = async () => {
+      if (locationSubscription.current) return;
+
+      locationSubscription.current = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Balanced,
+          timeInterval: 500,
+          distanceInterval: 1,
+        },
+        (location) => {
+          const { latitude, longitude, heading: nextHeading } = location.coords;
+
+          setCoordinates({ latitude, longitude });
+
+          if (
+            typeof nextHeading === "number" &&
+            Number.isFinite(nextHeading) &&
+            nextHeading >= 0
+          ) {
+            setHeading(nextHeading);
+          }
+
+          if (isRunning && mapRef.current) {
+            mapRef.current.animateToRegion(
+              {
+                latitude,
+                longitude,
+                latitudeDelta: DEFAULT_REGION.latitudeDelta,
+                longitudeDelta: DEFAULT_REGION.longitudeDelta,
+              },
+              500,
+            );
+          }
+        },
+      );
+    };
+
+    void startWatch();
+
+    return () => {
+      locationSubscription.current?.remove();
+      locationSubscription.current = null;
+    };
+  }, [isRunning, permission]);
 
   useEffect(() => {
     if (!mapRef.current || !isLocationInitialized.current) return;
@@ -189,29 +252,74 @@ const GoogleMap = ({
         showsCompass
         showsScale
         mapType="standard"
-        showsUserLocation={!isSummary}
         zoomEnabled={!isSummary}
         scrollEnabled={!isSummary}
         pitchEnabled={!isSummary}
         rotateEnabled={!isSummary}
         showsMyLocationButton={false}
-        onUserLocationChange={(e) => {
-          if (isRunning && mapRef.current) {
-            const { coordinate } = e.nativeEvent;
-            if (coordinate) {
-              mapRef.current.animateToRegion(
-                {
-                  latitude: coordinate.latitude,
-                  longitude: coordinate.longitude,
-                  latitudeDelta: DEFAULT_REGION.latitudeDelta,
-                  longitudeDelta: DEFAULT_REGION.longitudeDelta,
-                },
-                500,
-              );
-            }
-          }
-        }}
       >
+        {!isSummary && (
+          <Marker
+            coordinate={{
+              latitude: coordinates.latitude,
+              longitude: coordinates.longitude,
+            }}
+            anchor={{ x: 0.5, y: 0.5 }}
+            tracksViewChanges
+            zIndex={10}
+          >
+            <View
+              collapsable={false}
+              style={{
+                width: 40,
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "visible",
+                transform: [{ rotate: `${heading}deg` }],
+              }}
+            >
+              <View
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderLeftWidth: 4,
+                  borderRightWidth: 4,
+                  borderBottomWidth: 5,
+                  borderLeftColor: "transparent",
+                  borderRightColor: "transparent",
+                  borderBottomColor: "#F25857",
+                  marginBottom: 2,
+                  borderRadius: 2,
+                }}
+              />
+
+              <View
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  backgroundColor: "#F25857",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: 9,
+                    backgroundColor: "#FDECEA",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="paw" size={12} color="#F25857" />
+                </View>
+              </View>
+            </View>
+          </Marker>
+        )}
         {children}
       </MapView>
       {!isSummary && (
@@ -220,7 +328,7 @@ const GoogleMap = ({
           className="bottom-safe-offset-20 absolute right-3 rounded-full bg-white p-2.5 shadow-sm"
           activeOpacity={0.7}
         >
-          <Ionicons name="location" size={24} color="#7D1D1C" />
+          <Ionicons name="location" size={24} color="#F25857" />
         </TouchableOpacity>
       )}
     </View>
