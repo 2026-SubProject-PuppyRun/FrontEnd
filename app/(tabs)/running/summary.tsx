@@ -2,7 +2,7 @@ import RunResultBoard from "@/components/board/RunBoard/RunResultBoard";
 import SelfieButton from "@/components/button/SelfieButton";
 import GoogleMap from "@/components/map/GoogleMap";
 import CustomAlert from "@/components/modal/CustomAlert";
-import useNonNavbar from "@/hooks/use-non-navbar";
+import RunLogoSvg from "@/components/svg/RunLogoSvg";
 import { useRunStore } from "@/store/useRunStore";
 import { useNavigation, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -21,8 +21,6 @@ const Summary = () => {
 
   const isIntentionalExit = useRef(false);
 
-  useNonNavbar();
-
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
       if (isIntentionalExit.current) {
@@ -36,8 +34,11 @@ const Summary = () => {
   }, [navigation]);
 
   return (
-    <View style={{ paddingTop: insets.top }} className="flex-1">
-      <View className="h-2/5 bg-white">
+    <View
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom + 48 }}
+      className="relative flex-1 bg-white"
+    >
+      <View className="flex-1 py-16">
         <GoogleMap
           onMapLoad={() => setIsMapLoaded(true)}
           isSummary={true}
@@ -55,8 +56,12 @@ const Summary = () => {
           )}
         </GoogleMap>
       </View>
-      <RunResultBoard />
-      <SelfieButton />
+      <View className="absolute inset-0 z-20 items-center justify-center gap-8 ">
+        <RunLogoSvg width={329} height={88} />
+        <RunResultBoard />
+        <SelfieButton />
+      </View>
+
       <CustomAlert
         showAlertDialog={showAlert}
         handleClose={() => setShowAlert(false)}

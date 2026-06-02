@@ -1,11 +1,13 @@
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useRunStore } from "@/store/useRunStore";
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Alert, Text } from "react-native";
-import { Button } from "../ui/button";
+import { Alert } from "react-native";
 import { CheckCircleIcon } from "../ui/icon";
+import { Pressable } from "../ui/pressable";
+import RedButtonSurface from "../ui/RedButtonSurface";
 
 const SelfieButton = () => {
   const router = useRouter();
@@ -18,7 +20,7 @@ const SelfieButton = () => {
       return;
     }
 
-    let result = await ImagePicker.launchCameraAsync({
+    const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 5],
@@ -31,9 +33,19 @@ const SelfieButton = () => {
     }
   };
   return (
-    <Button className="w-4/6 self-center" onPress={takeSelfie}>
-      <Text>인증샷 촬영하기</Text>
-    </Button>
+    <RedButtonSurface
+      borderRadius={100}
+      backgroundColor={"#F25857"}
+      shadowPadding={8}
+      style={{ width: 100, height: 100 }}
+    >
+      <Pressable
+        onPress={takeSelfie}
+        className="h-full w-full items-center justify-center"
+      >
+        <Ionicons name="logo-instagram" size={46} color="white" />
+      </Pressable>
+    </RedButtonSurface>
   );
 };
 
