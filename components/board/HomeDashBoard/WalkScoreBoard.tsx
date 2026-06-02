@@ -79,14 +79,14 @@ const WalkScoreBoard = () => {
   return (
     <View className="m-4 gap-6 pb-16">
       <View className="rounded-lg bg-white p-4 shadow">
-        <View className="flex-row items-center gap-2 self-start rounded-2xl bg-[#737153] px-4 py-2">
+        <View className="flex-row items-center gap-2 self-start rounded-2xl bg-primary-600 px-4 py-2">
           <Ionicons name="location-sharp" size={20} color="white" />
           <Text className="text-white">{address}</Text>
         </View>
       </View>
       <View className="rounded-lg bg-white px-8 py-4 shadow">
         <View className="flex-row items-center gap-4">
-          <Ionicons name="cloudy-sharp" size={60} color="#BFB8AA" />
+          <Ionicons name="cloudy-sharp" size={60} color="#FFB3B2" />
           <View>
             <Text>5° 구름많음</Text>
             <Text>최고 17° 최저 3° </Text>
@@ -95,22 +95,22 @@ const WalkScoreBoard = () => {
         <View className="flex-row justify-between px-4">
           <View className="items-center gap-1 pt-4">
             <Text>4시</Text>
-            <Ionicons name="cloudy-sharp" size={40} color="#BFB8AA" />
+            <Ionicons name="cloudy-sharp" size={40} color="#FFB3B2" />
             <Text>5°</Text>
           </View>
           <View className="items-center gap-1 pt-4">
             <Text>5시</Text>
-            <Ionicons name="cloudy-sharp" size={40} color="#BFB8AA" />
+            <Ionicons name="cloudy-sharp" size={40} color="#FFB3B2" />
             <Text>5°</Text>
           </View>
           <View className="items-center gap-1 pt-4">
             <Text>6시</Text>
-            <Ionicons name="cloudy-sharp" size={40} color="#BFB8AA" />
+            <Ionicons name="cloudy-sharp" size={40} color="#FFB3B2" />
             <Text>5°</Text>
           </View>
           <View className="items-center gap-1 pt-4">
             <Text>7시</Text>
-            <Ionicons name="cloudy-sharp" size={40} color="#BFB8AA" />
+            <Ionicons name="cloudy-sharp" size={40} color="#FFB3B2" />
             <Text>5°</Text>
           </View>
         </View>
@@ -144,25 +144,25 @@ const WalkScoreBoard = () => {
         <View className="flex-row justify-between px-4">
           <View className="items-center gap-4 pt-4">
             <Text>4시</Text>
-            <Ionicons name="umbrella-sharp" size={40} color="#BFB8AA" />
+            <Ionicons name="umbrella-sharp" size={40} color="#FFB3B2" />
             <Text>10%</Text>
             <Text>5mm</Text>
           </View>
           <View className="items-center gap-4 pt-4">
             <Text>5시</Text>
-            <Ionicons name="umbrella-sharp" size={40} color="#BFB8AA" />
+            <Ionicons name="umbrella-sharp" size={40} color="#FFB3B2" />
             <Text>10%</Text>
             <Text>5mm</Text>
           </View>
           <View className="items-center gap-4 pt-4">
             <Text>6시</Text>
-            <Ionicons name="umbrella-sharp" size={40} color="#BFB8AA" />
+            <Ionicons name="umbrella-sharp" size={40} color="#FFB3B2" />
             <Text>10%</Text>
             <Text>5mm</Text>
           </View>
           <View className="items-center gap-4 pt-4">
             <Text>7시</Text>
-            <Ionicons name="umbrella-sharp" size={40} color="#BFB8AA" />
+            <Ionicons name="umbrella-sharp" size={40} color="#FFB3B2" />
             <Text>10%</Text>
             <Text>5mm</Text>
           </View>

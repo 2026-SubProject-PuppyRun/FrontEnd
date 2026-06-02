@@ -51,30 +51,30 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
   const totalDistance = getPathLength(flatRoute);
 
   return (
-    <View className="top-safe-offset-12 absolute z-10 w-full items-center">
+    <View className="top-safe-offset-20 absolute z-10 w-full items-center">
       <HStack space="4xl">
-        <Box className="items-center gap-12">
-          <Text size="3xl" bold className="color-black">
+        <Box className="items-center gap-2">
+          <Text size="4xl" bold className="font-bold italic text-primary-500">
             {pace}
           </Text>
-          <Text size="3xl" bold className="color-gray-700">
-            페이스
+          <Text size="xl" bold className="font-semibold text-primary-500">
+            Face
           </Text>
         </Box>
-        <Box className="items-center gap-12">
-          <Text size="3xl" bold className="color-black">
+        <Box className="items-center gap-2">
+          <Text size="4xl" bold className="font-bold italic text-primary-500">
             {(totalDistance / 1000).toFixed(2)}km
           </Text>
-          <Text size="3xl" bold className="color-gray-700">
-            거리
+          <Text size="xl" bold className="font-semibold text-primary-500">
+            Distance
           </Text>
         </Box>
-        <Box className="items-center gap-12">
-          <Text size="3xl" bold className="color-black">
+        <Box className="items-center gap-2">
+          <Text size="4xl" bold className="font-bold italic text-primary-500">
             {formatTime(elapsedTime)}
           </Text>
-          <Text size="3xl" bold className="color-gray-700">
-            시간
+          <Text size="xl" bold className="font-semibold text-primary-500">
+            Time
           </Text>
         </Box>
       </HStack>

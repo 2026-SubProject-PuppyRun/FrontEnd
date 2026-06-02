@@ -21,17 +21,36 @@ const CustomTabBar = ({
 }: BottomTabBarProps) => {
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, 10);
+  const focusedRoute = state.routes[state.index];
+  const focusedOptions = descriptors[focusedRoute.key]?.options;
+  const focusedTabBarStyle = focusedOptions?.tabBarStyle;
+
+  const isHiddenByOption =
+    typeof focusedTabBarStyle === "object" &&
+    focusedTabBarStyle !== null &&
+    "display" in focusedTabBarStyle &&
+    focusedTabBarStyle.display === "none";
+
+  if (isHiddenByOption) {
+    return null;
+  }
 
   const visibleRoutes = state.routes.filter((route) => isTabRoute(route.name));
 
   return (
     <View
-      className="min-h-18 items-center justify-center bg-white"
-      style={{ paddingBottom: bottomInset }}
+      className="z-40 items-center justify-center"
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingBottom: bottomInset,
+      }}
       pointerEvents="box-none"
     >
       <View
-        className="h-16 w-[88%] max-w-[400px] flex-row items-center justify-between rounded-full bg-[#0D0F1B] px-5"
+        className="h-[72px] w-[88%] max-w-[400px] flex-row items-center justify-between rounded-full bg-[#0D0F1B] px-5"
         // style={{
         //   shadowColor: "#000",
         //   shadowOffset: { width: 0, height: 8 },
@@ -67,7 +86,7 @@ const CustomTabBar = ({
               accessibilityState={{ selected: isFocused }}
             >
               <View
-                className={`${isFocused ? "h-[52px] w-[52px] items-center justify-center rounded-full bg-white" : ""}`}
+                className={`${isFocused ? "h-[66px] w-[66px] items-center justify-center rounded-full bg-white" : ""}`}
               >
                 <Ionicons
                   name={iconName}

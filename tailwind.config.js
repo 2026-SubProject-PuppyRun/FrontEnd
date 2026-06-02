@@ -20,26 +20,24 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          // 기존 RGB 변수 대신 직접 색상 지정
-          50: "#FDFCFB", // 가장 밝은 톤
-          100: "#F9F6F3",
-          200: "#F4EDE7",
-          300: "#BFB8AA", // #BFB8AA
-          400: "#A69A88",
-          500: "#8C775E", // #8C775E (메인)
-          600: "#735E4A",
-          700: "#593F28", // #593F28
-          800: "#3F2E1D",
-          900: "#26170F", // #26170F (가장 어두운)
-          950: "#1A0F0A",
+          50: "#FFF5F5",
+          100: "#FFE8E8",
+          200: "#FFD4D4",
+          300: "#FFB3B2",
+          400: "#F87A79",
+          500: "#F25857",
+          600: "#E03E3D",
+          700: "#C42E2D",
+          800: "#A32524",
+          900: "#7D1D1C",
+          950: "#5A1514",
         },
-        // 커스텀 네이밍
         brand: {
-          lightest: "#737153",
-          light: "#BFB8AA",
-          main: "#8C775E",
-          dark: "#593F28",
-          darkest: "#26170F",
+          lightest: "#E03E3D",
+          light: "#FFB3B2",
+          main: "#F25857",
+          dark: "#C42E2D",
+          darkest: "#7D1D1C",
         },
         secondary: {
           0: "rgb(var(--color-secondary-0)/<alpha-value>)",
@@ -208,6 +206,9 @@ module.exports = {
         "soft-2": "0px 0px 20px rgba(38, 38, 38, 0.2)",
         "soft-3": "0px 0px 30px rgba(38, 38, 38, 0.1)",
         "soft-4": "0px 0px 40px rgba(38, 38, 38, 0.1)",
+        "red-button":
+          "5px 5px 5px 0 rgba(0, 0, 0, 0.25), inset 2px 2px 4px 0 rgba(255, 255, 255, 0.22), inset -2px -2px 4px 0 rgba(0, 0, 0, 0.22)",
+        "route-card-drop": "0px 5px 10px 0px rgba(0, 0, 0, 0.28)",
       },
     },
   },

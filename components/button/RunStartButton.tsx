@@ -1,67 +1,52 @@
+import CustomAlert from "@/components/modal/CustomAlert";
+import ConvexShadowSurface from "@/components/ui/ConvexShadowSurface";
+import { RED_BUTTON_EFFECT } from "@/constants/redButtonEffect";
 import { useRunStore } from "@/store/useRunStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import CustomAlert from "../modal/CustomAlert";
-import { Button } from "../ui/button";
-import { Center } from "../ui/center";
+import { Pressable, View } from "react-native";
 
 interface RunStartButtonProps {
   disabled: boolean;
 }
 
 const RunStartButton = ({ disabled }: RunStartButtonProps) => {
-  const [disabledRoute, setDisabledRoute] = useState(false);
-  const setSelectedRoute = useRunStore((state) => state.setSelectedRoute);
-  const recommendedRoutes = useRunStore((state) => state.recommendedRoutes);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
-  const handleClose = () => setShowAlertDialog(false);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
-
   const router = useRouter();
+
   if (disabled) return null;
+
   return (
     <>
-      <Center className="absolute bottom-12 right-1/2 h-1/5 w-96 translate-x-1/2 flex-row rounded-3xl bg-primary-400">
-        <Button
-          className={`h-28 w-28 rounded-full bg-primary-200 data-[active=true]:bg-primary-300 `}
-          onPress={() => {
-            setShowAlertDialog(true);
-          }}
+      <View className="bottom-safe-offset-40 absolute left-0 right-0 z-20 flex-row items-center justify-center overflow-visible">
+        <ConvexShadowSurface
+          shadowPadding={8}
+          className="-m-2"
+          style={{ width: 100, height: 100 }}
+          borderRadius={50}
+          backgroundColor={RED_BUTTON_EFFECT.fill}
         >
-          <Ionicons name="paw" size={32} color={`#A69A88`} />
-        </Button>
-        <Button
-          className={`absolute left-[50%] ml-20 h-16 w-16 rounded-full bg-primary-200 data-[active=true]:bg-primary-300 `}
-          onPress={() => {
-            const newDisabledState = !disabledRoute;
+          <Pressable
+            onPress={() => setShowAlertDialog(true)}
+            className="h-full w-full items-center justify-center"
+            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+            accessibilityRole="button"
+            accessibilityLabel="산책 시작"
+          >
+            <Ionicons name="play" size={47} color="white" className="pl-1" />
+          </Pressable>
+        </ConvexShadowSurface>
+      </View>
 
-            setDisabledRoute(newDisabledState);
-
-            if (newDisabledState) {
-              setSelectedRoute(null);
-            } else {
-              const firstRoute = recommendedRoutes
-                ? recommendedRoutes[0]
-                : null;
-              setSelectedRoute(firstRoute);
-            }
-          }}
-        >
-          {!disabledRoute ? (
-            <Ionicons name="golf" size={18} color={`#A69A88`} />
-          ) : (
-            <Ionicons name="golf-outline" size={18} color={`gray`} />
-          )}
-        </Button>
-      </Center>
       <CustomAlert
         showAlertDialog={showAlertDialog}
-        handleClose={handleClose}
+        handleClose={() => setShowAlertDialog(false)}
         title="산책을 시작해볼까요?"
         description={
           selectedRoute !== null
-            ? `해당 경로로 안내를 시작합니다.`
+            ? "해당 경로로 안내를 시작합니다."
             : "추천 경로 없이 산책을 시작합니다."
         }
         onConfirm={() => {

@@ -1,14 +1,23 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-const RecRouteSwiperItem = ({ index }: { index: number }) => {
-  return (
-    <View className="flex-1 justify-center rounded-2xl bg-primary-400 shadow-md">
-      <Text style={{ textAlign: "center", fontSize: 30 }}>
-        {index + 1}번째 루트
-      </Text>
-    </View>
-  );
-};
+interface RecRouteSwiperItemProps {
+  routeNumber: number;
+  distanceKm?: string;
+}
+
+const RecRouteSwiperItem = ({
+  routeNumber,
+  distanceKm = "3.00km",
+}: RecRouteSwiperItemProps) => (
+  <View className="flex-1 items-center justify-center px-2">
+    <Text className="text-center text-[32px] font-bold uppercase tracking-wide text-[#FAFAFA]">
+      ROUTE {routeNumber}
+    </Text>
+    <Text className="mt-0.5 text-center text-[22px] font-bold italic text-[#FAFAFA]">
+      {distanceKm}
+    </Text>
+  </View>
+);
 
 export default RecRouteSwiperItem;
