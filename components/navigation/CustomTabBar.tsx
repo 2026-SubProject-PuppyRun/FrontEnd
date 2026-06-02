@@ -50,7 +50,7 @@ const CustomTabBar = ({
       pointerEvents="box-none"
     >
       <View
-        className="h-16 w-[88%] max-w-[400px] flex-row items-center justify-between rounded-full bg-[#0D0F1B] px-5"
+        className="h-[72px] w-[88%] max-w-[400px] flex-row items-center justify-between rounded-full bg-[#0D0F1B] px-5"
         // style={{
         //   shadowColor: "#000",
         //   shadowOffset: { width: 0, height: 8 },
@@ -86,7 +86,7 @@ const CustomTabBar = ({
               accessibilityState={{ selected: isFocused }}
             >
               <View
-                className={`${isFocused ? "h-[52px] w-[52px] items-center justify-center rounded-full bg-white" : ""}`}
+                className={`${isFocused ? "h-[66px] w-[66px] items-center justify-center rounded-full bg-white" : ""}`}
               >
                 <Ionicons
                   name={iconName}
