@@ -325,7 +325,7 @@ const GoogleMap = ({
       {!isSummary && (
         <TouchableOpacity
           onPress={moveToMyLocation}
-          className="bottom-safe-offset-20 absolute right-3 rounded-full bg-white p-2.5 shadow-sm"
+          className="bottom-safe-offset-28 absolute right-3 rounded-full bg-white p-2.5 shadow-sm"
           activeOpacity={0.7}
         >
           <Ionicons name="location" size={24} color="#F25857" />
