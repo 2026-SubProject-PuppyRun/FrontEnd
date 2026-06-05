@@ -1,7 +1,9 @@
 import { GOOGLE_MAP_DARK_STYLE } from "@/constants/googleMapDarkStyle";
 import { GOOGLE_MAP_SILVER_STYLE } from "@/constants/googleMapSilverStyle";
+import { RUN_LOCATION_TRACKING } from "@/constants/locationTracking";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useRunStore } from "@/store/useRunStore";
+import { recordRunLocation } from "@/util/run/recordRunLocation";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
@@ -48,7 +50,6 @@ const GoogleMap = ({
   const locationSubscription =
     React.useRef<Location.LocationSubscription | null>(null);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
-  const { isRunning } = useRunStore();
   const finalRoute = useRunStore((state) => state.runData?.route);
   const moveToMyLocation = async () => {
     try {
@@ -120,15 +121,12 @@ const GoogleMap = ({
       if (locationSubscription.current) return;
 
       locationSubscription.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.Balanced,
-          timeInterval: 500,
-          distanceInterval: 1,
-        },
+        RUN_LOCATION_TRACKING,
         (location) => {
           const { latitude, longitude, heading: nextHeading } = location.coords;
 
           setCoordinates({ latitude, longitude });
+          recordRunLocation(location.coords, "watch");
 
           if (
             typeof nextHeading === "number" &&
@@ -138,7 +136,8 @@ const GoogleMap = ({
             setHeading(nextHeading);
           }
 
-          if (isRunning && mapRef.current) {
+          const running = useRunStore.getState().isRunning;
+          if (running && mapRef.current) {
             mapRef.current.animateToRegion(
               {
                 latitude,
@@ -159,7 +158,7 @@ const GoogleMap = ({
       locationSubscription.current?.remove();
       locationSubscription.current = null;
     };
-  }, [isRunning, permission]);
+  }, [permission]);
 
   useEffect(() => {
     if (!mapRef.current || !isLocationInitialized.current) return;

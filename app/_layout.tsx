@@ -1,11 +1,12 @@
+import "@/tasks/backgroundLocationTask";
 import { Stack } from "expo-router";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import CustomAlert from "@/components/modal/CustomAlert";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import "@/global.css";
 import { DUMMY_PET_LIST } from "@/constants/dummyPetList";
+import "@/global.css";
 import { usePetStore } from "@/store/usePetStore";
 import { getFirebaseMessaging, initFCM } from "@/util/notification";
 import notifee from "@notifee/react-native";
@@ -88,7 +89,7 @@ export default function RootLayout() {
               showAlertDialog={modalVisible}
               handleClose={() => setModalVisible(false)}
               title="알림 권한이 필요해요"
-              description="푸푸런에서 알림을 받으려면 권한이 필요해요. 설정에서 권한을 허용해주세요."
+              description="퍼피런에서 알림을 받으려면 권한이 필요해요. 설정에서 권한을 허용해주세요."
               confirmText="설정으로 이동"
               cancelText="취소"
               onConfirm={() => {
