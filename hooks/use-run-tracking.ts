@@ -1,106 +1,92 @@
+import { LOCATION_TASK_NAME } from "@/tasks/backgroundLocationTask";
 import { useRunStore } from "@/store/useRunStore";
-import { calculatePace } from "@/util/run";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
-import { useEffect } from "react";
-import { Alert, Linking } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, AppState, Linking, Platform } from "react-native";
 
-const LOCATION_TASK_NAME = "background-location-task";
-
-TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
-  if (error) {
-    console.error("❌ [Background Task] Error:", error);
-    return;
+const stopBackgroundTask = async () => {
+  const hasTask =
+    await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
+  if (hasTask) {
+    await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
   }
-  if (data) {
-    const { locations } = data as { locations: Location.LocationObject[] };
-
-    if (locations && locations.length > 0) {
-      if (useRunStore.getState().isPaused) {
-        console.log(
-          "⏸️ [Background Task] 러닝 일시정지 상태, 위치 업데이트 중지",
-        );
-        return;
-      }
-      locations.forEach((location) => {
-        useRunStore.getState().addActualLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-      });
-
-      const lastLocation = locations[locations.length - 1];
-      const speed = lastLocation.coords.speed; // m/s 단위
-
-      if (speed !== null && speed >= 0) {
-        const currentPace = calculatePace(speed); // "5'30''" 형식
-
-        useRunStore.getState().addRunData({
-          pace: currentPace,
-        });
-      }
-      console.log("📍 [Background Task] 위치 업데이트:", {
-        latitude: lastLocation.coords.latitude,
-        longitude: lastLocation.coords.longitude,
-        speed: lastLocation.coords.speed,
-        pace: useRunStore.getState().runData?.pace,
-      });
-    }
-  }
-});
+};
 
 export const useRunTracking = () => {
   const isRunning = useRunStore((state) => state.isRunning);
+  const [appState, setAppState] = useState(AppState.currentState);
 
   useEffect(() => {
-    const startLocationTracking = async () => {
-      console.log("🔍 [Tracking Hook] 권한 및 작업 시작 확인 중...");
-      console.log("🔍 [Tracking Hook] 현재 러닝 상태:", isRunning);
+    const subscription = AppState.addEventListener("change", setAppState);
+    return () => subscription.remove();
+  }, []);
 
-      const { status: backStatus } =
-        await Location.requestBackgroundPermissionsAsync();
-      if (backStatus !== "granted") {
-        Alert.alert(
-          "위치 권한 필요",
-          "앱 사용을 위해 위치 권한을 모두 허용해 주세요.",
-          [
-            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-            { text: "취소", style: "cancel", onPress: () => {} },
-          ],
+  useEffect(() => {
+    const syncBackgroundTask = async () => {
+      if (!isRunning || appState === "active") {
+        await stopBackgroundTask();
+        return;
+      }
+
+      const foreground = await Location.getForegroundPermissionsAsync();
+      if (foreground.status !== "granted") {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "위치 권한 필요",
+            "산책 경로 기록을 위해 위치 권한을 허용해 주세요.",
+            [
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+            ],
+          );
+          return;
+        }
+      }
+
+      const background = await Location.getBackgroundPermissionsAsync();
+      if (background.status !== "granted") {
+        const { status } = await Location.requestBackgroundPermissionsAsync();
+        if (status !== "granted") {
+          return;
+        }
+      }
+
+      const isTaskDefined = await TaskManager.isTaskDefined(LOCATION_TASK_NAME);
+      if (!isTaskDefined) {
+        console.error(
+          "❌ [Tracking] background task가 등록되지 않았습니다:",
+          LOCATION_TASK_NAME,
         );
         return;
       }
 
-      if (isRunning) {
+      try {
         const hasTask =
           await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
-        console.log(
-          "🔍 [Tracking Hook] 위치 추적 현재 상태:",
-          hasTask ? "ON" : "OFF",
-        );
-        if (hasTask) {
-          console.log("♻️ [Reset] 기존 Task를 종료하고 재시작합니다.");
-          await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-        }
-        console.log("🚀 [Tracking Hook] 위치 추적 시작 (Start Update)");
+        if (hasTask) return;
+
         await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
           accuracy: Location.Accuracy.High,
-          timeInterval: 1000,
-          distanceInterval: 5,
-          foregroundService: {
-            notificationTitle: "PuppyRun",
-            notificationBody: "러닝 중입니다. 안전하게 뛰세요!",
-          },
+          timeInterval: 2000,
+          distanceInterval: 2,
+          pausesUpdatesAutomatically: false,
+          showsBackgroundLocationIndicator: true,
+          ...(Platform.OS === "android"
+            ? {
+                foregroundService: {
+                  notificationTitle: "PuppyRun",
+                  notificationBody: "산책 중입니다.",
+                },
+              }
+            : {}),
         });
-      } else {
-        const hasTask =
-          await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
-        if (hasTask) {
-          console.log("🛑 [Stop] 러닝 종료, 위치 추적 OFF");
-          await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-        }
+      } catch (error) {
+        console.error("❌ [Tracking] startLocationUpdatesAsync 실패:", error);
       }
     };
-    startLocationTracking();
-  }, [isRunning]);
+
+    void syncBackgroundTask();
+  }, [isRunning, appState]);
 };
