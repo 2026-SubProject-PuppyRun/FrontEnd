@@ -5,8 +5,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import CustomAlert from "@/components/modal/CustomAlert";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import "@/global.css";
 import { DUMMY_PET_LIST } from "@/constants/dummyPetList";
+import "@/global.css";
 import { usePetStore } from "@/store/usePetStore";
 import { getFirebaseMessaging, initFCM } from "@/util/notification";
 import notifee from "@notifee/react-native";

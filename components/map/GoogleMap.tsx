@@ -1,5 +1,6 @@
 import { GOOGLE_MAP_DARK_STYLE } from "@/constants/googleMapDarkStyle";
 import { GOOGLE_MAP_SILVER_STYLE } from "@/constants/googleMapSilverStyle";
+import { RUN_LOCATION_TRACKING } from "@/constants/locationTracking";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useRunStore } from "@/store/useRunStore";
 import { recordRunLocation } from "@/util/run/recordRunLocation";
@@ -120,11 +121,7 @@ const GoogleMap = ({
       if (locationSubscription.current) return;
 
       locationSubscription.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.Balanced,
-          timeInterval: 500,
-          distanceInterval: 1,
-        },
+        RUN_LOCATION_TRACKING,
         (location) => {
           const { latitude, longitude, heading: nextHeading } = location.coords;
 
