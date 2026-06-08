@@ -1,15 +1,21 @@
 import { GOOGLE_MAP_DARK_STYLE } from "@/constants/googleMapDarkStyle";
 import { GOOGLE_MAP_SILVER_STYLE } from "@/constants/googleMapSilverStyle";
-import { RUN_LOCATION_TRACKING } from "@/constants/locationTracking";
+import { MAP_LOCATION_WATCH } from "@/constants/locationTracking";
+import RunLocationMarker from "@/components/map/RunLocationMarker";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useRunStore } from "@/store/useRunStore";
+import {
+  LatLng,
+  resolveMarkerHeading,
+} from "@/util/map/markerHeading";
 import { recordRunLocation } from "@/util/run/recordRunLocation";
-import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import { Ionicons } from "@expo/vector-icons";
 import { Spinner } from "../ui/spinner";
+
 interface Region {
   latitude: number;
   longitude: number;
@@ -49,28 +55,55 @@ const GoogleMap = ({
   const isLocationInitialized = React.useRef(false);
   const locationSubscription =
     React.useRef<Location.LocationSubscription | null>(null);
+  const previousCoordsRef = useRef<LatLng | null>(null);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const finalRoute = useRunStore((state) => state.runData?.route);
+
+  const applyGpsHeading = (gpsHeading?: number | null) => {
+    if (
+      typeof gpsHeading === "number" &&
+      Number.isFinite(gpsHeading) &&
+      gpsHeading >= 0
+    ) {
+      setHeading(gpsHeading);
+    }
+  };
+
+  const applyLocationUpdate = (
+    latitude: number,
+    longitude: number,
+    gpsHeading?: number | null,
+  ) => {
+    const current: LatLng = { latitude, longitude };
+    const nextHeading = resolveMarkerHeading(
+      previousCoordsRef.current,
+      current,
+      gpsHeading,
+    );
+
+    previousCoordsRef.current = current;
+    setCoordinates(current);
+
+    if (nextHeading != null) {
+      setHeading(nextHeading);
+    }
+  };
+
   const moveToMyLocation = async () => {
     try {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
-      setCoordinates({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      if (
-        typeof location.coords.heading === "number" &&
-        Number.isFinite(location.coords.heading) &&
-        location.coords.heading >= 0
-      ) {
-        setHeading(location.coords.heading);
-      }
+      applyLocationUpdate(
+        location.coords.latitude,
+        location.coords.longitude,
+        location.coords.heading,
+      );
     } catch (error) {
       console.error("위치 이동 실패:", error);
     }
   };
+
   useEffect(() => {
     const initLocation = async () => {
       if (permission === null || isLocationInitialized.current) return;
@@ -89,17 +122,12 @@ const GoogleMap = ({
         const location = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
-        setCoordinates({
+        previousCoordsRef.current = {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-        });
-        if (
-          typeof location.coords.heading === "number" &&
-          Number.isFinite(location.coords.heading) &&
-          location.coords.heading >= 0
-        ) {
-          setHeading(location.coords.heading);
-        }
+        };
+        setCoordinates(previousCoordsRef.current);
+        applyGpsHeading(location.coords.heading);
         isLocationInitialized.current = true;
       } catch (error) {
         isLocationInitialized.current = true;
@@ -121,20 +149,12 @@ const GoogleMap = ({
       if (locationSubscription.current) return;
 
       locationSubscription.current = await Location.watchPositionAsync(
-        RUN_LOCATION_TRACKING,
+        MAP_LOCATION_WATCH,
         (location) => {
-          const { latitude, longitude, heading: nextHeading } = location.coords;
+          const { latitude, longitude, heading: gpsHeading } = location.coords;
 
-          setCoordinates({ latitude, longitude });
+          applyLocationUpdate(latitude, longitude, gpsHeading);
           recordRunLocation(location.coords, "watch");
-
-          if (
-            typeof nextHeading === "number" &&
-            Number.isFinite(nextHeading) &&
-            nextHeading >= 0
-          ) {
-            setHeading(nextHeading);
-          }
 
           const running = useRunStore.getState().isRunning;
           if (running && mapRef.current) {
@@ -258,66 +278,11 @@ const GoogleMap = ({
         showsMyLocationButton={false}
       >
         {!isSummary && (
-          <Marker
-            coordinate={{
-              latitude: coordinates.latitude,
-              longitude: coordinates.longitude,
-            }}
-            anchor={{ x: 0.5, y: 0.5 }}
-            tracksViewChanges
-            zIndex={10}
-          >
-            <View
-              collapsable={false}
-              style={{
-                width: 40,
-                height: 40,
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "visible",
-                transform: [{ rotate: `${heading}deg` }],
-              }}
-            >
-              <View
-                style={{
-                  width: 0,
-                  height: 0,
-                  borderLeftWidth: 4,
-                  borderRightWidth: 4,
-                  borderBottomWidth: 5,
-                  borderLeftColor: "transparent",
-                  borderRightColor: "transparent",
-                  borderBottomColor: "#F25857",
-                  marginBottom: 2,
-                  borderRadius: 2,
-                }}
-              />
-
-              <View
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: 12,
-                  backgroundColor: "#F25857",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <View
-                  style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: 9,
-                    backgroundColor: "#FDECEA",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="paw" size={12} color="#F25857" />
-                </View>
-              </View>
-            </View>
-          </Marker>
+          <RunLocationMarker
+            latitude={coordinates.latitude}
+            longitude={coordinates.longitude}
+            heading={heading}
+          />
         )}
         {children}
       </MapView>
