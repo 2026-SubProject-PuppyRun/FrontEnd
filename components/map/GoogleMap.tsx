@@ -1,19 +1,16 @@
+import RunLocationMarker from "@/components/map/RunLocationMarker";
 import { GOOGLE_MAP_DARK_STYLE } from "@/constants/googleMapDarkStyle";
 import { GOOGLE_MAP_SILVER_STYLE } from "@/constants/googleMapSilverStyle";
 import { MAP_LOCATION_WATCH } from "@/constants/locationTracking";
-import RunLocationMarker from "@/components/map/RunLocationMarker";
+import { useCompassHeading } from "@/hooks/use-compass-heading";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useRunStore } from "@/store/useRunStore";
-import {
-  LatLng,
-  resolveMarkerHeading,
-} from "@/util/map/markerHeading";
 import { recordRunLocation } from "@/util/run/recordRunLocation";
+import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons";
 import { Spinner } from "../ui/spinner";
 
 interface Region {
@@ -51,54 +48,22 @@ const GoogleMap = ({
   const mapRef = React.useRef<MapView>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [heading, setHeading] = useState(0);
   const isLocationInitialized = React.useRef(false);
   const locationSubscription =
     React.useRef<Location.LocationSubscription | null>(null);
-  const previousCoordsRef = useRef<LatLng | null>(null);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const finalRoute = useRunStore((state) => state.runData?.route);
-
-  const applyGpsHeading = (gpsHeading?: number | null) => {
-    if (
-      typeof gpsHeading === "number" &&
-      Number.isFinite(gpsHeading) &&
-      gpsHeading >= 0
-    ) {
-      setHeading(gpsHeading);
-    }
-  };
-
-  const applyLocationUpdate = (
-    latitude: number,
-    longitude: number,
-    gpsHeading?: number | null,
-  ) => {
-    const current: LatLng = { latitude, longitude };
-    const nextHeading = resolveMarkerHeading(
-      previousCoordsRef.current,
-      current,
-      gpsHeading,
-    );
-
-    previousCoordsRef.current = current;
-    setCoordinates(current);
-
-    if (nextHeading != null) {
-      setHeading(nextHeading);
-    }
-  };
+  const heading = useCompassHeading(permission === true && !isSummary);
 
   const moveToMyLocation = async () => {
     try {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
-      applyLocationUpdate(
-        location.coords.latitude,
-        location.coords.longitude,
-        location.coords.heading,
-      );
+      setCoordinates({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
     } catch (error) {
       console.error("위치 이동 실패:", error);
     }
@@ -122,12 +87,10 @@ const GoogleMap = ({
         const location = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
-        previousCoordsRef.current = {
+        setCoordinates({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-        };
-        setCoordinates(previousCoordsRef.current);
-        applyGpsHeading(location.coords.heading);
+        });
         isLocationInitialized.current = true;
       } catch (error) {
         isLocationInitialized.current = true;
@@ -151,9 +114,9 @@ const GoogleMap = ({
       locationSubscription.current = await Location.watchPositionAsync(
         MAP_LOCATION_WATCH,
         (location) => {
-          const { latitude, longitude, heading: gpsHeading } = location.coords;
+          const { latitude, longitude } = location.coords;
 
-          applyLocationUpdate(latitude, longitude, gpsHeading);
+          setCoordinates({ latitude, longitude });
           recordRunLocation(location.coords, "watch");
 
           const running = useRunStore.getState().isRunning;
