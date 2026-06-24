@@ -35,13 +35,19 @@ module.exports = {
       config: {
         googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
       },
-      // googleServicesFile: "./GoogleService-Info.plist",
     },
-
     plugins: [
       "expo-router",
       "@react-native-firebase/app",
-      "@react-native-google-signin/google-signin", // ← 이 줄만 추가
+      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-seoul/kakao-login",
+        {
+          kakaoAppKey: process.env.EXPO_PUBLIC_KAKAO_APP_KEY,
+          overrideKakaoSDKVersion: "2.20.1",
+          kotlinVersion: "1.9.0",
+        },
+      ],
       [
         "expo-splash-screen",
         {
@@ -65,13 +71,6 @@ module.exports = {
           isAndroidForegroundServiceEnabled: true,
         },
       ],
-      // [
-      //   "react-native-maps",
-      //   {
-      //     iosGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-      //     androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-      //   },
-      // ],
       [
         "expo-build-properties",
         {

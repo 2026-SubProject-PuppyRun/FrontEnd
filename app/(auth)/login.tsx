@@ -2,7 +2,7 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Login() {
   const router = useRouter();
@@ -10,16 +10,20 @@ export default function Login() {
   const [pw, setPw] = useState("");
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#F5EFE8] px-7 pt-[60px]">
       <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.back}>←</Text>
+        <Text className="mb-4 text-[22px] text-[#333]">←</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Login</Text>
-      <Text style={styles.subtitle}>앱을 사용하려면 로그인이 필요합니다.</Text>
+      <Text className="mb-1 text-[32px] font-extrabold text-[#1A1A1A]">
+        Login
+      </Text>
+      <Text className="mb-7 text-[13px] text-[#888]">
+        앱을 사용하려면 로그인이 필요합니다.
+      </Text>
 
-      <View style={styles.card}>
-        <Text style={styles.label}>ID</Text>
+      <View className="mb-5 rounded-2xl bg-white p-6">
+        <Text className="mt-2 text-[13px] font-semibold text-[#333]">ID</Text>
         <Input variant="underlined" size="md" className="mb-2">
           <InputField
             placeholder="E-mail or Phone Number"
@@ -30,7 +34,7 @@ export default function Login() {
           />
         </Input>
 
-        <Text style={styles.label}>PW</Text>
+        <Text className="mt-2 text-[13px] font-semibold text-[#333]">PW</Text>
         <Input variant="underlined" size="md" className="mb-4">
           <InputField
             placeholder="Password"
@@ -52,28 +56,10 @@ export default function Login() {
       </View>
 
       <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
-        <Text style={styles.signupLink}>계정이 없으신가요? 회원가입</Text>
+        <Text className="text-center text-[13px] text-[#D95F52]">
+          계정이 없으신가요? 회원가입
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F5EFE8",
-    paddingHorizontal: 28,
-    paddingTop: 60,
-  },
-  back: { fontSize: 22, color: "#333", marginBottom: 16 },
-  title: { fontSize: 32, fontWeight: "800", color: "#1A1A1A", marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "#888", marginBottom: 28 },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 20,
-  },
-  label: { fontSize: 13, fontWeight: "600", color: "#333", marginTop: 8 },
-  signupLink: { textAlign: "center", color: "#D95F52", fontSize: 13 },
-});

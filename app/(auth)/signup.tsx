@@ -2,7 +2,7 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Signup() {
   const router = useRouter();
@@ -24,16 +24,20 @@ export default function Signup() {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#F5EFE8] px-7 pt-[60px]">
       <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.back}>←</Text>
+        <Text className="mb-4 text-[22px] text-[#333]">←</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>New Account</Text>
-      <Text style={styles.subtitle}>로그인을 위해 회원가입이 필요합니다.</Text>
+      <Text className="mb-1 text-[32px] font-extrabold text-[#1A1A1A]">
+        New Account
+      </Text>
+      <Text className="mb-7 text-[13px] text-[#888]">
+        로그인을 위해 회원가입이 필요합니다.
+      </Text>
 
-      <View style={styles.card}>
-        <Text style={styles.label}>ID</Text>
+      <View className="rounded-2xl bg-white p-6">
+        <Text className="mt-2 text-[13px] font-semibold text-[#333]">ID</Text>
         <Input variant="underlined" size="md" className="mb-2">
           <InputField
             placeholder="E-mail or Phone Number"
@@ -44,7 +48,7 @@ export default function Signup() {
           />
         </Input>
 
-        <Text style={styles.label}>PW</Text>
+        <Text className="mt-2 text-[13px] font-semibold text-[#333]">PW</Text>
         <Input variant="underlined" size="md" className="mb-2">
           <InputField
             placeholder="Password"
@@ -55,7 +59,9 @@ export default function Signup() {
           />
         </Input>
 
-        <Text style={styles.label}>PW 확인</Text>
+        <Text className="mt-2 text-[13px] font-semibold text-[#333]">
+          PW 확인
+        </Text>
         <Input variant="underlined" size="md" className="mb-4">
           <InputField
             placeholder="Password"
@@ -78,21 +84,3 @@ export default function Signup() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F5EFE8",
-    paddingHorizontal: 28,
-    paddingTop: 60,
-  },
-  back: { fontSize: 22, color: "#333", marginBottom: 16 },
-  title: { fontSize: 32, fontWeight: "800", color: "#1A1A1A", marginBottom: 4 },
-  subtitle: { fontSize: 13, color: "#888", marginBottom: 28 },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 24,
-  },
-  label: { fontSize: 13, fontWeight: "600", color: "#333", marginTop: 8 },
-});
