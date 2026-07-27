@@ -117,11 +117,13 @@ const Diary = () => {
             >
               <TextareaInput
                 placeholder="오늘의 산책 일기를 작성해주세요..."
+                placeholderTextColor="#9CA3AF"
                 value={contents}
                 onChangeText={setContents}
                 multiline
                 textAlignVertical="top"
-                className="min-h-[120px] text-base text-[#0D0F1B]"
+                className="min-h-[120px] text-base"
+                style={{ color: "#0D0F1B" }}
               />
             </Textarea>
           </View>
