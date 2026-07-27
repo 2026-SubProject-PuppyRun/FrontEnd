@@ -26,6 +26,7 @@ const SelfieAndRouteSwiper = ({
 
   const ref = React.useRef<ICarouselInstance>(null);
   const width = Dimensions.get("window").width;
+  const cardWidth = Math.min(width - 48, 360);
 
   const onPressPagination = (index: number) => {
     ref.current?.scrollTo({
@@ -39,8 +40,8 @@ const SelfieAndRouteSwiper = ({
   };
 
   return (
-    <View id="carousel-component" style={{ gap: 10, marginTop: 30 }}>
-      <View style={{ marginBottom: 10 }}>
+    <View id="carousel-component">
+      <View>
         <Carousel
           ref={ref}
           {...baseOptions}
@@ -49,13 +50,34 @@ const SelfieAndRouteSwiper = ({
             progress.value = absoluteProgress;
           }}
           width={width}
-          style={{ width: width, height: width * 0.7 }}
+          style={{ width, height: width * 0.82 }}
           data={swiperData}
           renderItem={({ index }) => {
-            return index === 1 ? (
-              <RouteItem routeImgUrl={routeImgUrl} />
-            ) : (
-              <SelfieItem selfieImgUrl={selfieImgUrl} />
+            return (
+              <View
+                style={{
+                  width,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: cardWidth,
+                    height: width * 0.68,
+                    borderRadius: 28,
+                    backgroundColor: "#FFFFFF",
+                    overflow: "hidden",
+                    padding: 18,
+                  }}
+                >
+                  {index === 1 ? (
+                    <RouteItem routeImgUrl={routeImgUrl} />
+                  ) : (
+                    <SelfieItem selfieImgUrl={selfieImgUrl} />
+                  )}
+                </View>
+              </View>
             );
           }}
         />
@@ -67,17 +89,17 @@ const SelfieAndRouteSwiper = ({
         size={10}
         dotStyle={{
           borderRadius: 100,
-          backgroundColor: "#262626",
+          backgroundColor: "#FFB3B2",
         }}
         activeDotStyle={{
           borderRadius: 100,
           overflow: "hidden",
-          backgroundColor: "#f1f1f1",
+          backgroundColor: "#F25857",
         }}
         containerStyle={[
           {
-            gap: 5,
-            marginBottom: 10,
+            gap: 8,
+            marginBottom: 16,
           },
         ]}
         horizontal

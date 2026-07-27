@@ -5,6 +5,7 @@ import { MAP_LOCATION_WATCH } from "@/constants/locationTracking";
 import { useCompassHeading } from "@/hooks/use-compass-heading";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useRunStore } from "@/store/useRunStore";
+import { getCurrentPositionWithRetry } from "@/util/location";
 import { recordRunLocation } from "@/util/run/recordRunLocation";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -57,8 +58,9 @@ const GoogleMap = ({
 
   const moveToMyLocation = async () => {
     try {
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
+      const location = await getCurrentPositionWithRetry({
+        initialDelayMs: 0,
+        maxAttempts: 2,
       });
       setCoordinates({
         latitude: location.coords.latitude,
@@ -70,30 +72,30 @@ const GoogleMap = ({
   };
 
   useEffect(() => {
-    const initLocation = async () => {
-      if (permission === null || isLocationInitialized.current) return;
-      try {
-        if (permission !== true) {
-          if (permission === false) setErrorMsg("위치 권한이 거부되었습니다.");
-          return;
-        }
+    if (permission === null || isLocationInitialized.current) return;
 
+    if (permission === false) {
+      setErrorMsg("위치 권한이 거부되었습니다.");
+      setIsLoading(false);
+      return;
+    }
+
+    const initLocation = async () => {
+      try {
         const serviceEnabled = await Location.hasServicesEnabledAsync();
         if (!serviceEnabled) {
           setErrorMsg("기기 위치 서비스가 꺼져 있습니다. 설정에서 켜 주세요.");
           return;
         }
 
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
+        const location = await getCurrentPositionWithRetry();
         setCoordinates({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
+        setErrorMsg(null);
         isLocationInitialized.current = true;
       } catch (error) {
-        isLocationInitialized.current = true;
         console.error("위치 조회 실패:", error);
         setErrorMsg(
           "현재 위치를 가져올 수 없습니다. 잠시 후 다시 시도해 주세요.",
@@ -102,7 +104,8 @@ const GoogleMap = ({
         setIsLoading(false);
       }
     };
-    if (permission === true && !isLocationInitialized.current) initLocation();
+
+    void initLocation();
   }, [permission]);
 
   useEffect(() => {

@@ -1,6 +1,10 @@
 import WalkScoreSkeleton from "@/components/skeleton/WalkScoreSkeleton";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useWeatherStore } from "@/store/useWeatherStore";
+import {
+  fetchWithRetry,
+  getCurrentPositionWithRetry,
+} from "@/util/location";
 import { getDustLevel } from "@/util/weather";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -20,23 +24,23 @@ const WalkScoreBoard = () => {
   } | null>(null);
 
   useEffect(() => {
-    const initLocation = async () => {
-      if (permission === null || isLocationInitialized.current) return;
-      try {
-        if (permission !== true) {
-          if (permission === false) setErrorMsg("위치 권한이 거부되었습니다.");
-          return;
-        }
+    if (permission === null || isLocationInitialized.current) return;
 
+    if (permission === false) {
+      setErrorMsg("위치 권한이 거부되었습니다.");
+      setIsLoading(false);
+      return;
+    }
+
+    const initLocation = async () => {
+      try {
         const serviceEnabled = await Location.hasServicesEnabledAsync();
         if (!serviceEnabled) {
           setErrorMsg("기기 위치 서비스가 꺼져 있습니다. 설정에서 켜 주세요.");
           return;
         }
 
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
+        const location = await getCurrentPositionWithRetry();
 
         const [reverseGeocode] = await Location.reverseGeocodeAsync({
           latitude: location.coords.latitude,
@@ -46,7 +50,7 @@ const WalkScoreBoard = () => {
           `${reverseGeocode.region || ""} ${reverseGeocode.city || ""} ${reverseGeocode.street || ""}`.trim(),
         );
 
-        const airRes = await fetch(
+        const airRes = await fetchWithRetry(
           `https://api.openweathermap.org/data/2.5/air_pollution?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${process.env.EXPO_PUBLIC_OPENWEATHERMAP_API_KEY}`,
         );
         const airData = await airRes.json();
@@ -59,10 +63,10 @@ const WalkScoreBoard = () => {
           color: getDustLevel(airData.list[0].components.pm10, "pm10").color,
           icon: getDustLevel(airData.list[0].components.pm10, "pm10").icon,
         });
+        setErrorMsg(null);
         isLocationInitialized.current = true;
       } catch (error) {
-        isLocationInitialized.current = true;
-        console.error("위치 조회 실패:", error);
+        console.error("위치/날씨 조회 실패:", error);
         setErrorMsg(
           "현재 위치를 가져올 수 없습니다. 잠시 후 다시 시도해 주세요.",
         );
@@ -70,12 +74,22 @@ const WalkScoreBoard = () => {
         setIsLoading(false);
       }
     };
-    if (permission === true && !isLocationInitialized.current) initLocation();
+
+    void initLocation();
   }, [permission]);
 
   if (isLoading) {
     return <WalkScoreSkeleton />;
   }
+
+  if (errorMsg) {
+    return (
+      <View className="m-4 items-center justify-center rounded-lg bg-white p-8 shadow">
+        <Text className="text-center text-base text-gray-700">{errorMsg}</Text>
+      </View>
+    );
+  }
+
   return (
     <View className="m-4 gap-6 pb-16">
       <View className="rounded-lg bg-white p-4 shadow">

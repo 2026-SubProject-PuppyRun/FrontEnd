@@ -1,15 +1,24 @@
-import RunResultBoard from "@/components/board/RunBoard/RunResultBoard";
-import Header from "@/components/header/Header";
+import DiaryRunStats from "@/components/board/RunBoard/DiaryRunStats";
 import CustomAlert from "@/components/modal/CustomAlert";
+import RunLogoSvg from "@/components/svg/RunLogoSvg";
 import SelfieAndRouteSwiper from "@/components/swiper/SelfieAndRouteSwiper";
-import { Button, ButtonText } from "@/components/ui/button";
+import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { EditIcon } from "@/components/ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
+import useNonNavbar from "@/hooks/use-non-navbar";
 import { useRunStore } from "@/store/useRunStore";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Diary = () => {
@@ -29,6 +38,8 @@ const Diary = () => {
   const [showAlert, setShowAlert] = useState(false);
   const isSubmitRef = useRef(false);
 
+  useNonNavbar();
+
   const onFormSubmit = async () => {
     try {
       isSubmitRef.current = true;
@@ -37,6 +48,7 @@ const Diary = () => {
       router.replace("/");
     } catch (error) {
       console.error("데이터 제출 실패:", error);
+      isSubmitRef.current = false;
     }
   };
 
@@ -50,38 +62,92 @@ const Diary = () => {
   }, [navigation]);
 
   return (
-    <View style={{ paddingTop: insets.top }} className="flex-1 bg-white">
-      <Header>
-        <Button onPress={onFormSubmit}>
-          <ButtonText>저장 하기</ButtonText>
-        </Button>
-      </Header>
-      <View className="mx-4">
-        <Text className=" text-lx font-semibold">
-          {`${year}.${month}.${day}`} 산책
-        </Text>
-        <Input variant="underlined">
-          <InputField
-            placeholder="제목을 입력해주세요..."
-            value={title}
-            onChangeText={setTitle}
-            className="text-black"
-          />
-          <InputSlot className="pl-3">
-            <InputIcon as={EditIcon} />
-          </InputSlot>
-        </Input>
+    <View
+      style={{ paddingTop: insets.top }}
+      className="flex-1 bg-[#F7F7F7]"
+    >
+      <View className="flex-row items-center justify-between px-6 pt-3">
+        <Pressable
+          onPress={() => router.back()}
+          className="h-10 w-10 items-center justify-center"
+          accessibilityRole="button"
+          accessibilityLabel="뒤로 가기"
+        >
+          <Ionicons name="chevron-back" size={28} color="#0D0F1B" />
+        </Pressable>
+        <RunLogoSvg width={189} height={50} />
+        <View className="h-10 w-10" />
       </View>
-      <SelfieAndRouteSwiper />
-      <RunResultBoard />
-      <Textarea style={{ borderWidth: 0, borderColor: "transparent" }}>
-        <TextareaInput
-          placeholder="오늘의 산책 일기를 작성해주세요..."
-          value={contents}
-          onChangeText={setContents}
-          style={{ color: "#000000" }}
-        />
-      </Textarea>
+
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={insets.top}
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="pb-6"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="mx-6 mb-4 mt-4 rounded-3xl bg-white px-5 py-4 shadow-sm">
+            <Text className="mb-2 text-base font-semibold text-[#0D0F1B]">
+              {`${year}.${month}.${day}`} 산책
+            </Text>
+            <Input variant="underlined" className="border-outline-200">
+              <InputField
+                placeholder="제목을 입력해주세요..."
+                value={title}
+                onChangeText={setTitle}
+                className="text-[#0D0F1B]"
+              />
+              <InputSlot className="pl-3">
+                <InputIcon as={EditIcon} />
+              </InputSlot>
+            </Input>
+          </View>
+
+          <SelfieAndRouteSwiper />
+          <DiaryRunStats />
+
+          <View className="mx-6 mt-4 rounded-3xl bg-white px-5 py-4 shadow-sm">
+            <Textarea
+              className="min-h-[140px] border-0 bg-transparent"
+              size="md"
+            >
+              <TextareaInput
+                placeholder="오늘의 산책 일기를 작성해주세요..."
+                value={contents}
+                onChangeText={setContents}
+                multiline
+                textAlignVertical="top"
+                className="min-h-[120px] text-base text-[#0D0F1B]"
+              />
+            </Textarea>
+          </View>
+        </ScrollView>
+
+        <View className="w-full px-6 pb-8 pt-2">
+          <RedButtonSurface
+            borderRadius={30}
+            backgroundColor="#F25857"
+            shadowPadding={8}
+            hostStyle={{ width: "100%" }}
+            style={{ width: "100%", height: 64 }}
+          >
+            <Pressable
+              onPress={onFormSubmit}
+              className="h-full w-full items-center justify-center"
+              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+            >
+              <Text className="text-lg font-semibold text-white">
+                저장 하기
+              </Text>
+            </Pressable>
+          </RedButtonSurface>
+        </View>
+      </KeyboardAvoidingView>
+
       <CustomAlert
         showAlertDialog={showAlert}
         handleClose={() => setShowAlert(false)}
