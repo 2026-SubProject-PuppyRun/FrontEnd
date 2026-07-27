@@ -30,10 +30,10 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="care" />
-      <Tabs.Screen name="running" options={{ href: "/(tabs)/running" }} />
+      <Tabs.Screen name="mypage" />
       <Tabs.Screen name="home" options={{ href: "/(tabs)/home" }} />
+      <Tabs.Screen name="running" options={{ href: "/(tabs)/running" }} />
       <Tabs.Screen name="guide" options={{ href: "/(tabs)/guide" }} />
-      <Tabs.Screen name="mypage" options={{ href: null }} />
     </Tabs>
   );
 }
