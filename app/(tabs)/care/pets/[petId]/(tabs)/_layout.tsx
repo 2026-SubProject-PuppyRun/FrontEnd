@@ -34,7 +34,7 @@ export default function PetCareTabsLayout() {
           screenOptions={{
             tabBarActiveTintColor: "#0D0F1B",
             tabBarInactiveTintColor: "#9CA3AF",
-            tabBarIndicatorStyle: { backgroundColor: "#0D0F1B", height: 2 },
+            tabBarIndicatorStyle: { backgroundColor: "#F25857", height: 2 },
             tabBarLabelStyle: { fontWeight: "700", fontSize: 14 },
             tabBarStyle: styles.tabBar,
             sceneStyle: styles.scene,
@@ -59,20 +59,20 @@ export default function PetCareTabsLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     paddingTop: 8,
-    backgroundColor: "white",
+    backgroundColor: "#F7F7F7",
   },
   tabsWrapper: {
     flex: 1,
   },
   tabBar: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F7F7F7",
     elevation: 0,
     shadowOpacity: 0,
   },
   scene: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F7F7F7",
   },
 });

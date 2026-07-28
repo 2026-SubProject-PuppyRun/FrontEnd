@@ -1,4 +1,4 @@
-import { Button, ButtonText } from "@/components/ui/button";
+import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import {
   FormControl,
   FormControlError,
@@ -6,19 +6,25 @@ import {
   FormControlErrorText,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { HStack } from "@/components/ui/hstack";
-import { AlertCircleIcon } from "@/components/ui/icon";
+import { AlertCircleIcon, CalendarDaysIcon, Icon } from "@/components/ui/icon";
 import { Input, InputField } from "@/components/ui/input";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { VaccineFormValues } from "@/types/vaccine";
-import { useMemo, useState } from "react";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
+import { ReactNode, useMemo, useState } from "react";
 import { View } from "react-native";
 import DatePicker from "react-native-date-picker";
+
+const INPUT_TEXT_STYLE = { color: "#0D0F1B" } as const;
+
+const COMMON_VACCINES = ["종합백신", "광견병", "켄넬코프", "인플루엔자"];
 
 interface VaccineFormProps {
   initialValues?: Partial<VaccineFormValues>;
   submitLabel?: string;
+  isEdit?: boolean;
   onSubmit: (values: VaccineFormValues) => void;
   onDelete: () => void;
 }
@@ -30,9 +36,38 @@ const formatDate = (date: Date) => {
   return `${y}-${m}-${d}`;
 };
 
+const formatDateLabel = (dateStr: string) =>
+  dayjs(dateStr).locale("ko").format("YYYY년 M월 D일");
+
+const FormField = ({
+  label,
+  error,
+  errorMessage,
+  children,
+}: {
+  label: string;
+  error?: boolean;
+  errorMessage?: string;
+  children: ReactNode;
+}) => (
+  <FormControl isInvalid={error}>
+    <FormControlLabelText className="mb-2 text-sm font-semibold text-gray-500">
+      {label}
+    </FormControlLabelText>
+    {children}
+    {errorMessage ? (
+      <FormControlError>
+        <FormControlErrorIcon as={AlertCircleIcon} />
+        <FormControlErrorText>{errorMessage}</FormControlErrorText>
+      </FormControlError>
+    ) : null}
+  </FormControl>
+);
+
 const VaccineForm = ({
   initialValues,
-  submitLabel = "저장",
+  submitLabel = "저장하기",
+  isEdit = false,
   onSubmit,
   onDelete,
 }: VaccineFormProps) => {
@@ -69,76 +104,111 @@ const VaccineForm = ({
   };
 
   return (
-    <View className="w-full gap-4 pb-4">
-      <FormControl isInvalid={hasSubmitted && !name.trim()}>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          예방접종 이름
-        </FormControlLabelText>
-        <Input size="md" variant="underlined" className="mt-1 border-gray-300">
-          <InputField
-            value={name}
-            onChangeText={setName}
-            placeholder="예: 종합백신"
-            placeholderTextColor="#9CA3AF"
-            className="text-[#0D0F1B]"
-          />
-        </Input>
-        <FormControlError>
-          <FormControlErrorIcon as={AlertCircleIcon} />
-          <FormControlErrorText>
-            예방접종 이름을 입력해주세요.
-          </FormControlErrorText>
-        </FormControlError>
-      </FormControl>
+    <View className="w-full gap-5 pb-2">
+      <FormField
+        label="예방접종 이름"
+        error={hasSubmitted && !name.trim()}
+        errorMessage="예방접종 이름을 입력해주세요."
+      >
+        <View className="rounded-2xl bg-[#F7F7F7] px-4 py-1">
+          <Input className="border-0 bg-transparent" size="md">
+            <InputField
+              value={name}
+              onChangeText={setName}
+              placeholder="예: 종합백신"
+              placeholderTextColor="#9CA3AF"
+              style={INPUT_TEXT_STYLE}
+            />
+          </Input>
+        </View>
+        <View className="mt-2 flex-row flex-wrap gap-2">
+          {COMMON_VACCINES.map((vaccine) => {
+            const selected = name === vaccine;
+            return (
+              <Pressable
+                key={vaccine}
+                onPress={() => setName(vaccine)}
+                className="rounded-full px-3 py-1.5 active:opacity-80"
+                style={{
+                  backgroundColor: selected ? "#FEE2E2" : "#F7F7F7",
+                  borderWidth: 1,
+                  borderColor: selected ? "#F25857" : "transparent",
+                }}
+              >
+                <Text
+                  className="text-xs font-medium"
+                  style={{ color: selected ? "#F25857" : "#6B7280" }}
+                >
+                  {vaccine}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </FormField>
 
-      <FormControl isInvalid={hasSubmitted && !vaccinatedAt}>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          접종 날짜
-        </FormControlLabelText>
+      <FormField
+        label="접종 날짜"
+        error={hasSubmitted && !vaccinatedAt}
+        errorMessage="접종 날짜를 선택해주세요."
+      >
         <Pressable
           onPress={() => setPickField("vaccinatedAt")}
-          className="mt-1 rounded-xl border border-gray-300 px-3 py-3"
+          className="flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-4 py-3.5 active:opacity-80"
         >
           <Text className={vaccinatedAt ? "text-[#0D0F1B]" : "text-gray-400"}>
-            {vaccinatedAt || "날짜를 선택하세요"}
+            {vaccinatedAt ? formatDateLabel(vaccinatedAt) : "날짜를 선택하세요"}
           </Text>
+          <Icon as={CalendarDaysIcon} size="sm" className="text-gray-400" />
         </Pressable>
-        <FormControlError>
-          <FormControlErrorIcon as={AlertCircleIcon} />
-          <FormControlErrorText>접종 날짜를 선택해주세요.</FormControlErrorText>
-        </FormControlError>
-      </FormControl>
+      </FormField>
 
-      <FormControl isInvalid={hasSubmitted && !nextVaccinationAt}>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          다음 접종일
-        </FormControlLabelText>
+      <FormField
+        label="다음 접종일"
+        error={hasSubmitted && !nextVaccinationAt}
+        errorMessage="다음 접종일을 선택해주세요."
+      >
         <Pressable
           onPress={() => setPickField("nextVaccinationAt")}
-          className="mt-1 rounded-xl border border-gray-300 px-3 py-3"
+          className="flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-4 py-3.5 active:opacity-80"
         >
           <Text
             className={nextVaccinationAt ? "text-[#0D0F1B]" : "text-gray-400"}
           >
-            {nextVaccinationAt || "날짜를 선택하세요"}
+            {nextVaccinationAt
+              ? formatDateLabel(nextVaccinationAt)
+              : "날짜를 선택하세요"}
+          </Text>
+          <Icon as={CalendarDaysIcon} size="sm" className="text-gray-400" />
+        </Pressable>
+      </FormField>
+
+      <RedButtonSurface
+        borderRadius={30}
+        backgroundColor="#F25857"
+        shadowPadding={8}
+        hostStyle={{ width: "100%" }}
+        style={{ width: "100%", height: 56 }}
+      >
+        <Pressable
+          onPress={handleSubmit}
+          className="h-full w-full items-center justify-center"
+          style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+        >
+          <Text className="text-base font-semibold text-white">
+            {submitLabel}
           </Text>
         </Pressable>
-        <FormControlError>
-          <FormControlErrorIcon as={AlertCircleIcon} />
-          <FormControlErrorText>
-            다음 접종일을 선택해주세요.
-          </FormControlErrorText>
-        </FormControlError>
-      </FormControl>
+      </RedButtonSurface>
 
-      <HStack className="mt-2 items-center gap-2">
-        <Button
-          onPress={handleSubmit}
-          className="flex-1 rounded-2xl bg-primary-500"
+      {isEdit ? (
+        <Pressable
+          onPress={onDelete}
+          className="items-center py-2 active:opacity-70"
         >
-          <ButtonText>{submitLabel}</ButtonText>
-        </Button>
-      </HStack>
+          <Text className="text-sm font-medium text-[#F25857]">기록 삭제</Text>
+        </Pressable>
+      ) : null}
 
       <DatePicker
         modal
@@ -160,11 +230,6 @@ const VaccineForm = ({
         }}
         onCancel={() => setPickField(null)}
       />
-      {submitLabel === "수정" ? (
-        <Button onPress={onDelete} className="mt-2 rounded-2xl bg-error-500">
-          <ButtonText>삭제</ButtonText>
-        </Button>
-      ) : null}
     </View>
   );
 };

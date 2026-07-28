@@ -24,7 +24,7 @@ const DietDayCell = ({
   const dayTextColor = isSelected
     ? "text-white"
     : cell.isToday
-      ? "text-[#FF3B30]"
+      ? "text-[#F25857]"
       : cell.isCurrentMonth
         ? "text-[#0D0F1B]"
         : "text-gray-300";
@@ -37,13 +37,15 @@ const DietDayCell = ({
       accessibilityLabel={`${cell.day}일`}
     >
       <View
-        className={
+        className={`h-9 w-9 items-center justify-center rounded-full ${
           isSelected
-            ? "h-9 w-9 items-center justify-center rounded-full bg-primary-300"
-            : "h-9 w-9 items-center justify-center rounded-full bg-gray-50"
-        }
+            ? "bg-[#F25857]"
+            : cell.isToday
+              ? "border-2 border-[#F25857]"
+              : ""
+        }`}
       >
-        <Text className={`text-base font-medium ${dayTextColor}`}>
+        <Text className={`text-sm font-medium ${dayTextColor}`}>
           {cell.day}
         </Text>
       </View>

@@ -13,7 +13,7 @@ const PetDashBoard = ({ pet }: PetDashBoardProps) => {
   const info = getPetBasicInfo(pet);
 
   return (
-    <View className="mb-4 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
+    <View className="rounded-3xl bg-white px-4 py-4 shadow-sm">
       <View className="flex-row items-center gap-4">
         <View
           className="h-[72px] w-[72px] overflow-hidden rounded-full border-[3px] bg-white"
@@ -35,7 +35,7 @@ const PetDashBoard = ({ pet }: PetDashBoardProps) => {
         </View>
 
         <View className="flex-1 justify-center">
-          <Text className="text-lg font-bold text-gray-900">{info.name}</Text>
+          <Text className="text-lg font-bold text-[#0D0F1B]">{info.name}</Text>
           <Text className="mt-1 text-sm text-gray-500">{info.birthLabel}</Text>
         </View>
       </View>

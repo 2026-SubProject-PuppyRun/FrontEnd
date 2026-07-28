@@ -1,5 +1,9 @@
 import AllergyForm from "@/components/form/AllergyForm";
 import { AllergyFormValues, AllergyRecord } from "@/types/allergy";
+import { Pressable } from "@/components/ui/pressable";
+import { Text } from "@/components/ui/text";
+import { CloseIcon, Icon } from "@/components/ui/icon";
+import { View } from "react-native";
 import {
   Actionsheet,
   ActionsheetBackdrop,
@@ -8,13 +12,13 @@ import {
   ActionsheetDragIndicatorWrapper,
   ActionsheetScrollView,
 } from "../ui/actionsheet";
-import { Text } from "../ui/text";
 
 interface AllergyFormSheetProps {
   isOpen: boolean;
   onClose: () => void;
   editingRecord?: AllergyRecord | null;
   onSubmit: (values: AllergyFormValues) => void;
+  onDelete: () => void;
 }
 
 const AllergyFormSheet = ({
@@ -22,6 +26,7 @@ const AllergyFormSheet = ({
   onClose,
   editingRecord,
   onSubmit,
+  onDelete,
 }: AllergyFormSheetProps) => {
   const isEdit = Boolean(editingRecord);
 
@@ -33,23 +38,45 @@ const AllergyFormSheet = ({
   return (
     <Actionsheet isOpen={isOpen} onClose={onClose} snapPoints={[88]}>
       <ActionsheetBackdrop />
-      <ActionsheetContent className="bg-white px-4 pb-6">
+      <ActionsheetContent className="rounded-t-3xl bg-white px-6 pb-8 pt-2">
         <ActionsheetDragIndicatorWrapper>
-          <ActionsheetDragIndicator className="bg-gray-300" />
+          <ActionsheetDragIndicator className="bg-gray-200" />
         </ActionsheetDragIndicatorWrapper>
-        <Text className="mb-2 text-lg font-bold text-[#0D0F1B]">
-          {isEdit ? "알러지 수정" : "알러지 추가"}
-        </Text>
+
+        <View className="mb-4 mt-2 w-full flex-row items-start justify-between">
+          <View className="flex-1 pr-3">
+            <Text className="text-lg font-bold text-[#0D0F1B]">
+              {isEdit ? "알러지 수정" : "알러지 추가"}
+            </Text>
+            <Text className="mt-1 text-sm text-gray-500">
+              {isEdit
+                ? "기록 내용을 수정하거나 삭제할 수 있어요"
+                : "알러지 유발 물질과 증상을 기록해 보세요"}
+            </Text>
+          </View>
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="닫기"
+            className="h-8 w-8 items-center justify-center rounded-full bg-[#F7F7F7] active:opacity-70"
+          >
+            <Icon as={CloseIcon} size="sm" className="text-gray-500" />
+          </Pressable>
+        </View>
+
         <ActionsheetScrollView
           className="w-full"
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {isOpen ? (
             <AllergyForm
               key={editingRecord?.id ?? "new"}
               initialValues={editingRecord ?? undefined}
-              submitLabel={isEdit ? "수정" : "추가"}
+              submitLabel={isEdit ? "수정하기" : "저장하기"}
+              isEdit={isEdit}
               onSubmit={handleSubmit}
+              onDelete={onDelete}
             />
           ) : null}
         </ActionsheetScrollView>

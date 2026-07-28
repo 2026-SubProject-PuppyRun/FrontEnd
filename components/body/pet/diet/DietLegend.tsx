@@ -5,7 +5,7 @@ import { Text } from "@/components/ui/text";
 import { View } from "react-native";
 
 const DietLegend = () => (
-  <HStack className="items-center justify-center gap-5 px-4 py-3">
+  <HStack className="items-center justify-center gap-5 px-2 py-2">
     {(["food", "snack"] as DietMealType[]).map((type) => {
       const theme = DIET_MEAL_COLORS[type];
       return (

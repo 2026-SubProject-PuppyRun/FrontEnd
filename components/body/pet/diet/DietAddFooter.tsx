@@ -1,9 +1,8 @@
-import { DIET_MEAL_COLORS } from "@/constants/dietTheme";
-import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
-import { DietMealType } from "@/types/diet";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
+import { DIET_MEAL_COLORS } from "@/constants/dietTheme";
+import { DietMealType } from "@/types/diet";
 import { View } from "react-native";
 
 interface DietAddFooterProps {
@@ -11,8 +10,8 @@ interface DietAddFooterProps {
 }
 
 const DietAddFooter = ({ onPressAdd }: DietAddFooterProps) => (
-  <View className="border-t border-gray-100 px-4 py-3">
-    <HStack className="items-center gap-2">
+  <View className="absolute bottom-0 left-0 right-0 rounded-3xl border-t border-gray-100 bg-white px-6 pb-6 pt-4">
+    <HStack className="mb-3 gap-2">
       {(["food", "snack"] as DietMealType[]).map((type) => {
         const theme = DIET_MEAL_COLORS[type];
         return (
@@ -20,22 +19,22 @@ const DietAddFooter = ({ onPressAdd }: DietAddFooterProps) => (
             key={type}
             onPress={() => onPressAdd(type)}
             className="min-h-12 flex-1 items-center justify-center rounded-2xl active:opacity-80"
-            style={{ backgroundColor: theme.color }}
+            style={{
+              backgroundColor: theme.bg,
+              borderWidth: 1,
+              borderColor: theme.color + "33",
+            }}
           >
-            <Text className="text-base font-semibold text-white">
-              {theme.label} 추가
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: theme.color }}
+            >
+              + {theme.label}
             </Text>
           </Pressable>
         );
       })}
     </HStack>
-    <Button
-      onPress={() => onPressAdd()}
-      variant="outline"
-      className="mt-2 min-h-11 rounded-2xl border-gray-200"
-    >
-      <ButtonText className="text-[#0D0F1B]">기록 추가</ButtonText>
-    </Button>
   </View>
 );
 

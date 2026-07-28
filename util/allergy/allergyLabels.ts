@@ -29,6 +29,25 @@ export const ALLERGY_SEVERITIES: AllergySeverity[] = [
   "severe",
 ];
 
+export const ALLERGY_CATEGORY_COLORS: Record<
+  AllergyCategory,
+  { color: string; bg: string }
+> = {
+  food: { color: "#2563EB", bg: "#EFF6FF" },
+  environment: { color: "#059669", bg: "#ECFDF5" },
+  medication: { color: "#7C3AED", bg: "#F5F3FF" },
+  other: { color: "#6B7280", bg: "#F3F4F6" },
+};
+
+export const ALLERGY_SEVERITY_COLORS: Record<
+  AllergySeverity,
+  { color: string; bg: string }
+> = {
+  mild: { color: "#2563EB", bg: "#EFF6FF" },
+  moderate: { color: "#D97706", bg: "#FEF3C7" },
+  severe: { color: "#F25857", bg: "#FEE2E2" },
+};
+
 export const getCategoryLabel = (category: AllergyCategory): string =>
   CATEGORY_LABELS[category];
 
