@@ -10,8 +10,11 @@ const MetarialTopTabs = withLayoutContext(Navigator);
 export default function GuideLayout() {
   const insets = useSafeAreaInsets();
   return (
-    <View style={{ paddingTop: insets.top }} className="flex-1 bg-[#F7F7F7]">
-      <Header title="가이드" disableBack />
+    <View
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom + 60 }}
+      className="flex-1 bg-[#F7F7F7]"
+    >
+      <Header showLogo disableBack />
       <MetarialTopTabs
         screenOptions={{
           tabBarActiveTintColor: "#0D0F1B",
