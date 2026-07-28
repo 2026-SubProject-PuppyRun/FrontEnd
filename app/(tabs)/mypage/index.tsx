@@ -1,6 +1,6 @@
 import MyPageBody from "@/components/body/mypage/MyPageBody";
 import Header, { HeaderIconButton } from "@/components/header/Header";
-import { SettingsIcon } from "@/components/ui/icon";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { View } from "react-native";
@@ -17,7 +17,7 @@ const Index = () => {
             onPress={() => router.push("/mypage/settings")}
             accessibilityLabel="설정"
           >
-            <SettingsIcon width={22} height={22} color="#0D0F1B" />
+            <Ionicons name="settings-sharp" size={22} color="#0D0F1B" />
           </HeaderIconButton>
         }
       />
