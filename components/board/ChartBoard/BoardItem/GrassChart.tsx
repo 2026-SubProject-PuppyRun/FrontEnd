@@ -1,6 +1,7 @@
+import { Text } from "@/components/ui/text";
 import dayjs from "dayjs";
 import { useMemo } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 const dummyData: Record<string, number> = {
   "2026-03-16": 2,
@@ -14,11 +15,11 @@ const dummyData: Record<string, number> = {
 };
 
 const getColorByCount = (count: number) => {
-  if (count === 0) return "bg-gray-200"; // 안 한 날
-  if (count === 1) return "bg-green-200";
-  if (count === 2) return "bg-green-400";
-  if (count >= 3) return "bg-green-600"; // 많이 한 날
-  return "bg-gray-200";
+  if (count === 0) return "bg-[#F3F4F6]";
+  if (count === 1) return "bg-[#FFD6D6]";
+  if (count === 2) return "bg-[#FF9E9D]";
+  if (count >= 3) return "bg-[#F25857]";
+  return "bg-[#F3F4F6]";
 };
 
 const GrassChart = () => {
@@ -31,6 +32,7 @@ const GrassChart = () => {
     }
     return result;
   }, []);
+
   const weeks = useMemo(() => {
     const chunked = [];
     for (let i = 0; i < days.length; i += 7) {
@@ -38,17 +40,10 @@ const GrassChart = () => {
     }
     return chunked;
   }, [days]);
-  return (
-    <View className="m-4 rounded-lg bg-white p-4">
-      <Text className="mb-4 text-lg font-bold text-black">
-        산책 잔디심기 🌿
-      </Text>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="mx-4 "
-      >
+  return (
+    <View className="rounded-3xl bg-white p-5 shadow-sm">
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View className="flex-row gap-1">
           {weeks.map((week, weekIndex) => {
             const currentMonth = dayjs(week[0]).format("M월");
@@ -84,12 +79,12 @@ const GrassChart = () => {
       </ScrollView>
 
       <View className="mt-4 flex-row items-center justify-end gap-2">
-        <Text className="text-xs text-gray-500">Less</Text>
-        <View className="h-3 w-3 rounded-sm bg-gray-200" />
-        <View className="h-3 w-3 rounded-sm bg-green-200" />
-        <View className="h-3 w-3 rounded-sm bg-green-400" />
-        <View className="h-3 w-3 rounded-sm bg-green-600" />
-        <Text className="text-xs text-gray-500">More</Text>
+        <Text className="text-xs text-gray-500">적음</Text>
+        <View className="h-3 w-3 rounded-sm bg-[#F3F4F6]" />
+        <View className="h-3 w-3 rounded-sm bg-[#FFD6D6]" />
+        <View className="h-3 w-3 rounded-sm bg-[#FF9E9D]" />
+        <View className="h-3 w-3 rounded-sm bg-[#F25857]" />
+        <Text className="text-xs text-gray-500">많음</Text>
       </View>
     </View>
   );

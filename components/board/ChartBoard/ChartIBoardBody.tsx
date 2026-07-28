@@ -1,4 +1,5 @@
 import ChartTapButton from "@/components/button/ChartTapButton";
+import { Text } from "@/components/ui/text";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import CompareChart from "./BoardItem/CompareChart";
@@ -9,11 +10,14 @@ import UserInsight from "./BoardItem/UserInsight";
 import WeeklyChart from "./BoardItem/WeeklyChart";
 import YearlyChart from "./BoardItem/YearlyChart";
 
+const CHART_TABS = [
+  { label: "주간", value: "weekly" },
+  { label: "월간", value: "monthly" },
+  { label: "연간", value: "yearly" },
+] as const;
+
 const ChartBoardBody = () => {
   const [selectedChart, setSelectedChart] = useState("weekly");
-  const handleSelectChart = (chart: string) => {
-    setSelectedChart(chart);
-  };
 
   const renderChart = () => {
     switch (selectedChart) {
@@ -29,30 +33,46 @@ const ChartBoardBody = () => {
   };
 
   return (
-    <ScrollView className="mb-4 flex-1 bg-gray-100">
+    <ScrollView
+      className="flex-1"
+      contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
+      showsVerticalScrollIndicator={false}
+    >
       <UserInsight />
-      <View className=" m-4 min-h-[390px] justify-around rounded-lg bg-white p-4">
-        <View className="flex-row justify-around">
-          <ChartTapButton
-            handleSelectChart={handleSelectChart}
-            label="주간"
-            isActive={selectedChart === "weekly"}
-          />
-          <ChartTapButton
-            handleSelectChart={handleSelectChart}
-            label="월간"
-            isActive={selectedChart === "monthly"}
-          />
-          <ChartTapButton
-            handleSelectChart={handleSelectChart}
-            label="연간"
-            isActive={selectedChart === "yearly"}
-          />
+
+      <View className="mb-4 rounded-3xl bg-white p-5 shadow-sm">
+        <Text className="mb-4 text-sm font-semibold text-gray-500">
+          기간별 산책량
+        </Text>
+
+        <View className="mb-5 flex-row rounded-2xl bg-[#F7F7F7] p-1">
+          {CHART_TABS.map((tab) => (
+            <ChartTapButton
+              key={tab.value}
+              handleSelectChart={setSelectedChart}
+              label={tab.label}
+              value={tab.value}
+              isActive={selectedChart === tab.value}
+            />
+          ))}
         </View>
+
         <View className="gap-4">{renderChart()}</View>
       </View>
+
+      <Text className="mb-3 text-base font-semibold text-[#0D0F1B]">
+        반려견별 산책 비율
+      </Text>
       <CompareChart />
+
+      <Text className="mb-3 mt-5 text-base font-semibold text-[#0D0F1B]">
+        주간 활동 비교
+      </Text>
       <StarChart />
+
+      <Text className="mb-3 mt-5 text-base font-semibold text-[#0D0F1B]">
+        산책 잔디심기
+      </Text>
       <GrassChart />
     </ScrollView>
   );

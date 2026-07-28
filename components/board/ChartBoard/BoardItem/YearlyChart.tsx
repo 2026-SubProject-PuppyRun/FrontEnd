@@ -36,8 +36,9 @@ const YearlyChart = () => {
       ) : (
         <BarChart
           data={data}
-          barBorderRadius={4}
+          barBorderRadius={6}
           barWidth={22}
+          frontColor="#F25857"
           hideRules
           isAnimated
           showFractionalValues
