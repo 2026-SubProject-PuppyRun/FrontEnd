@@ -1,42 +1,35 @@
 import React from "react";
-import { Text } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Pressable } from "../ui/pressable";
-
-const Tabs = [
-  { label: "주간", value: "weekly" },
-  { label: "월간", value: "monthly" },
-  { label: "연간", value: "yearly" },
-];
 
 interface ChartTapButtonProps {
   handleSelectChart: (chart: string) => void;
   label: string;
+  value: string;
   isActive?: boolean;
 }
+
 const ChartTapButton = ({
   handleSelectChart,
   label,
+  value,
   isActive,
 }: ChartTapButtonProps) => {
   return (
     <Pressable
-      onPress={() =>
-        handleSelectChart(
-          Tabs.find((tab) => tab.label === label)?.value || "weekly",
-        )
-      }
-      className={`${isActive ? "border-b-2 border-blue-500" : ""} px-4 py-2`}
+      onPress={() => handleSelectChart(value)}
+      className={`flex-1 items-center rounded-xl py-2.5 ${
+        isActive ? "bg-[#F25857]" : "bg-transparent"
+      }`}
+      style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
     >
-      {({ pressed }) => (
-        <Text
-          style={{
-            color: isActive ? "#3b82f6" : pressed ? "#1e40af" : "#000000",
-            fontWeight: isActive ? "bold" : "normal",
-          }}
-        >
-          {label}
-        </Text>
-      )}
+      <Text
+        className={`text-sm font-semibold ${
+          isActive ? "text-white" : "text-gray-500"
+        }`}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 };

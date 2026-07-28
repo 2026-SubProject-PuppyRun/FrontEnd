@@ -1,5 +1,7 @@
+import { Text } from "@/components/ui/text";
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Text, View } from "react-native";
+import { Animated, View } from "react-native";
 
 const DummyInsightComment = [
   "연속 5일 달리기 성공! 대단해요! 🏃‍♂️💨",
@@ -12,15 +14,14 @@ const UserInsight = () => {
   const [commentIndex, setCommentIndex] = useState(0);
   const [insightComment, setInsightComment] = useState<string[] | null>(null);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (DummyInsightComment === null)
-        setInsightComment(["정보가 부족하네요. 더 달려보세요!"]);
-      setInsightComment(DummyInsightComment);
-    };
-    fetchData();
+    setInsightComment(DummyInsightComment);
   }, []);
+
   useEffect(() => {
+    if (!insightComment?.length) return;
+
     const interval = setInterval(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -28,8 +29,7 @@ const UserInsight = () => {
         useNativeDriver: true,
       }).start(() => {
         setCommentIndex(
-          (prevIndex) =>
-            (prevIndex + 1) % (insightComment ? insightComment.length : 1),
+          (prevIndex) => (prevIndex + 1) % insightComment.length,
         );
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -38,6 +38,7 @@ const UserInsight = () => {
         }).start();
       });
     }, 5000);
+
     return () => clearInterval(interval);
   }, [fadeAnim, insightComment]);
 
@@ -46,9 +47,19 @@ const UserInsight = () => {
     : "로딩 중...";
 
   return (
-    <View className="m-4 rounded-lg bg-white p-4 shadow">
+    <View className="mb-4 rounded-3xl bg-white px-5 py-5 shadow-sm">
+      <View className="mb-3 flex-row items-center gap-2">
+        <View className="rounded-full bg-[#FFF0F0] p-2">
+          <Ionicons name="sparkles" size={16} color="#F25857" />
+        </View>
+        <Text className="text-sm font-semibold text-gray-500">
+          이번 주 인사이트
+        </Text>
+      </View>
       <Animated.View style={{ opacity: fadeAnim }}>
-        <Text className="text-center">{randomComment}</Text>
+        <Text className="text-center text-base leading-6 text-[#0D0F1B]">
+          {randomComment}
+        </Text>
       </Animated.View>
     </View>
   );

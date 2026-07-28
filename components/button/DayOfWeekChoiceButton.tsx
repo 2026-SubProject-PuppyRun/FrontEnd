@@ -1,5 +1,5 @@
-import { Text } from "react-native";
 import { Pressable } from "../ui/pressable";
+import { Text } from "../ui/text";
 
 interface DayOfWeekChoiceButtonProps {
   dayOfWeek: string;
@@ -12,10 +12,20 @@ const DayOfWeekChoiceButton = ({
   selectedDayOfWeek,
   handleSelectDayOfWeek,
 }: DayOfWeekChoiceButtonProps) => {
+  const isSelected = dayOfWeek === selectedDayOfWeek;
+
   return (
-    <Pressable onPress={() => handleSelectDayOfWeek(dayOfWeek)}>
+    <Pressable
+      onPress={() => handleSelectDayOfWeek(dayOfWeek)}
+      className={`h-10 w-10 items-center justify-center rounded-full ${
+        isSelected ? "bg-[#F25857]" : "bg-[#F7F7F7]"
+      }`}
+      style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+    >
       <Text
-        className={`${dayOfWeek === selectedDayOfWeek ? "font-bold text-blue-500" : "text-gray-500"}`}
+        className={`text-sm font-semibold ${
+          isSelected ? "text-white" : "text-gray-500"
+        }`}
       >
         {dayOfWeek}
       </Text>

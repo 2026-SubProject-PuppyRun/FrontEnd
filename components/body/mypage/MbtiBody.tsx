@@ -1,9 +1,11 @@
 import MbtiResultCard from "@/components/card/MbtiResultCard";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 import { Text } from "@/components/ui/text";
 import { mbtiQuestionData } from "@/constants/mbtiQuestionData";
 import { getResultMbti } from "@/util/mbti";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { Dimensions, View } from "react-native";
+import { Dimensions, Pressable, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
@@ -14,17 +16,23 @@ import Animated, {
 } from "react-native-reanimated";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3; // 화면의 30%를 넘기면 스와이프 처리
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 
-const MbtiBody = () => {
+interface MbtiBodyProps {
+  petId: string;
+  petName: string;
+}
+
+const MbtiBody = ({ petId, petName }: MbtiBodyProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
 
-  // 현재 카드의 X, Y 이동 값
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
 
-  // 스와이프 시 데이터 처리 (JS Thread에서 실행)
+  const totalQuestions = mbtiQuestionData.length;
+  const progressValue = Math.round((currentIndex / totalQuestions) * 100);
+
   const handleSwipe = (direction: "LEFT" | "RIGHT") => {
     const currentQ = mbtiQuestionData[currentIndex];
     const pickedValue =
@@ -39,84 +47,120 @@ const MbtiBody = () => {
 
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
-      // 드래그 중 이동 거리 반영
       translateX.value = event.translationX;
       translateY.value = event.translationY;
     })
     .onEnd(() => {
-      // 드래그가 끝났을 때 임계값 체크
       if (translateX.value > SWIPE_THRESHOLD) {
-        // 오른쪽 스와이프 완료
         translateX.value = withSpring(SCREEN_WIDTH * 1.5, {}, () => {
           runOnJS(handleSwipe)("RIGHT");
         });
       } else if (translateX.value < -SWIPE_THRESHOLD) {
-        // 왼쪽 스와이프 완료
         translateX.value = withSpring(-SCREEN_WIDTH * 1.5, {}, () => {
           runOnJS(handleSwipe)("LEFT");
         });
       } else {
-        // 제자리로 복귀
         translateX.value = withSpring(0);
         translateY.value = withSpring(0);
       }
     });
 
-  // 애니메이션 스타일
   const cardStyle = useAnimatedStyle(() => {
     const rotate = interpolate(
       translateX.value,
       [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-      [-10, 0, 10],
+      [-8, 0, 8],
     );
     return {
       transform: [
         { translateX: translateX.value },
         { translateY: translateY.value },
         { rotate: `${rotate}deg` },
-        { scale: currentIndex >= mbtiQuestionData.length ? 0.8 : 1 },
-        { perspective: 1500 },
       ],
-      opacity: withSpring(currentIndex >= mbtiQuestionData.length ? 0 : 1),
     };
   });
 
-  // 모든 검사가 끝났을 경우
-  if (currentIndex >= mbtiQuestionData.length) {
+  if (currentIndex >= totalQuestions) {
     const resultMbti = getResultMbti(answers);
-    return <MbtiResultCard resultMbti={resultMbti} />;
+    return (
+      <MbtiResultCard
+        resultMbti={resultMbti}
+        petId={petId}
+        petName={petName}
+      />
+    );
   }
 
   const currentQuestion = mbtiQuestionData[currentIndex];
 
   return (
-    <View className="relative flex-1 items-center justify-center bg-gray-50 p-4">
+    <View className="flex-1 px-6 pb-8">
+      <View className="mb-5">
+        <View className="mb-2 flex-row items-center justify-between">
+          <Text className="text-sm font-semibold text-[#0D0F1B]">
+            {currentIndex + 1} / {totalQuestions}
+          </Text>
+          <Text className="text-sm text-gray-500">{progressValue}%</Text>
+        </View>
+        <Progress className="h-2 w-full" size="sm" value={progressValue}>
+          <ProgressFilledTrack className="rounded-full bg-[#F25857]" />
+        </Progress>
+      </View>
+
       <GestureDetector gesture={panGesture}>
         <Animated.View
-          className="absolute h-[60%] w-full items-center justify-center rounded-2xl border border-gray-200 bg-white p-6 shadow-md"
+          className="min-h-[420px] rounded-3xl bg-white p-6 shadow-sm"
           style={cardStyle}
         >
-          <View className="mb-8 items-center">
-            <Text className="mb-2 font-bold text-gray-400">
-              {currentIndex + 1} / {mbtiQuestionData.length}
-            </Text>
-            <Text size="2xl" className="text-center font-bold text-black">
-              {currentQuestion.question}
-            </Text>
+          <View className="mb-2 items-center">
+            <View className="rounded-full bg-[#FFF0F0] px-3 py-1">
+              <Text className="text-xs font-semibold text-[#F25857]">
+                Q{currentIndex + 1}
+              </Text>
+            </View>
           </View>
 
-          <View className="flex w-full flex-col gap-4 space-y-4">
-            <View className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-              <Text className="text-center text-blue-700">
-                👈 왼쪽으로 밀기 {"\n"} {currentQuestion.answerA.text}
+          <Text className="mb-8 text-center text-lg font-bold leading-7 text-[#0D0F1B]">
+            {currentQuestion.question}
+          </Text>
+
+          <View className="gap-3">
+            <Pressable
+              onPress={() => handleSwipe("LEFT")}
+              className="rounded-2xl border border-[#F25857]/25 bg-[#FFF0F0] px-4 py-4"
+              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+            >
+              <View className="mb-2 flex-row items-center gap-1">
+                <Ionicons name="arrow-back" size={14} color="#F25857" />
+                <Text className="text-xs font-semibold text-[#F25857]">
+                  왼쪽 선택
+                </Text>
+              </View>
+              <Text className="text-center text-sm leading-5 text-[#0D0F1B]">
+                {currentQuestion.answerA.text}
               </Text>
-            </View>
-            <View className="rounded-xl border border-orange-200 bg-orange-50 p-4">
-              <Text className="text-center text-orange-700">
-                오른쪽으로 밀기 👉 {"\n"} {currentQuestion.answerB.text}
+            </Pressable>
+
+            <Pressable
+              onPress={() => handleSwipe("RIGHT")}
+              className="rounded-2xl border border-outline-200 bg-[#F7F7F7] px-4 py-4"
+              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+            >
+              <View className="mb-2 flex-row items-center justify-end gap-1">
+                <Text className="text-xs font-semibold text-gray-500">
+                  오른쪽 선택
+                </Text>
+                <Ionicons name="arrow-forward" size={14} color="#6B7280" />
+              </View>
+              <Text className="text-center text-sm leading-5 text-[#0D0F1B]">
+                {currentQuestion.answerB.text}
               </Text>
-            </View>
+            </Pressable>
           </View>
+
+          <Text className="mt-6 text-center text-xs text-gray-400">
+            카드를 스와이프하거나 답변을 탭해주세요
+          </Text>
         </Animated.View>
       </GestureDetector>
     </View>

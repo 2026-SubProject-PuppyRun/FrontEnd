@@ -1,20 +1,17 @@
+import { Text } from "@/components/ui/text";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { RadarChart } from "react-native-gifted-charts";
-
-//1. 총 이동 거리
-// 2. 평균 이동 속도
-// 3. 산책 빈도 (일수)
-// 4. 휴식 시간
 
 interface ChartData {
   metric_code: string;
   label: string;
   this_week_value: number;
   last_week_value: number;
-  max_score: number; // 최대 점수 100점
+  max_score: number;
 }
+
 const dummyData: ChartData[] = [
   {
     metric_code: "DISTANCE",
@@ -62,6 +59,7 @@ const StarChart = () => {
         setThisWeekNormalizedData([]);
         setChartData(dummyData);
       };
+
       const normalizeData = (data: ChartData[]) => {
         const thisWeekData = data.map(
           (item) => (item.this_week_value / item.max_score) * 100,
@@ -72,6 +70,7 @@ const StarChart = () => {
         setThisWeekNormalizedData(thisWeekData);
         setLastWeekNormalizedData(lastWeekData);
       };
+
       fetchChartData();
       if (chartData.length > 0) {
         normalizeData(chartData);
@@ -80,25 +79,25 @@ const StarChart = () => {
   );
 
   return (
-    <View className=" mx-4 mt-4 rounded-lg bg-white p-4">
+    <View className="rounded-3xl bg-white p-5 shadow-sm">
       <View className="relative items-center justify-center">
         {lastWeekNormalizedData.length > 0 && (
           <RadarChart
             data={lastWeekNormalizedData}
             labels={["이동 거리", "평균 속도", "산책 빈도", "휴식 시간"]}
             maxValue={100}
-            chartSize={300}
+            chartSize={280}
             noOfSections={5}
             polygonConfig={{
-              stroke: "#36A2EB",
+              stroke: "#FFB3B2",
               strokeWidth: 2,
-              fill: "rgba(54, 162, 235, 0.3)",
+              fill: "rgba(255, 179, 178, 0.35)",
             }}
             gridConfig={{
               opacity: 0,
             }}
             asterLinesConfig={{
-              stroke: "#36A2EB",
+              stroke: "#E5E7EB",
             }}
             circular
           />
@@ -110,46 +109,27 @@ const StarChart = () => {
               data={thisWeekNormalizedData}
               labels={["", "", "", ""]}
               maxValue={100}
-              chartSize={300}
+              chartSize={280}
               hideGrid
               polygonConfig={{
-                stroke: "#FF6384",
+                stroke: "#F25857",
                 strokeWidth: 2.5,
-                fill: "rgba(255, 99, 132, 0.5)",
+                fill: "rgba(242, 88, 87, 0.35)",
               }}
               circular
             />
           </View>
         )}
-        {[20, 40, 60, 80, 100].map((val, idx) => {
-          const distance = 24 * (idx + 1);
-          return (
-            <Text
-              key={val}
-              style={{
-                position: "absolute",
-                color: "#9CA3AF",
-                fontSize: 10,
-                bottom: "50%",
-                marginBottom: distance, // 위로 띄우기 (텍스트 세로 중앙 정렬 보정값 -6px)
-                left: "50%",
-                marginLeft: 4,
-              }}
-              pointerEvents="none"
-            >
-              {val}
-            </Text>
-          );
-        })}
       </View>
-      <View className=" flex-col items-end gap-2 pr-2">
+
+      <View className="mt-2 flex-row justify-end gap-4 pr-1">
         <View className="flex-row items-center">
-          <View className="mr-2 h-4 w-4 rounded-full bg-[#36A2EB]" />
-          <Text>지난 주</Text>
+          <View className="mr-2 h-3.5 w-3.5 rounded-full bg-[#FFB3B2]" />
+          <Text className="text-sm text-gray-500">지난 주</Text>
         </View>
         <View className="flex-row items-center">
-          <View className="mr-2 h-4 w-4 rounded-full bg-[#FF6384]" />
-          <Text>이번 주</Text>
+          <View className="mr-2 h-3.5 w-3.5 rounded-full bg-[#F25857]" />
+          <Text className="text-sm text-gray-500">이번 주</Text>
         </View>
       </View>
     </View>

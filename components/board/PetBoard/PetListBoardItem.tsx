@@ -1,13 +1,23 @@
 import { Pressable } from "@/components/ui/pressable";
+import { Text } from "@/components/ui/text";
 import { Pet } from "@/store/usePetStore";
-import { getBreedName } from "@/util/pet";
+import { getPetBasicInfo } from "@/util/pet";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 type PetListBoardItemProps = Pick<
   Pet,
-  "petId" | "name" | "breedCode" | "birthYear" | "profileImageUrl"
+  | "petId"
+  | "name"
+  | "breedCode"
+  | "birthYear"
+  | "profileImageUrl"
+  | "color"
+  | "weight"
+  | "gender"
+  | "isNeutered"
 >;
 
 const PetListBoardItem = ({
@@ -16,43 +26,61 @@ const PetListBoardItem = ({
   petId,
   breedCode,
   birthYear,
+  color,
+  weight,
+  gender,
+  isNeutered,
 }: PetListBoardItemProps) => {
-  const petBreed = getBreedName(breedCode);
   const router = useRouter();
-  const dateFormat = (date: string) => {
-    return new Date(date).toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  };
+  const info = getPetBasicInfo({
+    petId,
+    name,
+    breedCode,
+    birthYear,
+    profileImageUrl,
+    color,
+    weight,
+    gender,
+    isNeutered,
+    badgeCode: "",
+  });
+
   return (
     <Pressable
-      className="m-2 flex-row items-center gap-4 rounded-xl border border-gray-200 bg-white px-4 py-6 shadow-md"
       onPress={() => router.push(`/care/pets/${petId}/diet`)}
+      className="mb-3 flex-row items-center gap-4 rounded-3xl bg-white px-5 py-4 shadow-sm"
+      style={({ pressed }) => (pressed ? { opacity: 0.92 } : undefined)}
     >
-      <View className="h-32 w-32 overflow-hidden rounded-full">
-        <Image
-          source={{ uri: profileImageUrl || "" }}
-          style={{
-            flex: 1,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "#f1f5f9",
-          }}
-          contentFit="fill"
-          transition={200}
-        />
+      <View
+        className="h-16 w-16 overflow-hidden rounded-full border-[3px] bg-[#F1F5F9]"
+        style={{ borderColor: info.color }}
+      >
+        {info.profileImageUrl ? (
+          <Image
+            source={{ uri: info.profileImageUrl }}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
+          <View
+            className="h-full w-full items-center justify-center"
+            style={{ backgroundColor: info.color }}
+          >
+            <Ionicons name="paw" size={24} color="#fff" />
+          </View>
+        )}
       </View>
-      <View className="flex-1 flex-col items-center justify-center ">
-        <View className="flex-row items-center gap-2">
-          <Text className="text-lg font-bold">{name}</Text>
-          <Text className="text-sm text-gray-500">{petBreed}</Text>
-        </View>
-        <Text className="text-sm text-gray-500">
-          {dateFormat(birthYear || "")}
+
+      <View className="flex-1">
+        <Text className="text-base font-bold text-[#0D0F1B]">{info.name}</Text>
+        <Text className="mt-0.5 text-sm text-gray-500">{info.breedName}</Text>
+        <Text className="mt-1 text-xs text-gray-400">
+          {info.birthLabel} · {info.weightLabel}
         </Text>
       </View>
+
+      <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
     </Pressable>
   );
 };

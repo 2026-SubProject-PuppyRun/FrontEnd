@@ -47,6 +47,9 @@ const MonthlyChart = () => {
         <LineChart
           scrollRef={ref}
           data={data}
+          color="#F25857"
+          thickness={3}
+          dataPointsColor="#F25857"
           hideRules
           isAnimated
           showFractionalValues

@@ -119,8 +119,9 @@ const WeeklyChart = () => {
         <BarChart
           data={data}
           onPress={handleBarPress}
-          barBorderRadius={4}
+          barBorderRadius={6}
           barWidth={22}
+          frontColor="#F25857"
           hideRules
           isAnimated
           showFractionalValues
@@ -131,19 +132,22 @@ const WeeklyChart = () => {
         />
       )}
       {dayData && (
-        <View className="mt-8 flex-row flex-wrap justify-center gap-2">
+        <View className="mt-6 flex-row flex-wrap justify-center gap-2">
           {dayData.map((puppy, index) => (
             <View
               key={index}
-              className="min-w-[150px] items-center rounded-lg bg-gray-200 p-2"
+              className="min-w-[148px] items-center rounded-2xl bg-[#F7F7F7] p-3"
             >
               <Image
                 source={{ uri: puppy.img }}
-                style={{ width: 60, height: 60, borderRadius: 30 }}
+                style={{ width: 56, height: 56, borderRadius: 28 }}
               />
-              <Text className="mt-2 text-sm">페이스: {puppy.pace} min/km</Text>
-              <Text className="text-sm">거리: {puppy.distance} km</Text>
-              <Text className="text-sm">시간: {puppy.time} min</Text>
+              <Text className="mt-2 text-xs font-semibold text-[#0D0F1B]">
+                페이스 {puppy.pace} min/km
+              </Text>
+              <Text className="text-xs text-gray-500">
+                {puppy.distance} km · {puppy.time} min
+              </Text>
             </View>
           ))}
         </View>

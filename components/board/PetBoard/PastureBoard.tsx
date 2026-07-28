@@ -7,6 +7,7 @@ import { WanderBounds } from "@/hooks/use-pet-wander";
 import { usePetStore } from "@/store/usePetStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { LayoutChangeEvent, Text, View } from "react-native";
 
@@ -179,6 +180,7 @@ const PastureScenery = () => (
 );
 
 const PastureBoard = () => {
+  const router = useRouter();
   const petList = usePetStore((state) => state.petList);
   const totalPetCount = usePetStore((state) => state.totalPetCount);
   const [bounds, setBounds] = useState<WanderBounds>({ width: 0, height: 0 });
@@ -277,9 +279,7 @@ const PastureBoard = () => {
                 bounds={bounds}
                 name={pet.name}
                 accentColor={pet.color}
-                onPress={() => {
-                  // TODO: 펫 상세 / 케어 화면 이동
-                }}
+                onPress={() => router.push(`/care/pets/${pet.petId}/diet`)}
               />
             ))}
         </View>

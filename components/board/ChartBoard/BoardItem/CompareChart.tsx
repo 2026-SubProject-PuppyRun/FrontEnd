@@ -1,5 +1,6 @@
+import { Text } from "@/components/ui/text";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
 interface ChartData {
@@ -9,14 +10,13 @@ interface ChartData {
 }
 
 const dummyData = [
-  { value: 40, label: "PuppyA", color: "#FF6384" },
-  { value: 30, label: "PuppyB", color: "#36A2EB" },
-  { value: 20, label: "PuppyC", color: "#FFCE56" },
+  { value: 40, label: "PuppyA", color: "#F25857" },
+  { value: 30, label: "PuppyB", color: "#FFB3B2" },
+  { value: 20, label: "PuppyC", color: "#0D0F1B" },
 ];
 
 const CompareChart = () => {
   const [data, setData] = useState<ChartData[] | null>(null);
-
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   const totalValue = data ? data.reduce((sum, item) => sum + item.value, 0) : 0;
@@ -30,17 +30,17 @@ const CompareChart = () => {
   const selectedItem = data[selectedIndex];
 
   return (
-    <View className="mx-4 flex-row items-center justify-center rounded-lg bg-white p-4">
+    <View className="flex-row items-center justify-center rounded-3xl bg-white p-5 shadow-sm">
       <PieChart
         data={data}
         donut
         sectionAutoFocus
-        radius={90}
-        innerRadius={60}
-        innerCircleColor={"#ffffff"}
+        radius={88}
+        innerRadius={58}
+        innerCircleColor="#FFFFFF"
         focusOnPress
         toggleFocusOnPress={false}
-        onPress={(item: ChartData, index: number) => {
+        onPress={(_item: ChartData, index: number) => {
           setSelectedIndex(index);
         }}
         selectedIndex={selectedIndex}
@@ -51,27 +51,27 @@ const CompareChart = () => {
           );
           return (
             <View className="items-center justify-center">
-              <Text className="text-lg font-bold text-black">
+              <Text className="text-xl font-bold text-[#0D0F1B]">
                 {percentage}%
               </Text>
-              <Text className="text-black">{selectedItem.label}</Text>
+              <Text className="text-sm text-gray-500">{selectedItem.label}</Text>
             </View>
           );
         }}
       />
-      <View className="ml-4 gap-2 space-y-2">
+      <View className="ml-4 gap-3">
         {data.map((item, index) => (
           <View key={index} className="flex-row items-center">
             <View
               style={{ backgroundColor: item.color }}
-              className="mr-2 h-4 w-4 rounded-full"
+              className="mr-2.5 h-3.5 w-3.5 rounded-full"
             />
             <Text
-              className={
+              className={`text-sm ${
                 selectedIndex === index
-                  ? "font-bold text-black"
-                  : "text-gray-600"
-              }
+                  ? "font-bold text-[#0D0F1B]"
+                  : "text-gray-500"
+              }`}
             >
               {item.label}
             </Text>

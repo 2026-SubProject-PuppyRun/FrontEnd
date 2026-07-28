@@ -1,11 +1,10 @@
+import FeedBoardItem from "@/components/board/MyPageBoard/FeedBoardItem";
+import MyPageProfileCard from "@/components/board/MyPageBoard/MyPageProfileCard";
+import UserBoard from "@/components/board/MyPageBoard/UserBoard";
+import { Text } from "@/components/ui/text";
 import { FlashList } from "@shopify/flash-list";
 import { useState } from "react";
 import { View } from "react-native";
-import FeedBoardItem from "../../board/MyPageBoard/FeedBoardItem";
-import UserBoard from "../../board/MyPageBoard/UserBoard";
-import { Avatar, AvatarImage } from "../../ui/avatar";
-import { HStack } from "../../ui/hstack";
-import { Text } from "../../ui/text";
 
 const dummyFeedList = [
   {
@@ -77,32 +76,35 @@ const MyPageBody = () => {
   const [feedList, setFeedList] = useState(dummyFeedList);
 
   const loadFeedList = async () => {
-    const fetchLoadFeedList = () => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(loadMoreDummyFeedList);
-        }, 1000);
+    const fetchLoadFeedList = () =>
+      new Promise((resolve) => {
+        setTimeout(() => resolve(loadMoreDummyFeedList), 1000);
       });
-    };
 
     const newFeedList = await fetchLoadFeedList();
-    setFeedList((prevFeedList) => [...prevFeedList, ...(newFeedList as any)]);
+    setFeedList((prevFeedList) => [
+      ...prevFeedList,
+      ...(newFeedList as typeof dummyFeedList),
+    ]);
   };
+
   const ListHeader = (
     <>
-      <HStack space="md" className=" m-4 items-center gap-11">
-        <Avatar size="xl">
-          <AvatarImage source={{ uri: "https://i.ifh.cc/jgbhah.jpg" }} />
-        </Avatar>
-        <Text size="2xl" className="semi-bold text-black">
-          강대훈
-        </Text>
-      </HStack>
+      <MyPageProfileCard />
       <UserBoard />
+      <View className="mx-2 mb-3 mt-1">
+        <Text className="text-base font-semibold text-[#0D0F1B]">
+          산책 기록
+        </Text>
+        <Text className="mt-0.5 text-sm text-gray-500">
+          최근 산책 인증샷을 모아봤어요
+        </Text>
+      </View>
     </>
   );
+
   return (
-    <View className="flex-1 ">
+    <View className="flex-1">
       <FlashList
         ListHeaderComponent={ListHeader}
         data={feedList}
@@ -110,6 +112,7 @@ const MyPageBody = () => {
         onEndReached={loadFeedList}
         onEndReachedThreshold={0.5}
         numColumns={3}
+        contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 24 }}
       />
     </View>
   );

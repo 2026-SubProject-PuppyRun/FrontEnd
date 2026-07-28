@@ -1,11 +1,14 @@
+import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { BREED_DATA } from "@/constants/breedData";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
 import { getBreedDefaultColor, getBreedName } from "@/util/pet";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
-import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { ReactNode, useMemo, useState } from "react";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { runOnJS } from "react-native-reanimated";
 import ColorPicker, {
@@ -22,7 +25,6 @@ import {
   ActionsheetItem,
   ActionsheetItemText,
 } from "../ui/actionsheet";
-import { Button, ButtonText } from "../ui/button";
 import {
   Checkbox,
   CheckboxIcon,
@@ -65,6 +67,21 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 
+const INPUT_TEXT_COLOR = { color: "#0D0F1B" } as const;
+
+const FormSection = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) => (
+  <View className="mb-4 rounded-3xl bg-white px-5 py-4 shadow-sm">
+    <Text className="mb-3 text-sm font-semibold text-gray-500">{title}</Text>
+    <View className="gap-4">{children}</View>
+  </View>
+);
+
 interface PetFormProps {
   initialData?: Pet;
   onSubmit: (data: Partial<Pet>) => void;
@@ -99,6 +116,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
 
   const router = useRouter();
   const { showToast } = useCustomToast();
+  const submitLabel = initialData ? "저장하기" : "등록하기";
 
   const handleClose = () => setShowActionsheet(false);
 
@@ -109,7 +127,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
       return;
     }
 
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
@@ -128,7 +146,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
       return;
     }
 
-    let result = await ImagePicker.launchCameraAsync({
+    const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
@@ -179,6 +197,17 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
     router.replace("/mypage/pets");
   };
 
+  const birthLabel =
+    birthYear === null
+      ? ""
+      : birthYear
+        ? new Date(birthYear).toLocaleDateString("ko-KR", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })
+        : "날짜를 선택하세요";
+
   useMemo(() => {
     if (breedCode) {
       const breed = BREED_DATA.find((b) => b.code === breedCode);
@@ -187,276 +216,311 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
       }
     }
   }, [breedCode]);
+
   return (
-    <ScrollView className="relative m-4 flex-1 rounded-lg bg-gray-200 p-4">
-      <View className="mb-6 items-center">
-        <Pressable onPress={() => setShowActionsheet(true)}>
-          {profileImageUrl ? (
-            <Image
-              source={{ uri: profileImageUrl }}
-              className="h-32 w-32 rounded-full"
-            />
-          ) : (
-            <View className="h-32 w-32 items-center justify-center rounded-full bg-gray-300">
-              <Text className="text-s text-gray-500">사진 추가</Text>
+    <>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="mb-4 items-center rounded-3xl bg-white px-5 py-6 shadow-sm">
+          <Text className="mb-4 text-sm font-semibold text-gray-500">
+            프로필 사진
+          </Text>
+          <Pressable onPress={() => setShowActionsheet(true)}>
+            <View
+              className="h-28 w-28 overflow-hidden rounded-full border-4 bg-[#F1F5F9]"
+              style={{
+                borderColor:
+                  color !== "#F2F2F2" ? color : "rgba(242, 88, 87, 0.35)",
+              }}
+            >
+              {profileImageUrl ? (
+                <Image
+                  source={{ uri: profileImageUrl }}
+                  style={{ width: "100%", height: "100%" }}
+                  contentFit="cover"
+                  transition={200}
+                />
+              ) : (
+                <View className="h-full w-full items-center justify-center">
+                  <Ionicons name="camera-outline" size={32} color="#9CA3AF" />
+                </View>
+              )}
             </View>
-          )}
-        </Pressable>
-      </View>
+          </Pressable>
+          <Text className="mt-3 text-sm text-gray-500">
+            탭하여 사진을 추가해주세요
+          </Text>
+        </View>
 
-      <View className="gap-2">
-        {/* 1. 이름 컴포넌트 */}
-        <FormControl isInvalid={hasSubmitted && !name.trim()}>
-          <FormControlLabelText className="text-black">
-            이름
-          </FormControlLabelText>
-          <Input size="md" variant="underlined">
-            <InputField
-              value={name}
-              onChange={(e) => setName(e.nativeEvent.text)}
-              className=" text-black"
-            />
-          </Input>
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>이름을 입력해주세요.</FormControlErrorText>
-          </FormControlError>
-        </FormControl>
-
-        {/* 2. 성별 (RadioGroup) */}
-        <FormControl isInvalid={hasSubmitted && !gender}>
-          <FormControlLabelText className="text-black">
-            성별
-          </FormControlLabelText>
-          <RadioGroup
-            value={gender}
-            onChange={(value) => setGender(value as any)}
-          >
-            <HStack space="md" className="my-2">
-              <Radio value="M" size="md">
-                <RadioIndicator>
-                  <RadioIcon as={CircleIcon} />
-                </RadioIndicator>
-                <RadioLabel className="text-black data-[checked=true]:text-primary-600">
-                  수컷
-                </RadioLabel>
-              </Radio>
-
-              <Radio value="F" size="md">
-                <RadioIndicator>
-                  <RadioIcon as={CircleIcon} />
-                </RadioIndicator>
-                <RadioLabel className="text-black data-[checked=true]:text-primary-600">
-                  암컷
-                </RadioLabel>
-              </Radio>
-            </HStack>
-          </RadioGroup>
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>성별을 선택해주세요.</FormControlErrorText>
-          </FormControlError>
-        </FormControl>
-
-        {/* 3. 생년월일 컴포넌트 */}
-        <FormControl isInvalid={hasSubmitted && birthYear === ""}>
-          <FormControlLabelText className="text-black">
-            생년월일
-          </FormControlLabelText>
-          <HStack className="items-center gap-4">
-            <Pressable
-              className="flex-1"
-              onPress={() => setDateModalOpen(true)}
-              disabled={birthYear === null}
-            >
-              <View
-                className={`border-b pb-2 pt-3 ${
-                  birthYear === null ? "border-gray-400" : "border-gray-500"
-                }`}
-              >
-                <Text
-                  className={`text-base ${
-                    birthYear === null ? "text-gray-400" : "text-black"
-                  }`}
-                >
-                  {birthYear === null ? "" : birthYear || "날짜를 선택하세요"}
-                </Text>
-              </View>
-            </Pressable>
-
-            <DatePicker
-              modal
-              open={dateModalOpen}
-              date={birthYear ? new Date(birthYear) : new Date()}
-              mode="date"
-              locale="ko"
-              title="생년월일 선택"
-              confirmText="확인"
-              cancelText="취소"
-              onConfirm={(date) => {
-                setDateModalOpen(false);
-                setBirthYear(date.toISOString().split("T")[0]);
-              }}
-              onCancel={() => {
-                setDateModalOpen(false);
-              }}
-            />
-
-            <Checkbox
-              size="md"
-              value="unknown"
-              isChecked={birthYear === null}
-              onChange={(isChecked) => {
-                if (isChecked) {
-                  setBirthYear(null);
-                } else {
-                  setBirthYear("");
-                }
-              }}
-            >
-              <CheckboxIndicator>
-                <CheckboxIcon as={CheckIcon} />
-              </CheckboxIndicator>
-              <CheckboxLabel className="text-black ">모름</CheckboxLabel>
-            </Checkbox>
-          </HStack>
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>
-              생년월일을 선택하거나 모름을 체크해주세요.
-            </FormControlErrorText>
-          </FormControlError>
-        </FormControl>
-
-        {/* 4. 체중 */}
-        <FormControl isInvalid={hasSubmitted && !weight}>
-          <FormControlLabelText className="text-black">
-            체중(kg)
-          </FormControlLabelText>
-          <Input size="md" variant="underlined">
-            <InputField
-              className="text-black"
-              value={weight}
-              keyboardType="decimal-pad"
-              onChange={(e) => {
-                const text = e.nativeEvent.text.replace(/[^0-9.]/g, "");
-                setWeight(text);
-              }}
-            />
-          </Input>
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>체중을 입력해주세요.</FormControlErrorText>
-          </FormControlError>
-        </FormControl>
-
-        {/* 5. 견종 */}
-        <FormControl isInvalid={hasSubmitted && !breedCode}>
-          <FormControlLabelText className="text-black">
-            견종
-          </FormControlLabelText>
-          <Select selectedValue={breedCode} onValueChange={setBreedCode}>
-            <SelectTrigger
-              variant="underlined"
-              size="md"
-              className=" justify-between"
-            >
-              <SelectInput
-                placeholder="종을 선택하세요"
-                className="text-black"
+        <FormSection title="기본 정보">
+          <FormControl isInvalid={hasSubmitted && !name.trim()}>
+            <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
+              이름
+            </FormControlLabelText>
+            <Input size="md" variant="underlined" className="border-outline-200">
+              <InputField
+                placeholder="이름을 입력해주세요"
+                placeholderTextColor="#9CA3AF"
+                value={name}
+                onChange={(e) => setName(e.nativeEvent.text)}
+                style={INPUT_TEXT_COLOR}
               />
-              <SelectIcon className="mr-3" as={ChevronDownIcon} />
-            </SelectTrigger>
+            </Input>
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText>이름을 입력해주세요.</FormControlErrorText>
+            </FormControlError>
+          </FormControl>
 
-            <SelectPortal>
-              <SelectBackdrop />
-              <SelectContent className="max-h-[60vh]">
-                <SelectDragIndicatorWrapper>
-                  <SelectDragIndicator />
-                </SelectDragIndicatorWrapper>
+          <FormControl isInvalid={hasSubmitted && !gender}>
+            <FormControlLabelText className="mb-2 text-sm font-semibold text-gray-500">
+              성별
+            </FormControlLabelText>
+            <RadioGroup
+              value={gender}
+              onChange={(value) => setGender(value as "F" | "M")}
+            >
+              <HStack space="md">
+                <Radio value="M" size="md">
+                  <RadioIndicator>
+                    <RadioIcon as={CircleIcon} />
+                  </RadioIndicator>
+                  <RadioLabel className="text-[#0D0F1B] data-[checked=true]:text-primary-500">
+                    수컷
+                  </RadioLabel>
+                </Radio>
+                <Radio value="F" size="md">
+                  <RadioIndicator>
+                    <RadioIcon as={CircleIcon} />
+                  </RadioIndicator>
+                  <RadioLabel className="text-[#0D0F1B] data-[checked=true]:text-primary-500">
+                    암컷
+                  </RadioLabel>
+                </Radio>
+              </HStack>
+            </RadioGroup>
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText>성별을 선택해주세요.</FormControlErrorText>
+            </FormControlError>
+          </FormControl>
 
-                <ScrollView className="w-full">
-                  {BREED_DATA.map((breed) => (
-                    <SelectItem
-                      key={breed.code}
-                      label={breed.name}
-                      value={breed.code}
-                    />
-                  ))}
-                </ScrollView>
-              </SelectContent>
-            </SelectPortal>
-          </Select>
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>견종을 선택해주세요.</FormControlErrorText>
-          </FormControlError>
-        </FormControl>
+          <FormControl isInvalid={hasSubmitted && birthYear === ""}>
+            <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
+              생년월일
+            </FormControlLabelText>
+            <HStack className="items-center gap-3">
+              <Pressable
+                className="flex-1"
+                onPress={() => setDateModalOpen(true)}
+                disabled={birthYear === null}
+              >
+                <View className="border-b border-outline-200 pb-2 pt-2">
+                  <Text
+                    style={{
+                      color:
+                        birthYear === null || !birthYear
+                          ? "#9CA3AF"
+                          : "#0D0F1B",
+                    }}
+                    className="text-base"
+                  >
+                    {birthYear === null ? "모름" : birthLabel}
+                  </Text>
+                </View>
+              </Pressable>
 
-        {/* 6. 색상 */}
-        <FormControl isInvalid={hasSubmitted && !color}>
-          <HStack space="md" className=" items-center">
-            <FormControlLabelText className="text-black">
-              색상
+              <DatePicker
+                modal
+                open={dateModalOpen}
+                date={birthYear ? new Date(birthYear) : new Date()}
+                mode="date"
+                locale="ko"
+                title="생년월일 선택"
+                confirmText="확인"
+                cancelText="취소"
+                onConfirm={(date) => {
+                  setDateModalOpen(false);
+                  setBirthYear(date.toISOString().split("T")[0]);
+                }}
+                onCancel={() => {
+                  setDateModalOpen(false);
+                }}
+              />
+
+              <Checkbox
+                size="md"
+                value="unknown"
+                isChecked={birthYear === null}
+                onChange={(isChecked) => {
+                  if (isChecked) {
+                    setBirthYear(null);
+                  } else {
+                    setBirthYear("");
+                  }
+                }}
+              >
+                <CheckboxIndicator>
+                  <CheckboxIcon as={CheckIcon} />
+                </CheckboxIndicator>
+                <CheckboxLabel className="text-[#0D0F1B]">모름</CheckboxLabel>
+              </Checkbox>
+            </HStack>
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText>
+                생년월일을 선택하거나 모름을 체크해주세요.
+              </FormControlErrorText>
+            </FormControlError>
+          </FormControl>
+
+          <FormControl isInvalid={hasSubmitted && !weight}>
+            <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
+              체중 (kg)
+            </FormControlLabelText>
+            <Input size="md" variant="underlined" className="border-outline-200">
+              <InputField
+                placeholder="예: 4.5"
+                placeholderTextColor="#9CA3AF"
+                value={weight}
+                keyboardType="decimal-pad"
+                style={INPUT_TEXT_COLOR}
+                onChange={(e) => {
+                  const text = e.nativeEvent.text.replace(/[^0-9.]/g, "");
+                  setWeight(text);
+                }}
+              />
+            </Input>
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText>체중을 입력해주세요.</FormControlErrorText>
+            </FormControlError>
+          </FormControl>
+        </FormSection>
+
+        <FormSection title="상세 정보">
+          <FormControl isInvalid={hasSubmitted && !breedCode}>
+            <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
+              견종
+            </FormControlLabelText>
+            <Select selectedValue={breedCode} onValueChange={setBreedCode}>
+              <SelectTrigger
+                variant="underlined"
+                size="md"
+                className="justify-between border-outline-200"
+              >
+                <SelectInput
+                  placeholder="종을 선택하세요"
+                  placeholderTextColor="#9CA3AF"
+                  style={INPUT_TEXT_COLOR}
+                />
+                <SelectIcon className="mr-3" as={ChevronDownIcon} />
+              </SelectTrigger>
+
+              <SelectPortal>
+                <SelectBackdrop />
+                <SelectContent className="max-h-[60vh]">
+                  <SelectDragIndicatorWrapper>
+                    <SelectDragIndicator />
+                  </SelectDragIndicatorWrapper>
+
+                  <ScrollView className="w-full">
+                    {BREED_DATA.map((breed) => (
+                      <SelectItem
+                        key={breed.code}
+                        label={breed.name}
+                        value={breed.code}
+                      />
+                    ))}
+                  </ScrollView>
+                </SelectContent>
+              </SelectPortal>
+            </Select>
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText>견종을 선택해주세요.</FormControlErrorText>
+            </FormControlError>
+          </FormControl>
+
+          <FormControl isInvalid={hasSubmitted && !color}>
+            <FormControlLabelText className="mb-2 text-sm font-semibold text-gray-500">
+              대표 색상
             </FormControlLabelText>
             <Pressable onPress={() => setColorModalOpen(true)}>
               <View
-                className="h-10 w-full items-center justify-center rounded-2xl border border-gray-400 px-2"
+                className="h-12 items-center justify-center rounded-2xl border border-outline-200 px-3"
                 style={{ backgroundColor: color }}
               >
                 <Text
-                  className={
-                    color === "#F2F2F2" ||
-                    color.toLowerCase() === "#fff" ||
-                    color.toLowerCase() === "#ffffff"
-                      ? "text-black"
-                      : "text-white drop-shadow-md"
-                  }
+                  className="text-sm font-medium"
+                  style={{
+                    color:
+                      color === "#F2F2F2" ||
+                      color.toLowerCase() === "#fff" ||
+                      color.toLowerCase() === "#ffffff"
+                        ? "#0D0F1B"
+                        : "#FFFFFF",
+                  }}
                 >
                   {color === "#F2F2F2" ? "색상 선택" : color}
                 </Text>
               </View>
             </Pressable>
-          </HStack>
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText>색상을 선택해주세요.</FormControlErrorText>
+            </FormControlError>
+          </FormControl>
 
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>색상을 선택해주세요.</FormControlErrorText>
-          </FormControlError>
-        </FormControl>
+          <FormControl isInvalid={hasSubmitted && isNeutered === undefined}>
+            <HStack className="items-center justify-between">
+              <FormControlLabelText className="text-sm font-semibold text-gray-500">
+                중성화 여부
+              </FormControlLabelText>
+              <Switch
+                trackColor={{ false: "#E5E7EB", true: "#F25857" }}
+                thumbColor="#FFFFFF"
+                ios_backgroundColor="#E5E7EB"
+                onValueChange={setIsNeutered}
+                value={isNeutered}
+              />
+            </HStack>
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText>
+                중성화 여부를 선택해주세요.
+              </FormControlErrorText>
+            </FormControlError>
+          </FormControl>
+        </FormSection>
 
-        {/* 7. 중성화 여부 */}
-        <FormControl isInvalid={hasSubmitted && isNeutered === undefined}>
-          <HStack space="md" className=" items-center">
-            <FormControlLabelText className="text-black">
-              중성화 여부
-            </FormControlLabelText>
-            <Switch
-              trackColor={{ false: "#d4d4d4", true: "#525252" }}
-              thumbColor="#fafafa"
-              ios_backgroundColor="#d4d4d4"
-              onValueChange={setIsNeutered}
-              value={isNeutered}
-            />
-          </HStack>
+        <RedButtonSurface
+          borderRadius={30}
+          backgroundColor="#F25857"
+          shadowPadding={8}
+          hostStyle={{ width: "100%" }}
+          style={{ width: "100%", height: 56 }}
+        >
+          <Pressable
+            onPress={handleSubmit}
+            className="h-full w-full items-center justify-center"
+            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          >
+            <Text className="text-base font-semibold text-white">
+              {submitLabel}
+            </Text>
+          </Pressable>
+        </RedButtonSurface>
+      </ScrollView>
 
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} />
-            <FormControlErrorText>
-              중성화 여부를 선택해주세요.
-            </FormControlErrorText>
-          </FormControlError>
-        </FormControl>
-      </View>
-
-      <Button className="absolute bottom-2 right-2" onPress={handleSubmit}>
-        <ButtonText className="text-lg font-bold text-white">저장</ButtonText>
-      </Button>
-
-      <Modal visible={colorModalOpen} transparent={true} animationType="slide">
+      <Modal visible={colorModalOpen} transparent animationType="slide">
         <View className="flex-1 justify-end bg-black/50">
           <View className="rounded-t-3xl bg-white p-6 pb-10">
-            <Text className="mb-6 text-center text-lg font-bold text-black">
+            <Text className="mb-6 text-center text-lg font-bold text-[#0D0F1B]">
               반려견 색상 선택
             </Text>
 
@@ -474,10 +538,11 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
             </ColorPicker>
 
             <Pressable
-              className="mt-6 items-center rounded-lg bg-blue-500 py-4"
+              className="mt-6 items-center rounded-2xl bg-[#F25857] py-4"
               onPress={() => setColorModalOpen(false)}
+              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
             >
-              <Text className="text-lg font-bold text-white">확인</Text>
+              <Text className="text-base font-semibold text-white">확인</Text>
             </Pressable>
           </View>
         </View>
@@ -507,7 +572,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
           </ActionsheetItem>
         </ActionsheetContent>
       </Actionsheet>
-    </ScrollView>
+    </>
   );
 };
 

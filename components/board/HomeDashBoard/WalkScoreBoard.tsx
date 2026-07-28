@@ -1,4 +1,5 @@
 import WalkScoreSkeleton from "@/components/skeleton/WalkScoreSkeleton";
+import { Text } from "@/components/ui/text";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useWeatherStore } from "@/store/useWeatherStore";
 import {
@@ -9,7 +10,21 @@ import { getDustLevel } from "@/util/weather";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+
+const HOURLY_FORECAST = [
+  { hour: "4시", temp: "5°" },
+  { hour: "5시", temp: "5°" },
+  { hour: "6시", temp: "4°" },
+  { hour: "7시", temp: "4°" },
+];
+
+const RAIN_FORECAST = [
+  { hour: "4시", chance: "10%", amount: "5mm" },
+  { hour: "5시", chance: "10%", amount: "5mm" },
+  { hour: "6시", chance: "20%", amount: "8mm" },
+  { hour: "7시", chance: "30%", amount: "10mm" },
+];
 
 const WalkScoreBoard = () => {
   const permission = useLocationPermission();
@@ -84,102 +99,100 @@ const WalkScoreBoard = () => {
 
   if (errorMsg) {
     return (
-      <View className="m-4 items-center justify-center rounded-lg bg-white p-8 shadow">
-        <Text className="text-center text-base text-gray-700">{errorMsg}</Text>
+      <View className="mx-6 items-center justify-center rounded-3xl bg-white px-6 py-10 shadow-sm">
+        <View className="mb-3 rounded-full bg-[#FFF0F0] p-3">
+          <Ionicons name="location-outline" size={24} color="#F25857" />
+        </View>
+        <Text className="text-center text-sm text-gray-600">{errorMsg}</Text>
       </View>
     );
   }
 
   return (
-    <View className="m-4 gap-6 pb-16">
-      <View className="rounded-lg bg-white p-4 shadow">
-        <View className="flex-row items-center gap-2 self-start rounded-2xl bg-primary-600 px-4 py-2">
-          <Ionicons name="location-sharp" size={20} color="white" />
-          <Text className="text-white">{address}</Text>
+    <View className="gap-4 px-6 pb-4">
+      <Text className="text-base font-semibold text-[#0D0F1B]">
+        산책 점수 · 날씨
+      </Text>
+
+      <View className="rounded-3xl bg-white p-5 shadow-sm">
+        <View className="flex-row items-center gap-2 self-start rounded-full bg-[#F25857] px-4 py-2">
+          <Ionicons name="location-sharp" size={16} color="white" />
+          <Text className="text-sm font-medium text-white">{address}</Text>
         </View>
       </View>
-      <View className="rounded-lg bg-white px-8 py-4 shadow">
+
+      <View className="rounded-3xl bg-white px-5 py-5 shadow-sm">
         <View className="flex-row items-center gap-4">
-          <Ionicons name="cloudy-sharp" size={60} color="#FFB3B2" />
+          <View className="rounded-2xl bg-[#FFF0F0] p-3">
+            <Ionicons name="cloudy-sharp" size={36} color="#F25857" />
+          </View>
           <View>
-            <Text>5° 구름많음</Text>
-            <Text>최고 17° 최저 3° </Text>
+            <Text className="text-2xl font-bold text-[#0D0F1B]">5°</Text>
+            <Text className="text-sm text-gray-500">구름 많음</Text>
+            <Text className="mt-0.5 text-xs text-gray-400">
+              최고 17° · 최저 3°
+            </Text>
           </View>
         </View>
-        <View className="flex-row justify-between px-4">
-          <View className="items-center gap-1 pt-4">
-            <Text>4시</Text>
-            <Ionicons name="cloudy-sharp" size={40} color="#FFB3B2" />
-            <Text>5°</Text>
-          </View>
-          <View className="items-center gap-1 pt-4">
-            <Text>5시</Text>
-            <Ionicons name="cloudy-sharp" size={40} color="#FFB3B2" />
-            <Text>5°</Text>
-          </View>
-          <View className="items-center gap-1 pt-4">
-            <Text>6시</Text>
-            <Ionicons name="cloudy-sharp" size={40} color="#FFB3B2" />
-            <Text>5°</Text>
-          </View>
-          <View className="items-center gap-1 pt-4">
-            <Text>7시</Text>
-            <Ionicons name="cloudy-sharp" size={40} color="#FFB3B2" />
-            <Text>5°</Text>
-          </View>
+
+        <View className="mt-5 flex-row justify-between">
+          {HOURLY_FORECAST.map((item) => (
+            <View key={item.hour} className="items-center gap-1">
+              <Text className="text-xs text-gray-500">{item.hour}</Text>
+              <Ionicons name="cloudy-sharp" size={28} color="#FFB3B2" />
+              <Text className="text-sm font-semibold text-[#0D0F1B]">
+                {item.temp}
+              </Text>
+            </View>
+          ))}
         </View>
       </View>
-      <View className="gap-4 rounded-lg bg-white p-4 shadow">
-        <View className="flex-row items-center justify-between">
-          <Text>미세먼지</Text>
-          <View className="flex-row items-center gap-1">
-            <Text>{dustLevel?.text}</Text>
+
+      <View className="gap-3 rounded-3xl bg-white p-5 shadow-sm">
+        <Text className="text-sm font-semibold text-gray-500">대기질</Text>
+        <View className="flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-4 py-3">
+          <Text className="text-sm text-[#0D0F1B]">미세먼지</Text>
+          <View className="flex-row items-center gap-1.5">
+            <Text className="text-sm font-semibold text-[#0D0F1B]">
+              {dustLevel?.text}
+            </Text>
             <Ionicons
               name={(dustLevel?.icon as "happy" | "sad") || "help"}
-              size={24}
+              size={20}
               color={dustLevel?.color}
             />
           </View>
         </View>
-        <View className="flex-row items-center justify-between">
-          <Text>초미세먼지</Text>
-          <View className="flex-row items-center gap-1">
-            <Text>{dustLevel?.text}</Text>
+        <View className="flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-4 py-3">
+          <Text className="text-sm text-[#0D0F1B]">초미세먼지</Text>
+          <View className="flex-row items-center gap-1.5">
+            <Text className="text-sm font-semibold text-[#0D0F1B]">
+              {dustLevel?.text}
+            </Text>
             <Ionicons
               name={(dustLevel?.icon as "happy" | "sad") || "help"}
-              size={24}
+              size={20}
               color={dustLevel?.color}
             />
           </View>
         </View>
       </View>
-      <View className="rounded-lg bg-white p-4 shadow ">
-        <Text>시간대 별 예상 강수량</Text>
-        <View className="flex-row justify-between px-4">
-          <View className="items-center gap-4 pt-4">
-            <Text>4시</Text>
-            <Ionicons name="umbrella-sharp" size={40} color="#FFB3B2" />
-            <Text>10%</Text>
-            <Text>5mm</Text>
-          </View>
-          <View className="items-center gap-4 pt-4">
-            <Text>5시</Text>
-            <Ionicons name="umbrella-sharp" size={40} color="#FFB3B2" />
-            <Text>10%</Text>
-            <Text>5mm</Text>
-          </View>
-          <View className="items-center gap-4 pt-4">
-            <Text>6시</Text>
-            <Ionicons name="umbrella-sharp" size={40} color="#FFB3B2" />
-            <Text>10%</Text>
-            <Text>5mm</Text>
-          </View>
-          <View className="items-center gap-4 pt-4">
-            <Text>7시</Text>
-            <Ionicons name="umbrella-sharp" size={40} color="#FFB3B2" />
-            <Text>10%</Text>
-            <Text>5mm</Text>
-          </View>
+
+      <View className="rounded-3xl bg-white p-5 shadow-sm">
+        <Text className="mb-4 text-sm font-semibold text-gray-500">
+          시간대별 예상 강수량
+        </Text>
+        <View className="flex-row justify-between">
+          {RAIN_FORECAST.map((item) => (
+            <View key={item.hour} className="items-center gap-1.5">
+              <Text className="text-xs text-gray-500">{item.hour}</Text>
+              <Ionicons name="umbrella-sharp" size={28} color="#FFB3B2" />
+              <Text className="text-sm font-semibold text-[#0D0F1B]">
+                {item.chance}
+              </Text>
+              <Text className="text-xs text-gray-400">{item.amount}</Text>
+            </View>
+          ))}
         </View>
       </View>
     </View>
