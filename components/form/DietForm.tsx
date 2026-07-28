@@ -1,5 +1,5 @@
+import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { DIET_MEAL_COLORS } from "@/constants/dietTheme";
-import { Button, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
   FormControlError,
@@ -8,19 +8,25 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { HStack } from "@/components/ui/hstack";
-import { AlertCircleIcon } from "@/components/ui/icon";
+import { AlertCircleIcon, CalendarDaysIcon, Icon } from "@/components/ui/icon";
 import { Input, InputField } from "@/components/ui/input";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
+import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { DietFormValues, DietMealType } from "@/types/diet";
-import { useMemo, useState } from "react";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
+import { ReactNode, useMemo, useState } from "react";
 import { View } from "react-native";
 import DatePicker from "react-native-date-picker";
+
+const INPUT_TEXT_STYLE = { color: "#0D0F1B" } as const;
 
 interface DietFormProps {
   initialValues?: Partial<DietFormValues>;
   defaultType?: DietMealType;
   submitLabel?: string;
+  isEdit?: boolean;
   onSubmit: (values: DietFormValues) => void;
   onDelete: () => void;
 }
@@ -32,10 +38,39 @@ const formatDate = (date: Date) => {
   return `${y}-${m}-${d}`;
 };
 
+const formatDateLabel = (dateStr: string) =>
+  dayjs(dateStr).locale("ko").format("YYYY년 M월 D일");
+
+const FormField = ({
+  label,
+  error,
+  errorMessage,
+  children,
+}: {
+  label: string;
+  error?: boolean;
+  errorMessage?: string;
+  children: ReactNode;
+}) => (
+  <FormControl isInvalid={error}>
+    <FormControlLabelText className="mb-2 text-sm font-semibold text-gray-500">
+      {label}
+    </FormControlLabelText>
+    {children}
+    {errorMessage ? (
+      <FormControlError>
+        <FormControlErrorIcon as={AlertCircleIcon} />
+        <FormControlErrorText>{errorMessage}</FormControlErrorText>
+      </FormControlError>
+    ) : null}
+  </FormControl>
+);
+
 const DietForm = ({
   initialValues,
   defaultType = "food",
-  submitLabel = "저장",
+  submitLabel = "저장하기",
+  isEdit = false,
   onSubmit,
   onDelete,
 }: DietFormProps) => {
@@ -45,7 +80,9 @@ const DietForm = ({
   const [amount, setAmount] = useState(
     initialValues?.amount != null ? String(initialValues.amount) : "",
   );
-  const [date, setDate] = useState(initialValues?.date ?? formatDate(new Date()));
+  const [date, setDate] = useState(
+    initialValues?.date ?? formatDate(new Date()),
+  );
   const [memo, setMemo] = useState(initialValues?.memo ?? "");
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -72,10 +109,9 @@ const DietForm = ({
   };
 
   return (
-    <View className="w-full gap-4 pb-4">
-      <FormControl>
-        <FormControlLabelText className="text-[#0D0F1B]">종류</FormControlLabelText>
-        <HStack className="mt-2 gap-2">
+    <View className="w-full gap-5 pb-2">
+      <FormField label="종류">
+        <HStack className="gap-2">
           {(["food", "snack"] as DietMealType[]).map((mealType) => {
             const theme = DIET_MEAL_COLORS[mealType];
             const selected = type === mealType;
@@ -83,14 +119,15 @@ const DietForm = ({
               <Pressable
                 key={mealType}
                 onPress={() => setType(mealType)}
-                className="flex-1 rounded-2xl border px-3 py-3"
+                className="min-h-[52px] flex-1 items-center justify-center rounded-2xl active:opacity-80"
                 style={{
+                  borderWidth: selected ? 2 : 1,
                   borderColor: selected ? theme.color : "#E5E7EB",
                   backgroundColor: selected ? theme.bg : "#FFFFFF",
                 }}
               >
                 <Text
-                  className="text-center text-base font-medium"
+                  className="text-sm font-semibold"
                   style={{ color: selected ? theme.color : "#6B7280" }}
                 >
                   {theme.label}
@@ -99,67 +136,87 @@ const DietForm = ({
             );
           })}
         </HStack>
-      </FormControl>
+      </FormField>
 
-      <FormControl isInvalid={hasSubmitted && !isAmountValid}>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          양(g)
-        </FormControlLabelText>
-        <Input size="md" variant="underlined" className="mt-1 border-gray-300">
-          <InputField
-            value={amount}
-            onChangeText={setAmount}
-            placeholder="예: 120"
-            keyboardType="number-pad"
-            placeholderTextColor="#9CA3AF"
-            className="text-[#0D0F1B]"
-          />
-        </Input>
-        <FormControlError>
-          <FormControlErrorIcon as={AlertCircleIcon} />
-          <FormControlErrorText>양을 입력해주세요.</FormControlErrorText>
-        </FormControlError>
-      </FormControl>
+      <FormField
+        label="양"
+        error={hasSubmitted && !isAmountValid}
+        errorMessage="양을 입력해주세요."
+      >
+        <View className="flex-row items-center rounded-2xl bg-[#F7F7F7] px-4 py-1">
+          <Input className="flex-1 border-0 bg-transparent" size="md">
+            <InputField
+              value={amount}
+              onChangeText={setAmount}
+              placeholder="예: 120"
+              keyboardType="number-pad"
+              placeholderTextColor="#9CA3AF"
+              style={INPUT_TEXT_STYLE}
+            />
+          </Input>
+          <Text className="ml-2 text-sm font-medium text-gray-400">g</Text>
+        </View>
+      </FormField>
 
-      <FormControl isInvalid={hasSubmitted && !date}>
-        <FormControlLabelText className="text-[#0D0F1B]">날짜</FormControlLabelText>
+      <FormField
+        label="날짜"
+        error={hasSubmitted && !date}
+        errorMessage="날짜를 선택해주세요."
+      >
         <Pressable
           onPress={() => setDatePickerOpen(true)}
-          className="mt-1 rounded-xl border border-gray-300 px-3 py-3"
+          className="flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-4 py-3.5 active:opacity-80"
         >
           <Text className={date ? "text-[#0D0F1B]" : "text-gray-400"}>
-            {date || "날짜를 선택하세요"}
+            {date ? formatDateLabel(date) : "날짜를 선택하세요"}
+          </Text>
+          <Icon as={CalendarDaysIcon} size="sm" className="text-gray-400" />
+        </Pressable>
+      </FormField>
+
+      <FormField label="메모 (선택)">
+        <View className="rounded-2xl bg-[#F7F7F7] px-4 py-3">
+          <Textarea className="min-h-[88px] border-0 bg-transparent" size="md">
+            <TextareaInput
+              value={memo}
+              onChangeText={setMemo}
+              placeholder="예: 저녁 조금 줄임"
+              placeholderTextColor="#9CA3AF"
+              multiline
+              textAlignVertical="top"
+              className="min-h-[72px] text-base"
+              style={INPUT_TEXT_STYLE}
+            />
+          </Textarea>
+        </View>
+      </FormField>
+
+      <RedButtonSurface
+        borderRadius={30}
+        backgroundColor="#F25857"
+        shadowPadding={8}
+        hostStyle={{ width: "100%" }}
+        style={{ width: "100%", height: 56 }}
+      >
+        <Pressable
+          onPress={handleSubmit}
+          className="h-full w-full items-center justify-center"
+          style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+        >
+          <Text className="text-base font-semibold text-white">
+            {submitLabel}
           </Text>
         </Pressable>
-        <FormControlError>
-          <FormControlErrorIcon as={AlertCircleIcon} />
-          <FormControlErrorText>날짜를 선택해주세요.</FormControlErrorText>
-        </FormControlError>
-      </FormControl>
+      </RedButtonSurface>
 
-      <FormControl>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          메모 (선택)
-        </FormControlLabelText>
-        <Input size="md" variant="underlined" className="mt-1 border-gray-300">
-          <InputField
-            value={memo}
-            onChangeText={setMemo}
-            placeholder="예: 저녁 조금 줄임"
-            placeholderTextColor="#9CA3AF"
-            className="text-[#0D0F1B]"
-          />
-        </Input>
-      </FormControl>
-
-      <HStack className="mt-2 items-center gap-2">
-        <Button
-          onPress={handleSubmit}
-          className="flex-1 rounded-2xl bg-primary-500"
+      {isEdit ? (
+        <Pressable
+          onPress={onDelete}
+          className="items-center py-2 active:opacity-70"
         >
-          <ButtonText>{submitLabel}</ButtonText>
-        </Button>
-      </HStack>
+          <Text className="text-sm font-medium text-[#F25857]">기록 삭제</Text>
+        </Pressable>
+      ) : null}
 
       <DatePicker
         modal
@@ -176,12 +233,6 @@ const DietForm = ({
         }}
         onCancel={() => setDatePickerOpen(false)}
       />
-
-      {submitLabel === "수정" ? (
-        <Button onPress={onDelete} className="mt-2 rounded-2xl bg-error-500">
-          <ButtonText>삭제</ButtonText>
-        </Button>
-      ) : null}
     </View>
   );
 };

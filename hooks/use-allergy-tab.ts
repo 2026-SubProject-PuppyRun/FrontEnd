@@ -23,6 +23,7 @@ export const useAllergyTab = () => {
   const records = useAllergyStore((state) => state.records);
   const addRecord = useAllergyStore((state) => state.addRecord);
   const updateRecord = useAllergyStore((state) => state.updateRecord);
+  const deleteRecord = useAllergyStore((state) => state.removeRecord);
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AllergyRecord | null>(
@@ -49,7 +50,10 @@ export const useAllergyTab = () => {
     setSheetOpen(true);
   };
 
-  const closeSheet = () => setSheetOpen(false);
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setEditingRecord(null);
+  };
 
   const handleSubmit = (values: AllergyFormValues) => {
     if (!petId) return;
@@ -60,6 +64,12 @@ export const useAllergyTab = () => {
     }
 
     addRecord({ ...values, petId });
+  };
+
+  const handleDelete = () => {
+    if (!editingRecord) return;
+    deleteRecord(editingRecord.id);
+    closeSheet();
   };
 
   const shareAllergy = useCallback(async () => {
@@ -97,6 +107,7 @@ export const useAllergyTab = () => {
     openEdit,
     closeSheet,
     handleSubmit,
+    handleDelete,
     shareAllergy,
   };
 };

@@ -16,17 +16,22 @@ interface WeightPeriodTabsProps {
 }
 
 const WeightPeriodTabs = ({ period, onChange }: WeightPeriodTabsProps) => (
-  <View className="mx-4 mt-4 flex-row justify-around">
+  <View className="mb-4 flex-row rounded-2xl bg-[#F7F7F7] p-1">
     {PERIODS.map((item) => {
       const isActive = period === item.value;
       return (
         <Pressable
           key={item.value}
           onPress={() => onChange(item.value)}
-          className={`px-3 py-2 ${isActive ? "border-b-2 border-primary-500" : ""}`}
+          className={`flex-1 items-center rounded-xl py-2.5 ${
+            isActive ? "bg-[#F25857]" : "bg-transparent"
+          }`}
+          style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
         >
           <Text
-            className={`text-sm ${isActive ? "font-bold text-primary-500" : "text-gray-600"}`}
+            className={`text-xs font-semibold ${
+              isActive ? "text-white" : "text-gray-500"
+            }`}
           >
             {item.label}
           </Text>

@@ -22,20 +22,19 @@ const WeightRecordList = ({
     keyExtractor={(item) => item.id}
     extraData={selectedRecordId}
     nestedScrollEnabled
-    contentContainerClassName="gap-3 pb-4"
+    contentContainerClassName="gap-3 px-0 pb-36 pt-1"
     contentContainerStyle={records.length === 0 ? { flexGrow: 1 } : undefined}
+    showsVerticalScrollIndicator={false}
     ListHeaderComponent={
       renderListHeader ? () => <View>{renderListHeader()}</View> : undefined
     }
     ListEmptyComponent={<WeightEmptyState />}
     renderItem={({ item }) => (
-      <View className="px-4">
-        <WeightCard
-          record={item}
-          selected={item.id === selectedRecordId}
-          onPress={() => onPressRecord(item)}
-        />
-      </View>
+      <WeightCard
+        record={item}
+        selected={item.id === selectedRecordId}
+        onPress={() => onPressRecord(item)}
+      />
     )}
   />
 );

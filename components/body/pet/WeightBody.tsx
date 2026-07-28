@@ -32,19 +32,22 @@ const WeightBody = () => {
 
   const renderListHeader = useCallback(
     () => (
-      <View>
+      <View className="gap-4 pb-2">
         <WeightSummaryBar summary={summary} />
-        <WeightPeriodTabs period={period} onChange={setPeriod} />
-        <WeightChart
-          chartPoints={chartPoints}
-          selectedRecordId={selectedRecordId}
-          onSelectRecord={selectRecord}
-          records={periodRecords}
-        />
+
+        <View className="rounded-3xl bg-white p-4 shadow-sm">
+          <WeightPeriodTabs period={period} onChange={setPeriod} />
+          <WeightChart
+            chartPoints={chartPoints}
+            selectedRecordId={selectedRecordId}
+            onSelectRecord={selectRecord}
+            records={periodRecords}
+          />
+        </View>
+
         <WeightSelectedPanel record={selectedRecord} onPressEdit={openEdit} />
-        <Text className="mb-3 mt-4 px-4 text-base font-semibold text-[#0D0F1B]">
-          기록 목록
-        </Text>
+
+        <Text className="text-sm font-semibold text-[#0D0F1B]">기록 목록</Text>
       </View>
     ),
     [
@@ -61,7 +64,7 @@ const WeightBody = () => {
   );
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-[#F7F7F7]">
       <WeightRecordList
         records={petRecords}
         selectedRecordId={selectedRecordId}

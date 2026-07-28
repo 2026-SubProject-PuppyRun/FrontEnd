@@ -13,7 +13,7 @@ const formatDelta = (delta: number) => {
 };
 
 const WeightSummaryBar = ({ summary }: WeightSummaryBarProps) => (
-  <View className="mx-4 mt-4 rounded-2xl bg-gray-50 px-4 py-4">
+  <View className="rounded-3xl bg-white px-5 py-4 shadow-sm">
     <View className="flex-row items-end justify-between">
       <View>
         <Text className="text-sm text-gray-500">현재 체중</Text>
@@ -22,23 +22,36 @@ const WeightSummaryBar = ({ summary }: WeightSummaryBarProps) => (
         </Text>
       </View>
       {summary.previousDelta != null ? (
-        <Text className="text-sm font-medium text-gray-600">
+        <Text
+          className="text-sm font-medium"
+          style={{
+            color:
+              summary.previousDelta > 0
+                ? "#EA580C"
+                : summary.previousDelta < 0
+                  ? "#2563EB"
+                  : "#6B7280",
+          }}
+        >
           직전 대비 {formatDelta(summary.previousDelta)}
         </Text>
       ) : null}
     </View>
 
-    <View className="mt-3 flex-row items-center justify-between">
+    <View className="mt-4 flex-row items-center justify-between">
       <View
-        className="rounded-full px-3 py-1"
+        className="rounded-full px-3 py-1.5"
         style={{ backgroundColor: `${summary.statusColor}20` }}
       >
-        <Text style={{ color: summary.statusColor }} className="text-sm font-semibold">
+        <Text
+          style={{ color: summary.statusColor }}
+          className="text-xs font-semibold"
+        >
           {summary.statusLabel}
         </Text>
       </View>
       {summary.breedRangeLabel ? (
-        <Text className="text-sm text-gray-500">
+        <Text className="text-xs text-gray-500">
           견종 기준 {summary.breedRangeLabel}kg
         </Text>
       ) : null}

@@ -7,6 +7,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
 
+const CARE_ITEMS = [
+  { icon: "restaurant-outline" as const, label: "식단" },
+  { icon: "fitness-outline" as const, label: "체중" },
+  { icon: "medkit-outline" as const, label: "백신" },
+  { icon: "alert-circle-outline" as const, label: "알러지" },
+];
+
 const PetBody = () => {
   const router = useRouter();
   const petList = usePetStore((state) => state.petList);
@@ -15,34 +22,60 @@ const PetBody = () => {
   return (
     <ScrollView
       className="flex-1"
-      contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
+      contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <PastureBoard />
+      <View className="mb-4 rounded-3xl bg-white px-5 py-5 shadow-sm">
+        <View className="flex-row items-center gap-3">
+          <View className="rounded-2xl bg-[#FFF0F0] p-3">
+            <Ionicons name="heart" size={22} color="#F25857" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-base font-semibold text-[#0D0F1B]">
+              {/*추후에 우리 -> 유저이름으로 변경*/}
+              우리 아이들 {petCount}마리
+            </Text>
+            <Text className="mt-0.5 text-sm text-gray-500">
+              식단·체중·백신·알러지 기록을 관리해보세요
+            </Text>
+          </View>
+        </View>
 
-      <View className="mb-3 mt-1">
-        <Text className="text-base font-semibold text-[#0D0F1B]">
-          반려견 목록
-        </Text>
-        <Text className="mt-0.5 text-sm text-gray-500">
-          카드를 눌러 식단·체중·백신 기록을 확인하세요
-        </Text>
+        <View className="mt-4 flex-row justify-between">
+          {CARE_ITEMS.map((item) => (
+            <View key={item.label} className="items-center gap-1">
+              <View className="rounded-2xl bg-[#F7F7F7] p-2.5">
+                <Ionicons name={item.icon} size={18} color="#F25857" />
+              </View>
+              <Text className="text-[11px] font-medium text-gray-500">
+                {item.label}
+              </Text>
+            </View>
+          ))}
+        </View>
       </View>
 
-      {petCount === 0 ? (
-        <View className="items-center rounded-3xl bg-white px-6 py-10 shadow-sm">
-          <View className="mb-4 rounded-full bg-[#F7F7F7] p-5">
-            <Ionicons name="paw-outline" size={36} color="#9CA3AF" />
+      <PastureBoard />
+
+      {petCount > 0 && (
+        <>
+          <View className="mb-3 mt-1 flex-row items-end justify-between">
+            <View>
+              <Text className="text-base font-semibold text-[#0D0F1B]">
+                반려견 목록
+              </Text>
+              <Text className="mt-0.5 text-sm text-gray-500">
+                카드를 눌러 케어 기록을 확인하세요
+              </Text>
+            </View>
+            <View className="rounded-full bg-[#FFF0F0] px-3 py-1">
+              <Text className="text-xs font-semibold text-[#F25857]">
+                {petCount}마리
+              </Text>
+            </View>
           </View>
-          <Text className="text-base font-semibold text-[#0D0F1B]">
-            등록된 반려견이 없어요
-          </Text>
-          <Text className="mt-1 text-center text-sm text-gray-500">
-            펫을 추가하면 목장에서 함께 뛰어놀 수 있어요
-          </Text>
-        </View>
-      ) : (
-        <PetListBoard />
+          <PetListBoard />
+        </>
       )}
 
       <View className="mt-5">
@@ -60,7 +93,7 @@ const PetBody = () => {
           >
             <Ionicons name="add-circle-outline" size={22} color="#fff" />
             <Text className="text-base font-semibold text-white">
-              반려견 추가하기
+              {petCount === 0 ? "첫 반려견 등록하기" : "반려견 추가하기"}
             </Text>
           </Pressable>
         </RedButtonSurface>

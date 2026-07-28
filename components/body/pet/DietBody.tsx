@@ -30,21 +30,28 @@ const DietBody = () => {
   } = useDietTab();
 
   return (
-    <View className="flex-1 bg-white">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <DietMonthHeader
-          month={currentMonth}
-          onPrev={goToPrevMonth}
-          onNext={goToNextMonth}
-          onToday={goToToday}
-        />
-        <DietLegend />
-        <DietCalendar
-          cells={calendarCells}
-          dayMarkers={dayMarkers}
-          selectedDate={selectedDate}
-          onSelectDate={selectDate}
-        />
+    <View className="flex-1 bg-[#F7F7F7]">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 140 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="mb-4 rounded-3xl bg-white p-2 shadow-sm">
+          <DietMonthHeader
+            month={currentMonth}
+            onPrev={goToPrevMonth}
+            onNext={goToNextMonth}
+            onToday={goToToday}
+          />
+          <DietLegend />
+          <DietCalendar
+            cells={calendarCells}
+            dayMarkers={dayMarkers}
+            selectedDate={selectedDate}
+            onSelectDate={selectDate}
+          />
+        </View>
+
         <DietSelectedDayPanel
           selectedDate={selectedDate}
           marker={selectedDayMarker}

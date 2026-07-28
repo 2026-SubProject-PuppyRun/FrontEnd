@@ -24,16 +24,16 @@ const DietCalendar = ({
   }
 
   return (
-    <View className="px-2">
+    <View className="px-1 pb-2">
       <View className="flex-row">
         {WEEKDAY_LABELS.map((label, index) => (
           <View key={label} className="flex-1 items-center py-2">
             <Text
-              className={`text-xs font-semibold  ${
+              className={`text-xs font-semibold ${
                 index === 0
-                  ? "text-[#FF3B30]"
+                  ? "text-[#F25857]"
                   : index === 6
-                    ? "text-primary-500"
+                    ? "text-[#2563EB]"
                     : "text-gray-400"
               }`}
             >
