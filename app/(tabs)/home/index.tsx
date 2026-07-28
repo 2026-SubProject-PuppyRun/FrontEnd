@@ -1,16 +1,11 @@
 import HomeDashBoard from "@/components/board/HomeDashBoard/HomeDashBoard";
-import RunLogoSvg from "@/components/svg/RunLogoSvg";
-import React from "react";
+import Header from "@/components/header/Header";
 import { Text, View } from "react-native";
 
 const Index = () => {
   return (
-    <View className="flex-1 justify-center bg-[#F7F7F7]">
-      <View className="flex-row items-center px-6 pb-2 pt-3">
-        <View className="flex-1 items-center">
-          <RunLogoSvg width={160} height={42} />
-        </View>
-      </View>
+    <View className="flex-1 bg-[#F7F7F7]">
+      <Header showLogo disableBack />
 
       <View className="px-6 pb-3">
         <Text className="text-xl font-bold text-[#0D0F1B]">오늘의 산책</Text>

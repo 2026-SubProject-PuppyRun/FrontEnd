@@ -1,14 +1,14 @@
 import FeedDetailBody from "@/components/body/FeedDetailBody";
+import Header, { HeaderIconButton } from "@/components/header/Header";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { FeedDetail } from "@/types/feed";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   Share,
   View,
@@ -17,7 +17,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const FeedDetailIndex = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [feedDetail, setFeedDetail] = useState<FeedDetail | null>(null);
 
@@ -70,32 +69,24 @@ const FeedDetailIndex = () => {
       style={{ paddingBottom: insets.bottom + 40 }}
       className="flex-1 bg-[#F7F7F7]"
     >
-      <View className="flex-row items-center px-6 pb-2 pt-3">
-        <Pressable
-          onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center"
-          accessibilityRole="button"
-          accessibilityLabel="뒤로 가기"
-        >
-          <Ionicons name="chevron-back" size={28} color="#0D0F1B" />
-        </Pressable>
-        <View className="flex-1 items-center px-2">
+      <Header
+        center={
           <Text
             className="text-base font-semibold text-[#0D0F1B]"
             numberOfLines={1}
           >
             {runDateLabel}
           </Text>
-        </View>
-        <Pressable
-          onPress={handleShare}
-          className="h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
-          accessibilityRole="button"
-          accessibilityLabel="공유하기"
-        >
-          <Ionicons name="share-outline" size={22} color="#0D0F1B" />
-        </Pressable>
-      </View>
+        }
+        right={
+          <HeaderIconButton
+            onPress={handleShare}
+            accessibilityLabel="공유하기"
+          >
+            <Ionicons name="share-outline" size={22} color="#0D0F1B" />
+          </HeaderIconButton>
+        }
+      />
 
       <KeyboardAvoidingView
         className="flex-1"

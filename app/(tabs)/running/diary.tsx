@@ -1,6 +1,6 @@
 import DiaryRunStats from "@/components/board/RunBoard/DiaryRunStats";
+import Header from "@/components/header/Header";
 import CustomAlert from "@/components/modal/CustomAlert";
-import RunLogoSvg from "@/components/svg/RunLogoSvg";
 import SelfieAndRouteSwiper from "@/components/swiper/SelfieAndRouteSwiper";
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { EditIcon } from "@/components/ui/icon";
@@ -9,7 +9,6 @@ import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import useNonNavbar from "@/hooks/use-non-navbar";
 import { useRunStore } from "@/store/useRunStore";
-import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -66,18 +65,7 @@ const Diary = () => {
       style={{ paddingTop: insets.top }}
       className="flex-1 bg-[#F7F7F7]"
     >
-      <View className="flex-row items-center justify-between px-6 pt-3">
-        <Pressable
-          onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center"
-          accessibilityRole="button"
-          accessibilityLabel="뒤로 가기"
-        >
-          <Ionicons name="chevron-back" size={28} color="#0D0F1B" />
-        </Pressable>
-        <RunLogoSvg width={189} height={50} />
-        <View className="h-10 w-10" />
-      </View>
+      <Header showLogo logoWidth={189} logoHeight={50} />
 
       <KeyboardAvoidingView
         className="flex-1"
