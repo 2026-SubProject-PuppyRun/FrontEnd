@@ -1,35 +1,15 @@
 import PetBody from "@/components/body/pet/PetBody";
-import Header, { HeaderIconButton } from "@/components/header/Header";
-import { Text } from "@/components/ui/text";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import Header from "@/components/header/Header";
 import { View } from "react-native";
 
 const Index = () => {
-  const router = useRouter();
-
   return (
     <View className="flex-1 bg-[#F7F7F7]">
       <Header
         showLogo
         disableBack
-        right={
-          <HeaderIconButton
-            onPress={() => router.push("/mypage/pets/create")}
-            accessibilityLabel="반려견 추가"
-          >
-            <Ionicons name="add" size={26} color="#0D0F1B" />
-          </HeaderIconButton>
-        }
+        subtitle="목장에서 뛰어놀고, 건강 기록도 챙겨요"
       />
-
-      <View className="px-6 pb-2">
-        <Text className="text-xl font-bold text-[#0D0F1B]">우리 아이들</Text>
-        <Text className="mt-0.5 text-sm text-gray-500">
-          목장에서 뛰어놀고, 건강 기록도 챙겨요
-        </Text>
-      </View>
-
       <PetBody />
     </View>
   );
