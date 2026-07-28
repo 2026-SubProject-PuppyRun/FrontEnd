@@ -1,6 +1,7 @@
 import { useRunStore } from "@/store/useRunStore";
 import { formatTime } from "@/util/run";
-import { getPathLength } from "geolib";
+import { getRouteDistanceMeters } from "@/util/run/getRouteDistance";
+import { updateRunPaceMetrics } from "@/util/run/recordRunLocation";
 import React, { useEffect, useState } from "react";
 import { Box } from "../../ui/box";
 import { HStack } from "../../ui/hstack";
@@ -12,7 +13,7 @@ interface RunDataBoardProps {
 }
 
 const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
-  const pace = useRunStore((state) => state.runData?.pace ?? 0);
+  const currentPace = useRunStore((state) => state.runData?.pace ?? "0'00''");
   const actualRoute = useRunStore((state) => state.actualRoute);
   const startTime = useRunStore((state) => state.runData?.startTime);
   const isRunning = useRunStore((state) => state.isRunning);
@@ -20,7 +21,6 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
     (state) => state.runData?.accumulatedMs ?? 0,
   );
   const isPaused = useRunStore((state) => state.isPaused);
-  const flatRoute = actualRoute.flat();
 
   const [elapsedTime, setElapsedTime] = useState(0);
 
@@ -33,6 +33,7 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
         const now = Date.now();
         const currentSegmentMs = now - startTime;
         setElapsedTime(Math.floor((accumulatedMs + currentSegmentMs) / 1000));
+        updateRunPaceMetrics();
       };
 
       updateTimer();
@@ -48,17 +49,17 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
 
   if (!isMapLoaded) return null;
 
-  const totalDistance = getPathLength(flatRoute);
+  const totalDistance = getRouteDistanceMeters(actualRoute);
 
   return (
     <View className="top-safe-offset-20 absolute z-10 w-full items-center">
       <HStack space="4xl">
         <Box className="items-center gap-2">
           <Text size="4xl" bold className="font-bold italic text-primary-500">
-            {pace}
+            {currentPace}
           </Text>
           <Text size="xl" bold className="font-semibold text-primary-500">
-            Face
+            Current Pace
           </Text>
         </Box>
         <Box className="items-center gap-2">

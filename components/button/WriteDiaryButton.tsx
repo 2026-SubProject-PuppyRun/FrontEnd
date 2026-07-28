@@ -39,8 +39,8 @@ const WriteDiaryButton = () => {
         >
           <Pressable
             onPress={() => {
+              useRunStore.getState().resetRunSession();
               router.replace("/");
-              useRunStore.getState().resetRunData();
             }}
             className="h-full w-full items-center justify-center"
             style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
