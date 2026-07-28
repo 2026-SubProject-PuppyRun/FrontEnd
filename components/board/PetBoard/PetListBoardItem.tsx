@@ -14,6 +14,7 @@ type PetListBoardItemProps = Pick<
   | "breedCode"
   | "birthYear"
   | "profileImageUrl"
+  | "mbti"
   | "color"
   | "weight"
   | "gender"
@@ -26,6 +27,7 @@ const PetListBoardItem = ({
   petId,
   breedCode,
   birthYear,
+  mbti,
   color,
   weight,
   gender,
@@ -74,7 +76,14 @@ const PetListBoardItem = ({
         </View>
 
         <View className="min-w-0 flex-1">
-          <Text className="text-base font-bold text-[#0D0F1B]">{info.name}</Text>
+          <View className="flex-row flex-wrap items-center gap-2">
+            <Text className="text-base font-bold text-[#0D0F1B]">{info.name}</Text>
+            {mbti ? (
+              <View className="rounded-full bg-[#FFF8E1] px-2.5 py-0.5">
+                <Text className="text-xs font-bold text-[#D97706]">{mbti}</Text>
+              </View>
+            ) : null}
+          </View>
           <Text className="mt-0.5 text-sm text-gray-500">{info.breedName}</Text>
           <View className="mt-2 flex-row flex-wrap gap-1.5">
             <View className="rounded-full bg-[#F7F7F7] px-2.5 py-0.5">

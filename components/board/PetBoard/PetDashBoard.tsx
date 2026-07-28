@@ -35,7 +35,16 @@ const PetDashBoard = ({ pet }: PetDashBoardProps) => {
         </View>
 
         <View className="flex-1 justify-center">
-          <Text className="text-lg font-bold text-[#0D0F1B]">{info.name}</Text>
+          <View className="flex-row flex-wrap items-center gap-2">
+            <Text className="text-lg font-bold text-[#0D0F1B]">{info.name}</Text>
+            {pet.mbti ? (
+              <View className="rounded-full bg-[#FFF8E1] px-2.5 py-0.5">
+                <Text className="text-xs font-bold text-[#D97706]">
+                  {pet.mbti}
+                </Text>
+              </View>
+            ) : null}
+          </View>
           <Text className="mt-1 text-sm text-gray-500">{info.birthLabel}</Text>
         </View>
       </View>

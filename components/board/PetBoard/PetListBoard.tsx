@@ -16,6 +16,7 @@ const PetListBoard = () => {
             breedCode={pet.breedCode}
             birthYear={pet.birthYear}
             profileImageUrl={pet.profileImageUrl}
+            mbti={pet.mbti}
             color={pet.color}
             weight={pet.weight}
             gender={pet.gender}
