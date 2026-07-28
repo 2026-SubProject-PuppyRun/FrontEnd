@@ -1,37 +1,33 @@
+import { Text } from "@/components/ui/text";
 import { Law } from "@/constants/lawData";
-import { Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { View } from "react-native";
 
 const LawCard = (props: Law) => {
   return (
-    <View className="m-2 flex-1 justify-between rounded-3xl border border-gray-100 bg-white p-6 shadow-lg">
-      <View>
-        <View className="mb-4 flex-row items-center justify-between">
-          <View className="rounded-full bg-blue-100 px-3 py-1.5">
-            <Text className="text-xs font-bold tracking-wider text-blue-700">
-              {props.category}
-            </Text>
-          </View>
-        </View>
-
-        <Text className="text-2xl font-extrabold leading-tight text-gray-900">
-          {props.title}
-        </Text>
-
-        <Text className="mt-5 text-base font-medium leading-relaxed text-gray-600">
-          {props.description}
+    <View className="mb-3 rounded-3xl bg-white px-5 py-5 shadow-sm">
+      <View className="mb-3 self-start rounded-full bg-[#FFF0F0] px-3 py-1">
+        <Text className="text-xs font-semibold text-[#F25857]">
+          {props.category}
         </Text>
       </View>
 
-      <View className="mt-6 flex-row items-start rounded-xl border border-red-100 bg-red-50 p-4">
-        <Text className="mr-2 mt-0.5 text-red-500">🚨</Text>
-        <View className="flex-1">
-          <Text className="mb-1 text-sm font-bold text-red-800">
+      <Text className="text-lg font-bold leading-6 text-[#0D0F1B]">
+        {props.title}
+      </Text>
+
+      <Text className="mt-3 text-sm leading-6 text-gray-600">
+        {props.description}
+      </Text>
+
+      <View className="mt-4 rounded-2xl bg-[#FFF0F0] px-4 py-3.5">
+        <View className="mb-1.5 flex-row items-center gap-1.5">
+          <Ionicons name="alert-circle" size={16} color="#F25857" />
+          <Text className="text-sm font-semibold text-[#F25857]">
             위반 시 처벌 규정
           </Text>
-          <Text className="text-sm font-medium leading-tight text-red-600">
-            {props.penalty}
-          </Text>
         </View>
+        <Text className="text-sm leading-5 text-[#0D0F1B]">{props.penalty}</Text>
       </View>
     </View>
   );
