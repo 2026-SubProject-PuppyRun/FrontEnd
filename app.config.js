@@ -1,6 +1,6 @@
 module.exports = {
   expo: {
-    name: "PuppyRun_FE",
+    name: "퍼피런",
     slug: "PuppyRun_FE",
     version: "1.0.0",
     orientation: "portrait",
