@@ -1,3 +1,4 @@
+import { Pressable, View } from "react-native";
 import {
   AlertDialog,
   AlertDialogBackdrop,
@@ -6,9 +7,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
 } from "../ui/alert-dialog";
-import { Button, ButtonText } from "../ui/button";
-import { Heading } from "../ui/heading";
+import { CloseIcon, Icon } from "../ui/icon";
 import { Text } from "../ui/text";
+
 interface WarningAlertProps {
   showAlertDialog: boolean;
   handleClose: () => void;
@@ -27,43 +28,56 @@ const WarningAlert = ({
   confirmAction,
 }: WarningAlertProps) => {
   return (
-    <>
-      <AlertDialog isOpen={showAlertDialog} onClose={handleClose}>
-        <AlertDialogBackdrop />
-        <AlertDialogContent className="w-[90%] max-w-[415px] items-center gap-4">
-          <AlertDialogHeader className="mb-2">
-            <Heading size="md">{title}</Heading>
-          </AlertDialogHeader>
-          <AlertDialogBody>
-            <Text size="sm" className="text-center">
-              {description}
+    <AlertDialog isOpen={showAlertDialog} onClose={handleClose}>
+      <AlertDialogBackdrop className="bg-[#0D0F1B]/45" />
+      <AlertDialogContent
+        className="mx-6 w-full max-w-[380px] rounded-3xl border-0 px-5 py-5 shadow-sm"
+        style={{ backgroundColor: "#FFFFFF" }}
+      >
+        <AlertDialogHeader className="mb-3 items-start">
+          <Text className="flex-1 pr-2 text-lg font-bold text-[#0D0F1B]">
+            {title}
+          </Text>
+          <Pressable
+            onPress={handleClose}
+            className="h-8 w-8 items-center justify-center rounded-full bg-[#F7F7F7]"
+            style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
+            accessibilityRole="button"
+            accessibilityLabel="닫기"
+          >
+            <Icon as={CloseIcon} size="sm" className="text-gray-500" />
+          </Pressable>
+        </AlertDialogHeader>
+
+        <AlertDialogBody className="mb-5 rounded-2xl bg-[#F7F7F7] px-4 py-4">
+          <Text className="text-center text-sm leading-5 text-gray-500">
+            {description}
+          </Text>
+        </AlertDialogBody>
+
+        <AlertDialogFooter className="gap-2">
+          <Pressable
+            onPress={handleClose}
+            className="h-12 flex-1 items-center justify-center rounded-2xl border border-gray-200 bg-white"
+            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          >
+            <Text className="text-sm font-semibold text-[#0D0F1B]">
+              취소하기
             </Text>
-          </AlertDialogBody>
-          <AlertDialogFooter className="mt-5">
-            <Button
-              size="sm"
-              action="negative"
-              onPress={() => {
-                confirmAction();
-                handleClose();
-              }}
-              className="px-[30px]"
-            >
-              <ButtonText>{confirmText}</ButtonText>
-            </Button>
-            <Button
-              variant="outline"
-              action="secondary"
-              onPress={handleClose}
-              size="sm"
-              className="px-[30px]"
-            >
-              <ButtonText>취소하기</ButtonText>
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              confirmAction();
+              handleClose();
+            }}
+            className="h-12 flex-1 items-center justify-center rounded-2xl bg-[#F25857]"
+            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          >
+            <Text className="text-sm font-semibold text-white">{confirmText}</Text>
+          </Pressable>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

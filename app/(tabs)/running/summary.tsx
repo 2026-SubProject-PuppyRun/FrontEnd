@@ -69,7 +69,7 @@ const Summary = () => {
         description="결과 저장을 정말 취소하시겠습니까? 기록이 저장되지 않을 수 있습니다."
         onConfirm={() => {
           isIntentionalExit.current = true;
-          useRunStore.getState().resetRunData();
+          useRunStore.getState().resetRunSession();
           router.replace("/");
         }}
         confirmText="종료"

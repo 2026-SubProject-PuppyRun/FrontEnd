@@ -16,5 +16,5 @@ export type RunResultStats = {
 export const getRunResultStats = (runData: RunDataLike): RunResultStats => ({
   distanceKm: ((runData?.distance ?? 0) / 1000).toFixed(2),
   totalTimeLabel: formatTime(runData?.totalTime ?? 0),
-  paceLabel: runData?.averagePace || runData?.pace || "0'00''",
+  paceLabel: runData?.averagePace ?? "0'00''",
 });

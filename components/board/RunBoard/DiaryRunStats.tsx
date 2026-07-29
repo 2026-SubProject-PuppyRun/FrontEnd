@@ -16,7 +16,7 @@ const DiaryRunStats = () => {
             {paceLabel}
           </Text>
           <Text className="mt-0.5 text-xs font-semibold text-primary-400">
-            Pace
+            Avg Pace
           </Text>
         </View>
         <View className="h-8 w-px bg-outline-200" />

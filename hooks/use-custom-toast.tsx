@@ -30,18 +30,15 @@ export const useCustomToast = () => {
         return (
           <Toast
             nativeID={toastId}
-            className="flex-row items-center gap-4 bg-primary-300 px-5 py-3 shadow-soft-1"
+            className="flex-row items-center gap-4 rounded-3xl bg-[#F7F7F7] px-5 py-3 shadow-soft-1"
           >
             <Icon
               as={icon || CheckCircleIcon}
               size="xl"
-              className={!iconColor ? "text-typography-black" : ""}
-              color={iconColor}
+              className={iconColor ? "" : "text-green-500"}
+              color={iconColor ? iconColor : "#008000"}
             />
-            <Divider
-              orientation="vertical"
-              className="h-[30px] bg-outline-200"
-            />
+            <Divider orientation="vertical" className="h-[30px] bg-gray-300" />
             <ToastTitle size="sm">{message}</ToastTitle>
           </Toast>
         );

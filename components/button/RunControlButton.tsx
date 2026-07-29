@@ -3,7 +3,7 @@ import { useRunStore } from "@/store/useRunStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 
 interface RunControlButtonProps {
   isMapLoaded: boolean;
@@ -48,6 +48,29 @@ const RunControlButton = ({ isMapLoaded }: RunControlButtonProps) => {
   const isPaused = useRunStore((state) => state.isPaused);
   const router = useRouter();
 
+  const finishRun = () => {
+    stopRun();
+    router.replace("/running/summary");
+  };
+
+  const handleStop = () => {
+    const pointCount = useRunStore.getState().actualRoute.flat().length;
+
+    if (pointCount < 2) {
+      Alert.alert(
+        "러닝 종료",
+        "기록된 경로가 거의 없습니다. 그래도 종료할까요?",
+        [
+          { text: "취소", style: "cancel" },
+          { text: "종료", style: "destructive", onPress: finishRun },
+        ],
+      );
+      return;
+    }
+
+    finishRun();
+  };
+
   if (!isMapLoaded) return null;
 
   return (
@@ -66,14 +89,7 @@ const RunControlButton = ({ isMapLoaded }: RunControlButtonProps) => {
             accessibilityLabel="재개"
           />
           <ControlCircleButton
-            onPress={() => {
-              if (useRunStore.getState().runData?.route?.length === 0) {
-                alert("러닝 경로가 없습니다. 러닝을 종료할 수 없습니다.");
-                return;
-              }
-              stopRun();
-              router.replace("/running/summary");
-            }}
+            onPress={handleStop}
             icon="stop"
             accessibilityLabel="종료"
           />

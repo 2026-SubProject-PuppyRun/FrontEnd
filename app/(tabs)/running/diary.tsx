@@ -43,7 +43,7 @@ const Diary = () => {
     try {
       isSubmitRef.current = true;
       await useRunStore.getState().submitRunData(title, contents);
-      useRunStore.getState().resetRunData();
+      useRunStore.getState().resetRunSession();
       router.replace("/");
     } catch (error) {
       console.error("데이터 제출 실패:", error);
@@ -142,11 +142,10 @@ const Diary = () => {
         showAlertDialog={showAlert}
         handleClose={() => setShowAlert(false)}
         title="일기 작성종료"
-        description="일기 작성을 정말 종료하시겠습니까? 기록은 임시 저장 됩니다."
+        description="일기 작성을 정말 종료하시겠습니까? 작성 중인 내용은 저장되지 않습니다."
         onConfirm={() => {
           isSubmitRef.current = true;
-          useRunStore.getState().submitRunData(title, contents);
-          useRunStore.getState().resetRunData();
+          useRunStore.getState().resetRunSession();
           router.replace("/");
         }}
         confirmText="종료"
