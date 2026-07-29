@@ -5,7 +5,9 @@ LogBox.ignoreLogs(["Open debugger"]);
 
 const Index = () => {
   const isLoggedIn = true;
-  return <Redirect href={isLoggedIn ? "/(tabs)/home" : "/(auth)/login"} />;
+  return (
+    <Redirect href={isLoggedIn ? "/(onboarding)/welcome" : "/(auth)/login"} />
+  );
 };
 
 export default Index;
