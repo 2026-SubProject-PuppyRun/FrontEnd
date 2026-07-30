@@ -42,6 +42,13 @@ module.exports = {
       "expo-router",
       "@react-native-firebase/app",
       [
+        "expo-notifications",
+        {
+          icon: "./assets/images/notification_icon.png",
+          color: "#F25857", 
+        },
+      ],
+      [
         "expo-splash-screen",
         {
           image: "./assets/images/splash-icon.png",
