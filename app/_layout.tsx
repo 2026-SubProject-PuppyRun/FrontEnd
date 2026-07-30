@@ -61,7 +61,8 @@ export default function RootLayout() {
               body: remoteMessage.notification?.body,
               android: {
                 channelId,
-                smallIcon: "ic_launcher",
+                smallIcon: "notification_icon",
+                color: "#F25857",
                 pressAction: {
                   id: "default",
                 },
