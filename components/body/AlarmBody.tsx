@@ -153,7 +153,7 @@ const AlarmBody = () => {
             newAlarmDate,
             {
               body: "퍼피런에서 온 알림입니다!",
-              smallIcon: "ic_launcher",
+              smallIcon: "notification_icon",
             },
             "puppyrun_alarm_channel",
           );
