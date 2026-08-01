@@ -1,14 +1,17 @@
-import RunResultBoard from "@/components/board/RunBoard/RunResultBoard";
 import WriteDiaryButton from "@/components/button/WriteDiaryButton";
 import RunLogoSvg from "@/components/svg/RunLogoSvg";
-import SelfieAndRouteSwiper from "@/components/swiper/SelfieAndRouteSwiper";
+import SelfieRouteCard from "@/components/swiper/SelfieRouteCard";
 import useNonNavbar from "@/hooks/use-non-navbar";
+import { useRunStore } from "@/store/useRunStore";
+import { getRunResultStats } from "@/util/run/getRunResultStats";
 import React from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Selfie = () => {
   const insets = useSafeAreaInsets();
+  const runData = useRunStore((state) => state.runData);
+  const { distanceKm, totalTimeLabel, paceLabel } = getRunResultStats(runData);
 
   useNonNavbar();
 
@@ -18,9 +21,14 @@ const Selfie = () => {
         <RunLogoSvg width={189} height={50} />
       </View>
 
-      <View className="flex-1 justify-center gap-0">
-        <SelfieAndRouteSwiper />
-        <RunResultBoard />
+      <View className="flex-1 justify-center">
+        <SelfieRouteCard
+          stats={{
+            pace: paceLabel,
+            distanceLabel: `${distanceKm}km`,
+            timeLabel: totalTimeLabel,
+          }}
+        />
       </View>
 
       <WriteDiaryButton />

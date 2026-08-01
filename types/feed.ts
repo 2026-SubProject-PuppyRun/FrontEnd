@@ -3,7 +3,8 @@ export interface FeedDetail {
   contents?: string;
   title?: string;
   selfieImgUrl: string;
-  routeImgUrl: string;
+  routeImgUrl?: string;
+  route?: { latitude: number; longitude: number }[];
   pace: string;
   distance: number;
   duration: number;

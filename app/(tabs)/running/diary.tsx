@@ -1,7 +1,6 @@
-import DiaryRunStats from "@/components/board/RunBoard/DiaryRunStats";
 import Header from "@/components/header/Header";
 import CustomAlert from "@/components/modal/CustomAlert";
-import SelfieAndRouteSwiper from "@/components/swiper/SelfieAndRouteSwiper";
+import SelfieRouteCard from "@/components/swiper/SelfieRouteCard";
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { EditIcon } from "@/components/ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
@@ -9,6 +8,7 @@ import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import useNonNavbar from "@/hooks/use-non-navbar";
 import { useRunStore } from "@/store/useRunStore";
+import { getRunResultStats } from "@/util/run/getRunResultStats";
 import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const Diary = () => {
   const insets = useSafeAreaInsets();
   const runData = useRunStore((state) => state.runData);
+  const { distanceKm, totalTimeLabel, paceLabel } = getRunResultStats(runData);
 
   const year = runData?.stopTime?.getFullYear() ?? new Date().getFullYear();
   const month = runData?.stopTime
@@ -95,8 +96,13 @@ const Diary = () => {
             </Input>
           </View>
 
-          <SelfieAndRouteSwiper />
-          <DiaryRunStats />
+          <SelfieRouteCard
+            stats={{
+              pace: paceLabel,
+              distanceLabel: `${distanceKm}km`,
+              timeLabel: totalTimeLabel,
+            }}
+          />
 
           <View className="mx-6 mt-4 rounded-3xl bg-white px-5 py-4 shadow-sm">
             <Textarea

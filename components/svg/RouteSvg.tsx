@@ -7,8 +7,19 @@ interface Coordinate {
   longitude: number;
 }
 
-const SVG_SIZE = 280;
-const PADDING = 24;
+type RouteSvgProps = {
+  size?: number;
+  padding?: number;
+  /** store 대신 외부에서 경로를 넘길 때 (피드 목업 등) */
+  route?: Coordinate[] | null;
+  /** false면 배경 없음 (셀피 오버레이용) */
+  withBackground?: boolean;
+  backgroundColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  /** 셀피 위 가독성용 외곽선 */
+  withOutline?: boolean;
+};
 
 const coordsToPoints = (
   coords: Coordinate[],
@@ -16,27 +27,40 @@ const coordsToPoints = (
   latDiff: number,
   minLng: number,
   lngDiff: number,
+  size: number,
+  padding: number,
 ): string => {
-  const drawable = SVG_SIZE - PADDING * 2;
+  const drawable = size - padding * 2;
   return coords
     .map(({ latitude, longitude }) => {
-      const x = PADDING + ((longitude - minLng) / lngDiff) * drawable;
-      const y = PADDING + (1 - (latitude - minLat) / latDiff) * drawable;
+      const x = padding + ((longitude - minLng) / lngDiff) * drawable;
+      const y = padding + (1 - (latitude - minLat) / latDiff) * drawable;
       return `${x},${y}`;
     })
     .join(" ");
 };
 
-const RouteSvg = () => {
-  const route = useRunStore((state) => state.runData?.route);
+const RouteSvg = ({
+  size = 280,
+  padding = 24,
+  route: routeProp,
+  withBackground = true,
+  backgroundColor = "#0D0F1B",
+  strokeColor = "#F25857",
+  strokeWidth = 5,
+  withOutline = false,
+}: RouteSvgProps) => {
+  const storeRoute = useRunStore((state) => state.runData?.route);
+  const route = routeProp ?? storeRoute;
 
   const segments: Coordinate[][] =
     route && route.length > 0 ? [route] : [];
 
   if (segments.length === 0 || segments.every((s) => s.length === 0)) {
+    if (!withBackground) return null;
     return (
-      <Svg width={SVG_SIZE} height={SVG_SIZE}>
-        <Rect width={SVG_SIZE} height={SVG_SIZE} fill="#0D0F1B" />
+      <Svg width={size} height={size}>
+        <Rect width={size} height={size} fill={backgroundColor} />
       </Svg>
     );
   }
@@ -52,8 +76,10 @@ const RouteSvg = () => {
   const lngDiff = maxLng - minLng || 0.0001;
 
   return (
-    <Svg width={SVG_SIZE} height={SVG_SIZE}>
-      <Rect width={SVG_SIZE} height={SVG_SIZE} fill="#0D0F1B" />
+    <Svg width={size} height={size}>
+      {withBackground ? (
+        <Rect width={size} height={size} fill={backgroundColor} />
+      ) : null}
       {segments.map((seg, i) => {
         if (seg.length < 2) return null;
         const points = coordsToPoints(
@@ -62,17 +88,30 @@ const RouteSvg = () => {
           latDiff,
           minLng,
           lngDiff,
+          size,
+          padding,
         );
         return (
-          <Polyline
-            key={i}
-            points={points}
-            fill="none"
-            stroke="#F25857"
-            strokeWidth="5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <React.Fragment key={i}>
+            {withOutline ? (
+              <Polyline
+                points={points}
+                fill="none"
+                stroke="rgba(255,255,255,0.9)"
+                strokeWidth={strokeWidth + 4}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ) : null}
+            <Polyline
+              points={points}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </React.Fragment>
         );
       })}
     </Svg>
