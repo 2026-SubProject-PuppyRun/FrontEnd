@@ -6,6 +6,7 @@ import { usePetStore } from "@/store/usePetStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CARE_ITEMS = [
   { icon: "restaurant-outline" as const, label: "식단" },
@@ -18,11 +19,15 @@ const PetBody = () => {
   const router = useRouter();
   const petList = usePetStore((state) => state.petList);
   const petCount = petList?.length ?? 0;
+  const insets = useSafeAreaInsets();
 
   return (
     <ScrollView
       className="flex-1"
-      contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
+      contentContainerStyle={{
+        paddingHorizontal: 24,
+        paddingBottom: insets.bottom + 60,
+      }}
       showsVerticalScrollIndicator={false}
     >
       <View className="mb-4 rounded-3xl bg-white px-5 py-5 shadow-sm">
