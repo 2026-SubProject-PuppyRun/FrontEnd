@@ -1,13 +1,15 @@
-import CustomTabBar from "@/components/navigation/CustomTabBar";
+import CustomTabBar, {
+  TAB_BAR_FAB_OVERHANG,
+  TAB_BAR_PILL_HEIGHT,
+} from "@/components/navigation/CustomTabBar";
 import { Tabs } from "expo-router";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const PILL_HEIGHT = 64;
-
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const tabBarHeight = PILL_HEIGHT + Math.max(insets.bottom, 10) + 8;
+  const tabBarHeight =
+    TAB_BAR_PILL_HEIGHT + TAB_BAR_FAB_OVERHANG + Math.max(insets.bottom, 10) + 8;
 
   return (
     <Tabs
