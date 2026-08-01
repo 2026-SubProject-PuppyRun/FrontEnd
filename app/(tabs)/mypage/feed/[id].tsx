@@ -2,6 +2,7 @@ import FeedDetailBody from "@/components/body/FeedDetailBody";
 import Header, { HeaderIconButton } from "@/components/header/Header";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
+import { DUMMY_FEED_ROUTE } from "@/constants/dummyFeedRoute";
 import { FeedDetail } from "@/types/feed";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -24,7 +25,7 @@ const FeedDetailIndex = () => {
     () => ({
       id: `${id}`,
       selfieImgUrl: "https://picsum.photos/1080/1350?random=1",
-      routeImgUrl: "https://picsum.photos/1080/1350?random=2",
+      route: DUMMY_FEED_ROUTE,
       pace: "10'00\"",
       distance: 5000,
       duration: 3000,

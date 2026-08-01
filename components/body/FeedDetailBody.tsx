@@ -1,5 +1,4 @@
-import FeedRunStats from "@/components/board/MyPageBoard/FeedRunStats";
-import SelfieAndRouteSwiper from "@/components/swiper/SelfieAndRouteSwiper";
+import SelfieRouteCard from "@/components/swiper/SelfieRouteCard";
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { CheckCircleIcon, EditIcon } from "@/components/ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
@@ -7,6 +6,7 @@ import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { FeedDetail } from "@/types/feed";
+import { formatTime } from "@/util/run/formatTime";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
@@ -53,15 +53,16 @@ const FeedDetailBody = (props: FeedDetailBodyProps) => {
         </Input>
       </View>
 
-      <SelfieAndRouteSwiper
+      <SelfieRouteCard
+        route={props.route}
         routeImgUrl={props.routeImgUrl}
         selfieImgUrl={props.selfieImgUrl}
-      />
-
-      <FeedRunStats
-        pace={props.pace}
-        distance={props.distance}
-        duration={props.duration}
+        captureRoute={false}
+        stats={{
+          pace: props.pace,
+          distanceLabel: `${(props.distance / 1000).toFixed(2)}km`,
+          timeLabel: formatTime(props.duration),
+        }}
       />
 
       <View className="mx-6 mt-4 rounded-3xl bg-white px-5 py-4 shadow-sm">
