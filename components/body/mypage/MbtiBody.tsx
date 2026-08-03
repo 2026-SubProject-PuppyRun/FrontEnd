@@ -21,17 +21,21 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 interface MbtiBodyProps {
   petId: string;
   petName: string;
+  savedMbti?: string;
 }
 
-const MbtiBody = ({ petId, petName }: MbtiBodyProps) => {
+const MbtiBody = ({ petId, petName, savedMbti }: MbtiBodyProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
+  const [isRetaking, setIsRetaking] = useState(false);
 
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
 
   const totalQuestions = mbtiQuestionData.length;
   const progressValue = Math.round((currentIndex / totalQuestions) * 100);
+  const quizCompleted = currentIndex >= totalQuestions;
+  const showSavedResult = Boolean(savedMbti) && !isRetaking && !quizCompleted;
 
   const handleSwipe = (direction: "LEFT" | "RIGHT") => {
     const currentQ = mbtiQuestionData[currentIndex];
@@ -41,6 +45,14 @@ const MbtiBody = ({ petId, petName }: MbtiBodyProps) => {
     setAnswers((prev) => [...prev, pickedValue]);
     setCurrentIndex((prev) => prev + 1);
 
+    translateX.value = 0;
+    translateY.value = 0;
+  };
+
+  const handleRetake = () => {
+    setIsRetaking(true);
+    setCurrentIndex(0);
+    setAnswers([]);
     translateX.value = 0;
     translateY.value = 0;
   };
@@ -80,7 +92,19 @@ const MbtiBody = ({ petId, petName }: MbtiBodyProps) => {
     };
   });
 
-  if (currentIndex >= totalQuestions) {
+  if (showSavedResult && savedMbti) {
+    return (
+      <MbtiResultCard
+        resultMbti={savedMbti}
+        petId={petId}
+        petName={petName}
+        isSaved
+        onRetake={handleRetake}
+      />
+    );
+  }
+
+  if (quizCompleted) {
     const resultMbti = getResultMbti(answers);
     return (
       <MbtiResultCard

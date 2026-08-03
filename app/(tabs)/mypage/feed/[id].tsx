@@ -80,10 +80,7 @@ const FeedDetailIndex = () => {
           </Text>
         }
         right={
-          <HeaderIconButton
-            onPress={handleShare}
-            accessibilityLabel="공유하기"
-          >
+          <HeaderIconButton onPress={handleShare} accessibilityLabel="공유하기">
             <Ionicons name="share-outline" size={22} color="#0D0F1B" />
           </HeaderIconButton>
         }
