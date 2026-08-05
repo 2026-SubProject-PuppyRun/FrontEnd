@@ -12,6 +12,7 @@ const Index = () => {
     <View className="flex-1 bg-[#F7F7F7]">
       <Header
         showLogo
+        disableBack
         right={
           <HeaderIconButton
             onPress={() => router.push("/mypage/settings")}
