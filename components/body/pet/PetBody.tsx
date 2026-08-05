@@ -1,5 +1,6 @@
 import PastureBoard from "@/components/board/PetBoard/PastureBoard";
 import PetListBoard from "@/components/board/PetBoard/PetListBoard";
+import VaccineWeekCalendar from "@/components/body/pet/vaccine/VaccineWeekCalendar";
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { Text } from "@/components/ui/text";
 import { usePetStore } from "@/store/usePetStore";
@@ -7,13 +8,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const CARE_ITEMS = [
-  { icon: "restaurant-outline" as const, label: "식단" },
-  { icon: "fitness-outline" as const, label: "체중" },
-  { icon: "medkit-outline" as const, label: "백신" },
-  { icon: "alert-circle-outline" as const, label: "알러지" },
-];
 
 const PetBody = () => {
   const router = useRouter();
@@ -30,8 +24,10 @@ const PetBody = () => {
       }}
       showsVerticalScrollIndicator={false}
     >
+      <PastureBoard />
+
       <View className="mb-4 rounded-3xl bg-white px-5 py-5 shadow-sm">
-        <View className="flex-row items-center gap-3">
+        <View className="mb-4 flex-row items-center gap-3">
           <View className="rounded-2xl bg-[#FFF0F0] p-3">
             <Ionicons name="heart" size={22} color="#F25857" />
           </View>
@@ -41,26 +37,13 @@ const PetBody = () => {
               우리 아이들 {petCount}마리
             </Text>
             <Text className="mt-0.5 text-sm text-gray-500">
-              식단·체중·백신·알러지 기록을 관리해보세요
+              이번 주 접종 일정을 확인해 보세요
             </Text>
           </View>
         </View>
 
-        <View className="mt-4 flex-row justify-between">
-          {CARE_ITEMS.map((item) => (
-            <View key={item.label} className="items-center gap-1">
-              <View className="rounded-2xl bg-[#F7F7F7] p-2.5">
-                <Ionicons name={item.icon} size={18} color="#F25857" />
-              </View>
-              <Text className="text-[11px] font-medium text-gray-500">
-                {item.label}
-              </Text>
-            </View>
-          ))}
-        </View>
+        <VaccineWeekCalendar />
       </View>
-
-      <PastureBoard />
 
       {petCount > 0 && (
         <>

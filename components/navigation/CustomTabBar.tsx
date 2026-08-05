@@ -1,6 +1,7 @@
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { type Href, router } from "expo-router";
 import { useState } from "react";
 import { LayoutChangeEvent, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,6 +16,40 @@ const TAB_ORDER: TabRouteName[] = [
   "mypage",
   "guide",
 ];
+
+/** 탭 재탭 시 pop-to-root 대상 (각 탭의 첫 화면) */
+const TAB_ROOTS: Record<TabRouteName, Href> = {
+  care: "/(tabs)/care/pets",
+  home: "/(tabs)/home",
+  running: "/(tabs)/running",
+  mypage: "/(tabs)/mypage",
+  guide: "/(tabs)/guide",
+};
+
+const goToTabRoot = (name: TabRouteName) => {
+  router.dismissTo(TAB_ROOTS[name]);
+};
+
+const handleTabPress = (
+  navigation: BottomTabBarProps["navigation"],
+  route: BottomTabBarProps["state"]["routes"][number],
+  isFocused: boolean,
+  name: TabRouteName,
+) => {
+  const event = navigation.emit({
+    type: "tabPress",
+    target: route.key,
+    canPreventDefault: true,
+  });
+  if (event.defaultPrevented) return;
+
+  if (isFocused) {
+    goToTabRoot(name);
+    return;
+  }
+
+  navigation.navigate(route.name, route.params);
+};
 
 const TAB_ICONS: Record<TabRouteName, keyof typeof Ionicons.glyphMap> = {
   care: "paw",
@@ -162,14 +197,7 @@ const CustomTabBar = ({
             const isCenter = name === "running";
 
             const onPress = () => {
-              const event = navigation.emit({
-                type: "tabPress",
-                target: route.key,
-                canPreventDefault: true,
-              });
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name, route.params);
-              }
+              handleTabPress(navigation, route, isFocused, name);
             };
 
             if (isCenter) {
@@ -242,14 +270,7 @@ const CustomTabBar = ({
                     (r) => r.key === runningRoute.key,
                   );
                   const isFocused = state.index === routeIndex;
-                  const event = navigation.emit({
-                    type: "tabPress",
-                    target: runningRoute.key,
-                    canPreventDefault: true,
-                  });
-                  if (!isFocused && !event.defaultPrevented) {
-                    navigation.navigate(runningRoute.name, runningRoute.params);
-                  }
+                  handleTabPress(navigation, runningRoute, isFocused, "running");
                 }}
                 className="h-full w-full items-center justify-center"
                 style={({ pressed }) =>

@@ -4,9 +4,10 @@ export interface VaccineRecord {
   name: string;
   vaccinatedAt: string;
   nextVaccinationAt: string;
+  memo?: string;
 }
 
 export type VaccineFormValues = Pick<
   VaccineRecord,
-  "name" | "vaccinatedAt" | "nextVaccinationAt"
+  "name" | "vaccinatedAt" | "nextVaccinationAt" | "memo"
 >;
