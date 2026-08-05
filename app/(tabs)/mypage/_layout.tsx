@@ -6,7 +6,7 @@ export default function MyPageLayout() {
   const insets = useSafeAreaInsets();
   return (
     <View
-      style={{ paddingTop: insets.top, paddingBottom: insets.bottom + 40 }}
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
       className="flex-1 bg-[#F7F7F7]"
     >
       <Slot />

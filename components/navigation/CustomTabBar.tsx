@@ -195,9 +195,7 @@ const CustomTabBar = ({
               >
                 <View
                   className={`items-center justify-center ${
-                    isFocused
-                      ? "h-11 w-11 rounded-full bg-white"
-                      : "h-11 w-11"
+                    isFocused ? "h-11 w-11 rounded-full bg-white" : "h-11 w-11"
                   }`}
                 >
                   <Ionicons
@@ -250,10 +248,7 @@ const CustomTabBar = ({
                     canPreventDefault: true,
                   });
                   if (!isFocused && !event.defaultPrevented) {
-                    navigation.navigate(
-                      runningRoute.name,
-                      runningRoute.params,
-                    );
+                    navigation.navigate(runningRoute.name, runningRoute.params);
                   }
                 }}
                 className="h-full w-full items-center justify-center"

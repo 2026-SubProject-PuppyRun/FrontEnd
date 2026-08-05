@@ -79,9 +79,17 @@ const PetListBoardItem = ({
           <View className="flex-row flex-wrap items-center gap-2">
             <Text className="text-base font-bold text-[#0D0F1B]">{info.name}</Text>
             {mbti ? (
-              <View className="rounded-full bg-[#FFF8E1] px-2.5 py-0.5">
+              <Pressable
+                onPress={() => router.push(`/mypage/pets/${petId}/mbti`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${name} 멍BTI 결과 보기`}
+                className="rounded-full bg-[#FFF8E1] px-2.5 py-0.5"
+                style={({ pressed }) =>
+                  pressed ? { opacity: 0.85 } : undefined
+                }
+              >
                 <Text className="text-xs font-bold text-[#D97706]">{mbti}</Text>
-              </View>
+              </Pressable>
             ) : null}
           </View>
           <Text className="mt-0.5 text-sm text-gray-500">{info.breedName}</Text>
