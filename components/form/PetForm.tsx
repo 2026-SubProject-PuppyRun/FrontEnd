@@ -221,7 +221,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
     <>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -261,7 +261,11 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
             <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
               이름
             </FormControlLabelText>
-            <Input size="md" variant="underlined" className="border-outline-200">
+            <Input
+              size="md"
+              variant="underlined"
+              className="border-outline-200"
+            >
               <InputField
                 placeholder="이름을 입력해주세요"
                 placeholderTextColor="#9CA3AF"
@@ -382,7 +386,11 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
             <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
               체중 (kg)
             </FormControlLabelText>
-            <Input size="md" variant="underlined" className="border-outline-200">
+            <Input
+              size="md"
+              variant="underlined"
+              className="border-outline-200"
+            >
               <InputField
                 placeholder="예: 4.5"
                 placeholderTextColor="#9CA3AF"
