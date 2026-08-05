@@ -20,6 +20,7 @@ interface PetSpriteProps {
   bounds: WanderBounds;
   name?: string;
   accentColor?: string;
+  scale?: number;
   onPress?: () => void;
 }
 
@@ -32,6 +33,7 @@ const PetSprite = ({
   bounds,
   name,
   accentColor = "#FFFFFF",
+  scale = 1,
   onPress,
 }: PetSpriteProps) => {
   const spritePackKey = getSpritePackKey(breedCode);
@@ -43,6 +45,10 @@ const PetSprite = ({
 
   const { source, frameCount } = getSpriteSheetMeta(pack, action);
   const frameMs = action === "walk" ? WALK_FRAME_MS : IDLE_FRAME_MS;
+
+  const displaySize = SPRITE_DISPLAY_SIZE * scale;
+  const nameTagTop = SPRITE_NAME_TAG_TOP * scale;
+  const nameTagHeight = SPRITE_NAME_TAG_HEIGHT * scale;
 
   useEffect(() => {
     setFrameIndex(0);
@@ -65,15 +71,15 @@ const PetSprite = ({
     transform: [{ scaleX: facingLeft.value ? -1 : 1 }],
   }));
 
-  const sheetDisplayWidth = frameCount * SPRITE_DISPLAY_SIZE;
+  const sheetDisplayWidth = frameCount * displaySize;
 
   return (
     <Animated.View style={positionStyle}>
       <Pressable onPress={onPress} accessibilityLabel={name}>
         <View
           style={{
-            width: SPRITE_DISPLAY_SIZE,
-            height: SPRITE_NAME_TAG_TOP + (name ? SPRITE_NAME_TAG_HEIGHT : 0),
+            width: displaySize,
+            height: nameTagTop + (name ? nameTagHeight : 0),
             alignItems: "center",
           }}
         >
@@ -83,8 +89,8 @@ const PetSprite = ({
                 position: "absolute",
                 top: 0,
                 left: 0,
-                width: SPRITE_DISPLAY_SIZE,
-                height: SPRITE_DISPLAY_SIZE,
+                width: displaySize,
+                height: displaySize,
                 overflow: "hidden",
               },
               spriteFlipStyle,
@@ -95,8 +101,8 @@ const PetSprite = ({
               source={source}
               style={{
                 width: sheetDisplayWidth,
-                height: SPRITE_DISPLAY_SIZE,
-                transform: [{ translateX: -frameIndex * SPRITE_DISPLAY_SIZE }],
+                height: displaySize,
+                transform: [{ translateX: -frameIndex * displaySize }],
               }}
               resizeMode="stretch"
             />
@@ -106,7 +112,7 @@ const PetSprite = ({
             <View
               style={{
                 position: "absolute",
-                top: SPRITE_NAME_TAG_TOP,
+                top: nameTagTop,
                 left: 0,
                 right: 0,
                 alignItems: "center",
@@ -115,18 +121,18 @@ const PetSprite = ({
               <View
                 style={{
                   borderRadius: 999,
-                  paddingHorizontal: 8,
-                  paddingVertical: 2,
+                  paddingHorizontal: 8 * scale,
+                  paddingVertical: 2 * scale,
                   backgroundColor: accentColor,
                   borderWidth: 1,
                   borderColor: "rgba(255,255,255,0.65)",
-                  maxWidth: SPRITE_DISPLAY_SIZE + 24,
+                  maxWidth: displaySize + 24 * scale,
                 }}
               >
                 <Text
                   style={{
                     textAlign: "center",
-                    fontSize: 10,
+                    fontSize: Math.max(8, 10 * scale),
                     fontWeight: "600",
                     color: "#4A4035",
                   }}
