@@ -7,6 +7,7 @@ export const DUMMY_VACCINE_RECORDS: VaccineRecord[] = [
     name: "종합백신",
     vaccinatedAt: "2025-08-05",
     nextVaccinationAt: "2026-08-05",
+    memo: "해피동물병원 · 이상 반응 없음",
   },
   {
     id: "vaccine-2",
@@ -21,5 +22,6 @@ export const DUMMY_VACCINE_RECORDS: VaccineRecord[] = [
     name: "코로나 장염",
     vaccinatedAt: "2025-07-20",
     nextVaccinationAt: "2026-08-03",
+    memo: "2차 접종 완료",
   },
 ];

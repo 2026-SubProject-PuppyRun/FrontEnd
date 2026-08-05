@@ -13,10 +13,10 @@ const buildVaccineShareMessage = (
   records: VaccineRecord[],
 ) => {
   if (records.length === 0) return null;
-  const lines = records.map(
-    (record) =>
-      `• ${record.name} · 접종일 ${record.vaccinatedAt} · 다음 ${record.nextVaccinationAt}`,
-  );
+  const lines = records.map((record) => {
+    const base = `• ${record.name} · 접종일 ${record.vaccinatedAt} · 다음 ${record.nextVaccinationAt}`;
+    return record.memo ? `${base}\n  메모: ${record.memo}` : base;
+  });
   return [`[${petName}] 접종 기록`, "", ...lines].join("\n");
 };
 

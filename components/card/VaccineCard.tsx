@@ -69,6 +69,10 @@ const VaccineCard = ({ record, onPress }: VaccineCardProps) => {
           </Text>
         </View>
       </View>
+
+      {record.memo ? (
+        <Text className="mt-2 text-sm text-gray-500">{record.memo}</Text>
+      ) : null}
     </Pressable>
   );
 };

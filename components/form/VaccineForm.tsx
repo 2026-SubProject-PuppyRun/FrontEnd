@@ -10,6 +10,7 @@ import { AlertCircleIcon, CalendarDaysIcon, Icon } from "@/components/ui/icon";
 import { Input, InputField } from "@/components/ui/input";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
+import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { VaccineFormValues } from "@/types/vaccine";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -78,6 +79,7 @@ const VaccineForm = ({
   const [nextVaccinationAt, setNextVaccinationAt] = useState(
     initialValues?.nextVaccinationAt ?? "",
   );
+  const [memo, setMemo] = useState(initialValues?.memo ?? "");
   const [pickField, setPickField] = useState<
     "vaccinatedAt" | "nextVaccinationAt" | null
   >(null);
@@ -100,6 +102,7 @@ const VaccineForm = ({
       name: name.trim(),
       vaccinatedAt,
       nextVaccinationAt,
+      memo: memo.trim() || undefined,
     });
   };
 
@@ -181,6 +184,23 @@ const VaccineForm = ({
           </Text>
           <Icon as={CalendarDaysIcon} size="sm" className="text-gray-400" />
         </Pressable>
+      </FormField>
+
+      <FormField label="메모 (선택)">
+        <View className="rounded-2xl bg-[#F7F7F7] px-4 py-3">
+          <Textarea className="min-h-[88px] border-0 bg-transparent" size="md">
+            <TextareaInput
+              value={memo}
+              onChangeText={setMemo}
+              placeholder="예: 병원 이름, 부작용 여부"
+              placeholderTextColor="#9CA3AF"
+              multiline
+              textAlignVertical="top"
+              className="min-h-[72px] text-base"
+              style={INPUT_TEXT_STYLE}
+            />
+          </Textarea>
+        </View>
       </FormField>
 
       <RedButtonSurface

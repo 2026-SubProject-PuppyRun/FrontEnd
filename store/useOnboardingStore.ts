@@ -13,6 +13,7 @@ export type OnboardingVaccine = {
   name: string;
   vaccinatedAt: string;
   nextVaccinationAt: string;
+  memo?: string;
 };
 
 export type OnboardingDraft = {

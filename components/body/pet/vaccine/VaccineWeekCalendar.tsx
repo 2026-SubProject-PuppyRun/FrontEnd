@@ -256,6 +256,14 @@ const VaccineWeekCalendar = () => {
                     >
                       {isOverdue ? "접종일이 지났어요" : "접종 예정"}
                     </Text>
+                    {record.memo ? (
+                      <Text
+                        className="mt-0.5 text-xs text-gray-400"
+                        numberOfLines={1}
+                      >
+                        {record.memo}
+                      </Text>
+                    ) : null}
                   </View>
                   <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
                 </Pressable>

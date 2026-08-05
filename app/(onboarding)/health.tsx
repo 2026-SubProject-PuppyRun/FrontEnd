@@ -66,6 +66,7 @@ const Health = () => {
       name: values.name,
       vaccinatedAt: values.vaccinatedAt,
       nextVaccinationAt: values.nextVaccinationAt,
+      memo: values.memo,
     });
     setVaccineModalOpen(false);
   };
@@ -105,6 +106,7 @@ const Health = () => {
         name: item.name,
         vaccinatedAt: item.vaccinatedAt,
         nextVaccinationAt: item.nextVaccinationAt,
+        memo: item.memo,
       });
     });
 
@@ -220,6 +222,11 @@ const Health = () => {
                     <Text className="mt-0.5 text-xs text-gray-500">
                       {item.vaccinatedAt} · 다음 {item.nextVaccinationAt}
                     </Text>
+                    {item.memo ? (
+                      <Text className="mt-0.5 text-xs text-gray-400">
+                        {item.memo}
+                      </Text>
+                    ) : null}
                   </View>
                   <Pressable
                     onPress={() => removeVaccine(item.id)}
