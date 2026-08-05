@@ -4,9 +4,31 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 /** 셀피/서머리용 — 기록 축하 강조 카드 */
-const RunResultBoard = () => {
+const RunResultBoard = ({
+  variant = "card",
+}: {
+  variant?: "card" | "strip";
+}) => {
   const runData = useRunStore((state) => state.runData);
   const { distanceKm, totalTimeLabel, paceLabel } = getRunResultStats(runData);
+
+  if (variant === "strip") {
+    return (
+      <View style={styles.stripCard}>
+        <View style={styles.stripMain}>
+          <Text style={styles.stripDistance}>
+            {distanceKm}km
+            <Text style={styles.stripSlash}> / </Text>
+            {totalTimeLabel}
+          </Text>
+          <View style={styles.stripPaceBlock}>
+            <Text style={styles.stripPace}>{paceLabel}</Text>
+            <Text style={styles.stripPaceLabel}>Average Pace</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper}>
@@ -84,6 +106,50 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontStyle: "italic",
     color: "#FFFFFF",
+  },
+  stripCard: {
+    flex: 1,
+    minWidth: 0,
+    borderRadius: CARD_RADIUS,
+    overflow: "hidden",
+    backgroundColor: "#F25857",
+  },
+  stripMain: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  stripDistance: {
+    flexShrink: 1,
+    fontSize: 26,
+    fontWeight: "600",
+    fontStyle: "italic",
+    color: "#FFFFFF",
+  },
+  stripSlash: {
+    fontSize: 22,
+    fontWeight: "600",
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.75)",
+  },
+  stripPaceBlock: {
+    alignItems: "flex-end",
+    gap: 2,
+  },
+  stripPace: {
+    fontSize: 22,
+    fontWeight: "600",
+    fontStyle: "italic",
+    color: "#FFFFFF",
+  },
+  stripPaceLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.85)",
   },
 });
 

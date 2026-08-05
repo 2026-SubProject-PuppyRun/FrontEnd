@@ -9,9 +9,10 @@ import { CheckCircleIcon } from "../ui/icon";
 import { Pressable } from "../ui/pressable";
 import RedButtonSurface from "../ui/RedButtonSurface";
 
-const SelfieButton = () => {
+const SelfieButton = ({ size = 100 }: { size?: number }) => {
   const router = useRouter();
   const { showToast } = useCustomToast();
+  const iconSize = Math.round(size * 0.46);
 
   const takeSelfie = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -37,13 +38,13 @@ const SelfieButton = () => {
       borderRadius={100}
       backgroundColor={"#F25857"}
       shadowPadding={8}
-      style={{ width: 100, height: 100 }}
+      style={{ width: size, height: size }}
     >
       <Pressable
         onPress={takeSelfie}
         className="h-full w-full items-center justify-center"
       >
-        <Ionicons name="logo-instagram" size={46} color="white" />
+        <Ionicons name="logo-instagram" size={iconSize} color="white" />
       </Pressable>
     </RedButtonSurface>
   );
