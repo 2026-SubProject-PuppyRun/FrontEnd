@@ -33,6 +33,12 @@ interface GoogleMapProps {
   children?: React.ReactNode;
   isSummary?: boolean;
   style?: "dark" | "silver";
+  fitEdgePadding?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
 }
 
 const GoogleMap = ({
@@ -40,6 +46,7 @@ const GoogleMap = ({
   children,
   isSummary,
   style,
+  fitEdgePadding,
 }: GoogleMapProps) => {
   const [coordinates, setCoordinates] = useState({
     latitude: DEFAULT_REGION.latitude,
@@ -195,12 +202,17 @@ const GoogleMap = ({
     if (isSummary && watchedRoute.length > 0 && mapRef.current) {
       setTimeout(() => {
         mapRef.current?.fitToCoordinates(watchedRoute, {
-          edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+          edgePadding: fitEdgePadding ?? {
+            top: 48,
+            right: 48,
+            bottom: 48,
+            left: 48,
+          },
           animated: true,
         });
       }, 500);
     }
-  }, [isSummary, finalRoute]);
+  }, [isSummary, finalRoute, fitEdgePadding]);
 
   if (isLoading === true) {
     return (
