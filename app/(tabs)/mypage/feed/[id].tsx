@@ -2,14 +2,14 @@ import FeedDetailBody from "@/components/body/FeedDetailBody";
 import Header, { HeaderIconButton } from "@/components/header/Header";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
-import { DUMMY_FEED_ROUTE } from "@/constants/dummyFeedRoute";
-import { FeedDetail } from "@/types/feed";
+import { useTrackingDetailQuery } from "@/util/api";
+import { resolveRouteParam } from "@/util/navigation/resolveRouteParam";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Share,
   View,
@@ -17,29 +17,12 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const FeedDetailIndex = () => {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const params = useLocalSearchParams<{ id: string }>();
+  const id = resolveRouteParam(params.id);
   const insets = useSafeAreaInsets();
-  const [feedDetail, setFeedDetail] = useState<FeedDetail | null>(null);
 
-  const dummyFeedDetail = useMemo<FeedDetail>(
-    () => ({
-      id: `${id}`,
-      selfieImgUrl: "https://picsum.photos/1080/1350?random=1",
-      route: DUMMY_FEED_ROUTE,
-      pace: "10'00\"",
-      distance: 5000,
-      duration: 3000,
-      date: new Date(),
-      title: "멍멍이와 함께한 즐거운 러닝",
-      contents:
-        "오늘은 멍멍이와 함께 공원에서 러닝을 했어요! 날씨도 좋고, 멍멍이도 신나서 정말 즐거운 시간이었답니다. 앞으로도 자주 함께 달려야겠어요!",
-    }),
-    [id],
-  );
-
-  useEffect(() => {
-    setFeedDetail(dummyFeedDetail);
-  }, [dummyFeedDetail]);
+  const { data: feedDetail, isLoading, isError, refetch } =
+    useTrackingDetailQuery(id);
 
   const runDateLabel = feedDetail
     ? `${feedDetail.date.getFullYear()}.${feedDetail.date.getMonth() + 1}.${feedDetail.date.getDate()} 산책`
@@ -57,10 +40,28 @@ const FeedDetailIndex = () => {
     }
   };
 
-  if (!feedDetail) {
+  if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-[#F7F7F7]">
         <Spinner size="large" color="#F25857" />
+      </View>
+    );
+  }
+
+  if (isError || !feedDetail) {
+    return (
+      <View
+        style={{ paddingTop: insets.top }}
+        className="flex-1 items-center justify-center bg-[#F7F7F7] px-8"
+      >
+        <Text className="mb-4 text-center text-sm text-gray-500">
+          피드를 불러오지 못했어요.
+        </Text>
+        <Pressable onPress={() => refetch()}>
+          <Text className="text-sm font-semibold text-[#F25857]">
+            다시 시도
+          </Text>
+        </Pressable>
       </View>
     );
   }
