@@ -22,6 +22,8 @@ const EMPTY_RUN_DATA = {
   stopTime: null as Date | null,
   title: "",
   contents: "",
+  /** 서버 트래킹 기록 ID — 일기 등록 시 필요 */
+  trackingId: null as string | null,
 };
 
 interface RunState {
