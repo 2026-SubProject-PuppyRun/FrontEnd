@@ -1,18 +1,40 @@
+import { RefreshControl } from "@/components/ui/refresh-control";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import HomeSummarySwiper from "../../swiper/HomeSummarySwiper";
-import WalkScoreBoard from "./WalkScoreBoard";
+import WalkScoreBoard, {
+  type WalkScoreBoardHandle,
+} from "./WalkScoreBoard";
 
 const HomeDashBoard = () => {
   const router = useRouter();
+  const walkScoreRef = useRef<WalkScoreBoardHandle>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await walkScoreRef.current?.refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   return (
     <ScrollView
       className="flex-1"
       contentContainerStyle={{ paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#F25857"
+          colors={["#F25857"]}
+        />
+      }
     >
       <HomeSummarySwiper />
 
@@ -38,7 +60,7 @@ const HomeDashBoard = () => {
         </Pressable>
       </View>
 
-      <WalkScoreBoard />
+      <WalkScoreBoard ref={walkScoreRef} />
     </ScrollView>
   );
 };
