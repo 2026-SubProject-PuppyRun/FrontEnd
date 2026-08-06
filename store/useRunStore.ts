@@ -1,6 +1,7 @@
 import { calculatePaceFromDistanceAndTime } from "@/util/run/calcPace";
 import { getRouteDistanceMeters } from "@/util/run/getRouteDistance";
 import { resetPaceTracking } from "@/util/run/recordRunLocation";
+import { submitWalkDiary } from "@/util/run/submitWalkDiary";
 import { create } from "zustand";
 
 interface Coordinate {
@@ -179,11 +180,6 @@ export const useRunStore = create<RunState>((set) => ({
     }),
 
   submitRunData: async (title, contents) => {
-    const { runData } = useRunStore.getState();
-    if (!runData?.route?.length) {
-      throw new Error("No run data to submit");
-    }
-    // TODO: API 연동 후 서버 저장
-    console.log("submitData :", { ...runData, title, contents });
+    await submitWalkDiary(title, contents);
   },
 }));

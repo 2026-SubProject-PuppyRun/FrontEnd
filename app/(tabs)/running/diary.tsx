@@ -6,12 +6,15 @@ import { EditIcon } from "@/components/ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
+import { useCustomToast } from "@/hooks/use-custom-toast";
 import useNonNavbar from "@/hooks/use-non-navbar";
 import { useRunStore } from "@/store/useRunStore";
+import { ApiError } from "@/util/api";
 import { getRunResultStats } from "@/util/run/getRunResultStats";
 import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,6 +27,7 @@ const Diary = () => {
   const insets = useSafeAreaInsets();
   const runData = useRunStore((state) => state.runData);
   const { distanceKm, totalTimeLabel, paceLabel } = getRunResultStats(runData);
+  const { showToast } = useCustomToast();
 
   const year = runData?.stopTime?.getFullYear() ?? new Date().getFullYear();
   const month = runData?.stopTime
@@ -33,6 +37,7 @@ const Diary = () => {
 
   const [title, setTitle] = useState("");
   const [contents, setContents] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
   const [showAlert, setShowAlert] = useState(false);
@@ -41,14 +46,27 @@ const Diary = () => {
   useNonNavbar();
 
   const onFormSubmit = async () => {
+    if (isSubmitting) return;
+
     try {
+      setIsSubmitting(true);
       isSubmitRef.current = true;
       await useRunStore.getState().submitRunData(title, contents);
       useRunStore.getState().resetRunSession();
+      showToast({ message: "산책 일기가 저장되었습니다!" });
       router.replace("/");
     } catch (error) {
       console.error("데이터 제출 실패:", error);
       isSubmitRef.current = false;
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "일기 저장에 실패했습니다. 다시 시도해 주세요.";
+      showToast({ message });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -62,10 +80,7 @@ const Diary = () => {
   }, [navigation]);
 
   return (
-    <View
-      style={{ paddingTop: insets.top }}
-      className="flex-1 bg-[#F7F7F7]"
-    >
+    <View style={{ paddingTop: insets.top }} className="flex-1 bg-[#F7F7F7]">
       <Header showLogo logoWidth={189} logoHeight={50} />
 
       <KeyboardAvoidingView
@@ -88,6 +103,7 @@ const Diary = () => {
                 placeholder="제목을 입력해주세요..."
                 value={title}
                 onChangeText={setTitle}
+                maxLength={100}
                 className="text-[#0D0F1B]"
               />
               <InputSlot className="pl-3">
@@ -133,12 +149,19 @@ const Diary = () => {
           >
             <Pressable
               onPress={onFormSubmit}
+              disabled={isSubmitting}
               className="h-full w-full items-center justify-center"
-              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+              style={({ pressed }) =>
+                pressed || isSubmitting ? { opacity: 0.85 } : undefined
+              }
             >
-              <Text className="text-lg font-semibold text-white">
-                저장 하기
-              </Text>
+              {isSubmitting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text className="text-lg font-semibold text-white">
+                  저장 하기
+                </Text>
+              )}
             </Pressable>
           </RedButtonSurface>
         </View>
