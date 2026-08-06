@@ -1,3 +1,16 @@
+export interface FeedDetailPet {
+  petId: string;
+  name: string;
+  profileImageUrl: string;
+  color: string;
+}
+
+export interface FeedDetailWeather {
+  temp: string;
+  sky: string;
+  pty: string;
+}
+
 export interface FeedDetail {
   id: string;
   contents?: string;
@@ -9,4 +22,7 @@ export interface FeedDetail {
   distance: number;
   duration: number;
   date: Date;
+  diaryId?: string;
+  weather?: FeedDetailWeather;
+  pets?: FeedDetailPet[];
 }
