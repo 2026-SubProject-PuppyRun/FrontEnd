@@ -6,7 +6,7 @@ import CustomAlert from "@/components/modal/CustomAlert";
 import RunLogoSvg from "@/components/svg/RunLogoSvg";
 import { useRunStore } from "@/store/useRunStore";
 import { useNavigation, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -23,6 +23,16 @@ const Summary = () => {
   const [showAlert, setShowAlert] = useState(false);
 
   const isIntentionalExit = useRef(false);
+
+  const fitEdgePadding = useMemo(
+    () => ({
+      top: insets.top + LOGO_HEIGHT + 28,
+      right: 40,
+      bottom: 40,
+      left: 40,
+    }),
+    [insets.top],
+  );
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
@@ -46,12 +56,7 @@ const Summary = () => {
           onMapLoad={() => setIsMapLoaded(true)}
           isSummary={true}
           style="dark"
-          fitEdgePadding={{
-            top: insets.top + LOGO_HEIGHT + 24,
-            right: LOGO_WIDTH + 32,
-            bottom: 48,
-            left: 48,
-          }}
+          fitEdgePadding={fitEdgePadding}
         >
           {isMapLoaded && finalRoute.length > 0 && (
             <RunRoutePolyline
