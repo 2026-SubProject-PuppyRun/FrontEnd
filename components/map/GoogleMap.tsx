@@ -69,10 +69,19 @@ const GoogleMap = ({
         initialDelayMs: 0,
         maxAttempts: 2,
       });
-      setCoordinates({
+      const next = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-      });
+      };
+      setCoordinates(next);
+      mapRef.current?.animateToRegion(
+        {
+          ...next,
+          latitudeDelta: DEFAULT_REGION.latitudeDelta,
+          longitudeDelta: DEFAULT_REGION.longitudeDelta,
+        },
+        500,
+      );
     } catch (error) {
       console.error("위치 이동 실패:", error);
     }
@@ -152,20 +161,6 @@ const GoogleMap = ({
       locationSubscription.current = null;
     };
   }, [permission]);
-
-  useEffect(() => {
-    if (!mapRef.current || !isLocationInitialized.current) return;
-
-    mapRef.current.animateToRegion(
-      {
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
-        latitudeDelta: DEFAULT_REGION.latitudeDelta,
-        longitudeDelta: DEFAULT_REGION.longitudeDelta,
-      },
-      500,
-    );
-  }, [coordinates]);
 
   useEffect(() => {
     if (selectedRoute && selectedRoute.length > 0 && mapRef.current) {
