@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const HEADING_ANIMATION_MS = 280;
+const HEADING_ANIMATION_MS = 420;
 
 type RunLocationMarkerProps = {
   latitude: number;

@@ -4,18 +4,18 @@ import {
   calculatePaceFromDistanceAndTime,
 } from "@/util/run/calcPace";
 import { getRouteDistanceMeters } from "@/util/run/getRouteDistance";
-import { getDistance, getPathLength } from "geolib";
+import {
+  resetGpsFilter,
+  shouldAcceptRecordPoint,
+  type GpsCoords,
+} from "@/util/run/gpsFilter";
+import { getPathLength } from "geolib";
 import { AppState } from "react-native";
 
 export type LocationRecordSource = "watch" | "task";
 
-type LocationCoords = {
-  latitude: number;
-  longitude: number;
-  speed?: number | null;
-};
+type LocationCoords = GpsCoords;
 
-const MIN_RECORD_DISTANCE_M = 2;
 const TASK_STOP_DELAY_MS = 400;
 const CURRENT_PACE_WINDOW_MS = 30_000;
 const MIN_CURRENT_PACE_DISTANCE_M = 8;
@@ -36,6 +36,7 @@ export const getTaskStopDelayMs = () => TASK_STOP_DELAY_MS;
 export const resetPaceTracking = () => {
   latestCoords = null;
   recentSamples = [];
+  resetGpsFilter();
 };
 
 /** 포그라운드: watch만, 백그라운드: task만 기록 */
@@ -47,12 +48,6 @@ export const shouldRecordFromSource = (source: LocationRecordSource) => {
 const getLastRecordedPoint = () => {
   const flat = useRunStore.getState().actualRoute.flat();
   return flat.length > 0 ? flat[flat.length - 1] : null;
-};
-
-const isFarEnoughFromLast = (coords: LocationCoords) => {
-  const last = getLastRecordedPoint();
-  if (!last) return true;
-  return getDistance(last, coords) >= MIN_RECORD_DISTANCE_M;
 };
 
 export const getElapsedRunSeconds = () => {
@@ -139,7 +134,7 @@ export const updateRunPaceMetrics = (coords?: LocationCoords) => {
 };
 
 const appendLocation = (coords: LocationCoords) => {
-  if (!isFarEnoughFromLast(coords)) return false;
+  if (!shouldAcceptRecordPoint(coords, getLastRecordedPoint())) return false;
 
   useRunStore.getState().addActualLocation({
     latitude: coords.latitude,
