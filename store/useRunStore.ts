@@ -30,6 +30,8 @@ const EMPTY_RUN_DATA = {
 interface RunState {
   recommendedRoutes: Coordinate[][] | null;
   selectedRoute: Coordinate[] | null;
+  /** 이번 산책에 참여할 반려견 ID 목록 */
+  selectedPetIds: string[];
   actualRoute: Coordinate[][];
   currentLocation: Coordinate | null;
   isRunning: boolean;
@@ -38,6 +40,7 @@ interface RunState {
 
   setRecommendedRoutes: (routes: Coordinate[][] | null) => void;
   setSelectedRoute: (route: Coordinate[] | null) => void;
+  setSelectedPetIds: (petIds: string[]) => void;
   setCurrentLocation: (location: Coordinate) => void;
   startRun: () => void;
   stopRun: () => void;
@@ -53,6 +56,7 @@ interface RunState {
 export const useRunStore = create<RunState>((set) => ({
   recommendedRoutes: null,
   selectedRoute: null,
+  selectedPetIds: [],
   actualRoute: [[]],
   currentLocation: null,
   isRunning: false,
@@ -62,6 +66,8 @@ export const useRunStore = create<RunState>((set) => ({
   setRecommendedRoutes: (routes) => set({ recommendedRoutes: routes }),
 
   setSelectedRoute: (route) => set({ selectedRoute: route }),
+
+  setSelectedPetIds: (petIds) => set({ selectedPetIds: petIds }),
 
   setCurrentLocation: (location) => set({ currentLocation: location }),
 
@@ -138,6 +144,7 @@ export const useRunStore = create<RunState>((set) => ({
     set({
       isRunning: false,
       isPaused: false,
+      selectedPetIds: [],
       actualRoute: [[]],
       runData: { ...EMPTY_RUN_DATA },
     });

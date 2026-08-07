@@ -43,9 +43,13 @@ export const submitWalkTracking = async (
     throw new Error("저장할 산책 경로가 없습니다.");
   }
 
+  const selectedPetIds = useRunStore.getState().selectedPetIds;
   const petList = usePetStore.getState().petList ?? [];
-  // const petIdList = petList.map((pet) => pet.petId).filter(Boolean); 
-  const petIdList = ["d1f01c51-fabf-4e14-9831-32a182ca752a"]; // 참여한 반려견 더미 데이터
+  const petIdList =
+    selectedPetIds.length > 0
+      ? selectedPetIds
+      : petList.map((pet) => pet.petId).filter(Boolean);
+
   if (petIdList.length === 0) {
     throw new Error("산책에 참여한 반려견 정보가 없습니다.");
   }

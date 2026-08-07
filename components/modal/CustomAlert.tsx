@@ -19,6 +19,7 @@ interface CustomAlertProps {
   onConfirm?: () => void;
   confirmText?: string;
   cancelText?: string;
+  confirmDisabled?: boolean;
   children?: React.ReactNode;
 }
 
@@ -30,6 +31,7 @@ const CustomAlert = ({
   onConfirm,
   confirmText = "확인",
   cancelText = "취소",
+  confirmDisabled = false,
   children,
 }: CustomAlertProps) => {
   return (
@@ -78,11 +80,17 @@ const CustomAlert = ({
           </Pressable>
           <Pressable
             onPress={() => {
+              if (confirmDisabled) return;
               onConfirm?.();
               handleClose();
             }}
-            className="h-12 flex-1 items-center justify-center rounded-2xl bg-[#F25857]"
-            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+            disabled={confirmDisabled}
+            className={`h-12 flex-1 items-center justify-center rounded-2xl ${
+              confirmDisabled ? "bg-[#F25857]/40" : "bg-[#F25857]"
+            }`}
+            style={({ pressed }) =>
+              pressed && !confirmDisabled ? { opacity: 0.85 } : undefined
+            }
           >
             <Text className="text-sm font-semibold text-white">{confirmText}</Text>
           </Pressable>
