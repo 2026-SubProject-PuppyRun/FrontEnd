@@ -9,7 +9,7 @@ import { getCurrentPositionWithRetry } from "@/util/location";
 import { recordRunLocation } from "@/util/run/recordRunLocation";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Spinner } from "../ui/spinner";
@@ -26,6 +26,23 @@ const DEFAULT_REGION: Region = {
   longitude: -122.4324,
   latitudeDelta: 0.005,
   longitudeDelta: 0.005,
+};
+
+const DEFAULT_SUMMARY_PADDING = {
+  top: 48,
+  right: 48,
+  bottom: 48,
+  left: 48,
+};
+
+const getRouteCenter = (
+  route: { latitude: number; longitude: number }[],
+) => {
+  const mid = route[Math.floor(route.length / 2)] ?? route[0];
+  return {
+    latitude: mid.latitude,
+    longitude: mid.longitude,
+  };
 };
 
 interface GoogleMapProps {
@@ -48,12 +65,9 @@ const GoogleMap = ({
   style,
   fitEdgePadding,
 }: GoogleMapProps) => {
-  const [coordinates, setCoordinates] = useState({
-    latitude: DEFAULT_REGION.latitude,
-    longitude: DEFAULT_REGION.longitude,
-  });
   const permission = useLocationPermission();
   const mapRef = React.useRef<MapView>(null);
+  const isMapReady = React.useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const isLocationInitialized = React.useRef(false);
@@ -63,22 +77,79 @@ const GoogleMap = ({
   const finalRoute = useRunStore((state) => state.runData?.route);
   const heading = useCompassHeading(permission === true && !isSummary);
 
+  const summaryRoute = useMemo(
+    () => (isSummary ? finalRoute ?? [] : []),
+    [isSummary, finalRoute],
+  );
+
+  const [coordinates, setCoordinates] = useState(() =>
+    summaryRoute.length > 0
+      ? getRouteCenter(summaryRoute)
+      : {
+          latitude: DEFAULT_REGION.latitude,
+          longitude: DEFAULT_REGION.longitude,
+        },
+  );
+
+  const edgePadding = fitEdgePadding ?? DEFAULT_SUMMARY_PADDING;
+
+  const fitSummaryRoute = useCallback(() => {
+    if (!isSummary || !mapRef.current || summaryRoute.length === 0) return;
+
+    mapRef.current.fitToCoordinates(summaryRoute, {
+      edgePadding,
+      animated: false,
+    });
+  }, [isSummary, summaryRoute, edgePadding]);
+
+  const handleMapReady = () => {
+    isMapReady.current = true;
+    fitSummaryRoute();
+    onMapLoad();
+  };
+
   const moveToMyLocation = async () => {
     try {
       const location = await getCurrentPositionWithRetry({
         initialDelayMs: 0,
         maxAttempts: 2,
       });
-      setCoordinates({
+      const next = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-      });
+      };
+      setCoordinates(next);
+      mapRef.current?.animateToRegion(
+        {
+          ...next,
+          latitudeDelta: DEFAULT_REGION.latitudeDelta,
+          longitudeDelta: DEFAULT_REGION.longitudeDelta,
+        },
+        500,
+      );
     } catch (error) {
       console.error("위치 이동 실패:", error);
     }
   };
 
+  // 요약 화면: GPS 없이 루트 기준으로 바로 표시
   useEffect(() => {
+    if (!isSummary) return;
+
+    if (summaryRoute.length === 0) {
+      setErrorMsg("표시할 산책 경로가 없습니다.");
+      setIsLoading(false);
+      return;
+    }
+
+    setCoordinates(getRouteCenter(summaryRoute));
+    setErrorMsg(null);
+    setIsLoading(false);
+  }, [isSummary, summaryRoute]);
+
+  // 일반 맵: 현재 위치 초기화
+  useEffect(() => {
+    if (isSummary) return;
     if (permission === null || isLocationInitialized.current) return;
 
     if (permission === false) {
@@ -113,10 +184,11 @@ const GoogleMap = ({
     };
 
     void initLocation();
-  }, [permission]);
+  }, [isSummary, permission]);
 
+  // 일반 맵: 위치 추적 (요약에서는 불필요)
   useEffect(() => {
-    if (permission !== true) return;
+    if (isSummary || permission !== true) return;
 
     const startWatch = async () => {
       if (locationSubscription.current) return;
@@ -151,23 +223,12 @@ const GoogleMap = ({
       locationSubscription.current?.remove();
       locationSubscription.current = null;
     };
-  }, [permission]);
+  }, [isSummary, permission]);
 
+  // 추천 경로 선택 시 fit (요약 화면에서는 건너뜀)
   useEffect(() => {
-    if (!mapRef.current || !isLocationInitialized.current) return;
+    if (isSummary) return;
 
-    mapRef.current.animateToRegion(
-      {
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
-        latitudeDelta: DEFAULT_REGION.latitudeDelta,
-        longitudeDelta: DEFAULT_REGION.longitudeDelta,
-      },
-      500,
-    );
-  }, [coordinates]);
-
-  useEffect(() => {
     if (selectedRoute && selectedRoute.length > 0 && mapRef.current) {
       setTimeout(() => {
         mapRef.current?.fitToCoordinates(selectedRoute, {
@@ -190,29 +251,23 @@ const GoogleMap = ({
         500,
       );
     }
-
-    if (selectedRoute === undefined) {
-      console.log("⚠️ selectedRoute가 undefined 입니다. 초기화 대기 중");
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRoute]);
+  }, [isSummary, selectedRoute]);
 
+  // 요약: 맵 준비 후 / 루트 변경 시 전체 경로로 고정
   useEffect(() => {
-    const watchedRoute = finalRoute || [];
-    if (isSummary && watchedRoute.length > 0 && mapRef.current) {
-      setTimeout(() => {
-        mapRef.current?.fitToCoordinates(watchedRoute, {
-          edgePadding: fitEdgePadding ?? {
-            top: 48,
-            right: 48,
-            bottom: 48,
-            left: 48,
-          },
-          animated: true,
-        });
-      }, 500);
-    }
-  }, [isSummary, finalRoute, fitEdgePadding]);
+    if (!isSummary || !isMapReady.current || summaryRoute.length === 0) return;
+
+    const frame = requestAnimationFrame(() => {
+      fitSummaryRoute();
+    });
+    const timer = setTimeout(fitSummaryRoute, 300);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
+  }, [isSummary, summaryRoute, fitSummaryRoute]);
 
   if (isLoading === true) {
     return (
@@ -233,7 +288,8 @@ const GoogleMap = ({
   return (
     <View className="flex-1">
       <MapView
-        onMapReady={onMapLoad}
+        onMapReady={handleMapReady}
+        onLayout={isSummary ? fitSummaryRoute : undefined}
         ref={mapRef}
         style={{ width: "100%", height: "100%" }}
         initialRegion={{
@@ -246,14 +302,15 @@ const GoogleMap = ({
         customMapStyle={
           style === "dark" ? GOOGLE_MAP_DARK_STYLE : GOOGLE_MAP_SILVER_STYLE
         }
-        showsCompass
-        showsScale
+        showsCompass={!isSummary}
+        showsScale={!isSummary}
         mapType="standard"
         zoomEnabled={!isSummary}
         scrollEnabled={!isSummary}
         pitchEnabled={!isSummary}
         rotateEnabled={!isSummary}
         showsMyLocationButton={false}
+        pointerEvents={isSummary ? "none" : "auto"}
       >
         {!isSummary && (
           <RunLocationMarker
