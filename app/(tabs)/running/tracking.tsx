@@ -74,6 +74,7 @@ const Tracking = () => {
             coordinates={selectedRoute}
             strokeWidth={5}
             strokeColor="#F25857"
+            zIndex={1}
           />
         )}
         {actualRoute.map(
@@ -84,10 +85,10 @@ const Tracking = () => {
                 coordinates={segment}
                 strokeWidth={5}
                 strokeColor="#F25857"
+                zIndex={1}
               />
             ),
         )}
-
         {actualRoute.map((segment, index) => {
           if (index >= actualRoute.length - 1) return null;
 
@@ -103,6 +104,7 @@ const Tracking = () => {
               strokeWidth={5}
               strokeColor="#999999"
               lineDashPattern={[5, 5]}
+              zIndex={1}
             />
           );
         })}

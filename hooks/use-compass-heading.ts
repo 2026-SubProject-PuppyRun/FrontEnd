@@ -6,17 +6,16 @@ import {
 import { Magnetometer } from "expo-sensors";
 import { useEffect, useRef, useState } from "react";
 
-/** 센서 샘플 주기 — 너무 잦으면 노이즈만 늘어남 */
-const UPDATE_INTERVAL_MS = 350;
+const UPDATE_INTERVAL_MS = 100;
 
-/** EMA 계수 (작을수록 둔함) */
-const SMOOTH_ALPHA = 0.18;
+/** EMA — 반응성 우선 */
+const SMOOTH_ALPHA = 0.45;
 
-/** 이보다 작은 변화는 UI에 반영하지 않음 */
-const PUBLISH_DEADZONE_DEG = 6;
+/** UI 반영 최소 각도 */
+const PUBLISH_DEADZONE_DEG = 2;
 
-/** 연속 샘플 내부 스무딩용 deadzone */
-const SAMPLE_DEADZONE_DEG = 3;
+/** 샘플 스무딩 deadzone */
+const SAMPLE_DEADZONE_DEG = 1;
 
 export const useCompassHeading = (enabled: boolean) => {
   const [heading, setHeading] = useState(0);

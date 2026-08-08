@@ -8,18 +8,22 @@ export type GpsCoords = {
 };
 
 /** 이보다 나쁜(큰) accuracy면 무시 */
-export const MAX_ACCURACY_M = 35;
+export const MAX_ACCURACY_M = 40;
 
-/** 폴리라인 기록 최소 이동 (실기기 GPS 흔들림 ~3–10m) */
+/** 폴리라인 기록 최소 이동 — 표시와 분리해 지터만 강하게 막음 */
 export const MIN_RECORD_DISTANCE_M = 10;
 
-/** 마커 표시 갱신 최소 이동 */
-export const MIN_MARKER_MOVE_M = 5;
+/** 마커 표시: 이보다 작으면 정지 지터로 보고 고정 */
+export const MIN_MARKER_MOVE_M = 1.5;
 
-/** 사실상 정지 속도 (m/s) — 이하면 기록 억제 */
-export const STATIONARY_SPEED_MPS = 0.45;
+/** 사실상 정지 속도 (m/s) */
+export const STATIONARY_SPEED_MPS = 0.4;
 
-const EMA_ALPHA = 0.28;
+/** 이동 중 마커 추종 EMA (클수록 빠름) */
+const MOVING_EMA_ALPHA = 0.72;
+
+/** 정지 근처 미세 이동 EMA */
+const IDLE_EMA_ALPHA = 0.35;
 
 let smoothedDisplay: { latitude: number; longitude: number } | null = null;
 
@@ -61,7 +65,6 @@ export const shouldAcceptRecordPoint = (
 
   if (distance < noiseFloor) return false;
 
-  // 속도가 거의 0인데 점만 튀는 경우 차단
   if (
     coords.speed != null &&
     coords.speed >= 0 &&
@@ -76,8 +79,7 @@ export const shouldAcceptRecordPoint = (
 
 /**
  * 맵 마커용 좌표.
- * 작은 흔들림은 고정하고, 의미 있는 이동만 EMA로 따라간다.
- * 부정확한 fix는 이전 표시 좌표를 유지한다.
+ * 기록(폴리라인)보다 느슨하게 따라가 체감 지연을 줄인다.
  */
 export const getSmoothedDisplayCoords = (
   coords: GpsCoords,
@@ -95,27 +97,23 @@ export const getSmoothedDisplayCoords = (
   }
 
   const distance = getDistance(smoothedDisplay, coords);
-  if (distance < MIN_MARKER_MOVE_M) {
+  const isMoving =
+    coords.speed == null || coords.speed >= STATIONARY_SPEED_MPS;
+
+  // 정지 상태의 아주 작은 흔들림만 고정
+  if (!isMoving && distance < MIN_MARKER_MOVE_M) {
     return smoothedDisplay;
   }
 
-  // 정지에 가까우면 마커를 붙잡아 둔다
-  if (
-    coords.speed != null &&
-    coords.speed >= 0 &&
-    coords.speed < STATIONARY_SPEED_MPS &&
-    distance < MIN_MARKER_MOVE_M * 2
-  ) {
-    return smoothedDisplay;
-  }
+  const alpha = isMoving || distance >= 4 ? MOVING_EMA_ALPHA : IDLE_EMA_ALPHA;
 
   smoothedDisplay = {
     latitude:
       smoothedDisplay.latitude +
-      EMA_ALPHA * (coords.latitude - smoothedDisplay.latitude),
+      alpha * (coords.latitude - smoothedDisplay.latitude),
     longitude:
       smoothedDisplay.longitude +
-      EMA_ALPHA * (coords.longitude - smoothedDisplay.longitude),
+      alpha * (coords.longitude - smoothedDisplay.longitude),
   };
   return smoothedDisplay;
 };

@@ -40,10 +40,10 @@ const DEFAULT_SUMMARY_PADDING = {
   left: 48,
 };
 
-/** GPS course를 신뢰할 최소 속도 (m/s) */
-const GPS_HEADING_MIN_SPEED_MPS = 0.8;
-const GPS_HEADING_SMOOTH_ALPHA = 0.25;
-const GPS_HEADING_DEADZONE_DEG = 5;
+/** GPS course를 신뢰할 최소 속도 (m/s) — 너무 낮으면 해딩이 늦게 바뀜 */
+const GPS_HEADING_MIN_SPEED_MPS = 1.4;
+const GPS_HEADING_SMOOTH_ALPHA = 0.4;
+const GPS_HEADING_DEADZONE_DEG = 3;
 
 const getRouteCenter = (
   route: { latitude: number; longitude: number }[],
@@ -359,6 +359,7 @@ const GoogleMap = ({
         showsMyLocationButton={false}
         pointerEvents={isSummary ? "none" : "auto"}
       >
+        {children}
         {!isSummary && (
           <RunLocationMarker
             latitude={coordinates.latitude}
@@ -366,7 +367,6 @@ const GoogleMap = ({
             heading={heading}
           />
         )}
-        {children}
       </MapView>
       {!isSummary && (
         <TouchableOpacity

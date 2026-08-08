@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const HEADING_ANIMATION_MS = 420;
+const HEADING_ANIMATION_MS = 140;
 
 type RunLocationMarkerProps = {
   latitude: number;
@@ -53,7 +53,7 @@ const RunLocationMarker = ({
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
       tracksViewChanges={tracksViewChanges}
-      zIndex={10}
+      zIndex={999}
       flat
     >
       <Animated.View
