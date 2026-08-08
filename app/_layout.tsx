@@ -1,9 +1,11 @@
 import "@/tasks/backgroundLocationTask";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import CustomAlert from "@/components/modal/CustomAlert";
+import AnimatedSplashScreen from "@/components/splash/AnimatedSplashScreen";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { DUMMY_PET_LIST } from "@/constants/dummyPetList";
 import "@/global.css";
@@ -13,14 +15,32 @@ import notifee from "@notifee/react-native";
 import { onMessage } from "@react-native-firebase/messaging";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Device from "expo-device";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Linking } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
 export default function RootLayout() {
   const queryClient = new QueryClient();
   const setPetList = usePetStore((state) => state.setPetList);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
   const dummyBreedSignature = DUMMY_PET_LIST.map((p) => p.breedCode).join(",");
+
+  const onAnimatedSplashReady = useCallback(() => {
+    SplashScreen.hideAsync().catch(() => undefined);
+  }, []);
+
+  const onAnimatedSplashFinish = useCallback(() => {
+    setShowAnimatedSplash(false);
+  }, []);
+
+  useEffect(() => {
+    if (showAnimatedSplash) {
+      onAnimatedSplashReady();
+    }
+  }, [showAnimatedSplash, onAnimatedSplashReady]);
 
   useEffect(() => {
     const fetchPetList = async () => {
@@ -98,6 +118,9 @@ export default function RootLayout() {
                 setModalVisible(false);
               }}
             />
+            {showAnimatedSplash ? (
+              <AnimatedSplashScreen onFinish={onAnimatedSplashFinish} />
+            ) : null}
           </GestureHandlerRootView>
         </GluestackUIProvider>
       </QueryClientProvider>
