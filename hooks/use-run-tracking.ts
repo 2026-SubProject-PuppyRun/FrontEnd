@@ -1,5 +1,6 @@
 import { RUN_LOCATION_TRACKING } from "@/constants/locationTracking";
 import { requestLocationPermission } from "@/hooks/use-location-permission";
+import { openPermissionModal } from "@/store/usePermissionModalStore";
 import { LOCATION_TASK_NAME } from "@/tasks/backgroundLocationTask";
 import { useRunStore } from "@/store/useRunStore";
 import {
@@ -35,28 +36,20 @@ const ensureBackgroundPermission = async () => {
   if (!hasForeground) return false;
 
   if (!background.canAskAgain) {
-    Alert.alert(
-      "백그라운드 위치 권한",
-      "화면을 끈 상태에서도 경로를 기록하려면 설정에서 위치를 '항상 허용'으로 바꿔 주세요.",
-      [
-        { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-        { text: "확인", style: "cancel" },
-      ],
-    );
+    openPermissionModal({
+      kind: "backgroundLocation",
+      onConfirm: () => Linking.openSettings(),
+    });
     return false;
   }
 
   const { status } = await Location.requestBackgroundPermissionsAsync();
   if (status === "granted") return true;
 
-  Alert.alert(
-    "백그라운드 위치 권한",
-    "화면을 켠 상태에서는 경로가 기록됩니다. 백그라운드 기록이 필요하면 설정에서 '항상 허용'을 선택해 주세요.",
-    [
-      { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-      { text: "확인", style: "cancel" },
-    ],
-  );
+  openPermissionModal({
+    kind: "backgroundLocation",
+    onConfirm: () => Linking.openSettings(),
+  });
   return false;
 };
 

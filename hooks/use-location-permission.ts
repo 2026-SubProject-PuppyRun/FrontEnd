@@ -1,6 +1,8 @@
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, AppState, Linking, Platform } from "react-native";
+import { AppState, Linking } from "react-native";
+
+import { openPermissionModal } from "@/store/usePermissionModalStore";
 
 type PermissionState = boolean | null;
 
@@ -18,24 +20,15 @@ const openSettingsAlert = () => {
   if (hasPromptedSettings) return;
   hasPromptedSettings = true;
 
-  Alert.alert(
-    "위치 권한 필요",
-    Platform.select({
-      ios: "설정 > 퍼피런 > 위치에서 '앱을 사용하는 동안'을 허용해 주세요.",
-      android: "설정 > 앱 > 퍼피런 > 권한 > 위치에서 허용해 주세요.",
-      default: "설정에서 위치 권한을 허용해 주세요.",
-    }),
-    [
-      { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-      {
-        text: "취소",
-        style: "cancel",
-        onPress: () => {
-          hasPromptedSettings = false;
-        },
-      },
-    ],
-  );
+  openPermissionModal({
+    kind: "location",
+    onConfirm: () => {
+      Linking.openSettings();
+    },
+    onCancel: () => {
+      hasPromptedSettings = false;
+    },
+  });
 };
 
 /**

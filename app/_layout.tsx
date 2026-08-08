@@ -4,11 +4,12 @@ import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import CustomAlert from "@/components/modal/CustomAlert";
+import PermissionAlert from "@/components/modal/PermissionAlert";
 import AnimatedSplashScreen from "@/components/splash/AnimatedSplashScreen";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { DUMMY_PET_LIST } from "@/constants/dummyPetList";
 import "@/global.css";
+import { openPermissionModal } from "@/store/usePermissionModalStore";
 import { usePetStore } from "@/store/usePetStore";
 import { getFirebaseMessaging, initFCM } from "@/util/notification";
 import notifee from "@notifee/react-native";
@@ -24,7 +25,6 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
 export default function RootLayout() {
   const queryClient = new QueryClient();
   const setPetList = usePetStore((state) => state.setPetList);
-  const [modalVisible, setModalVisible] = useState(false);
   const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
   const dummyBreedSignature = DUMMY_PET_LIST.map((p) => p.breedCode).join(",");
 
@@ -47,14 +47,6 @@ export default function RootLayout() {
       // Todo API 연동 — 연동 전까지 더미 데이터 사용
       setPetList(DUMMY_PET_LIST, DUMMY_PET_LIST.length);
     };
-    async function requestNotificationPermission() {
-      const settings = await notifee.requestPermission();
-      if (settings.authorizationStatus === 0) {
-        // TODO: 유저에게 권한이 필요하다는 안내 모달 띄우기
-        setModalVisible(true);
-      }
-    }
-    requestNotificationPermission();
     fetchPetList();
 
     let unsubscribeForeground: (() => void) | undefined;
@@ -100,24 +92,37 @@ export default function RootLayout() {
     };
   }, [setPetList, dummyBreedSignature]);
 
+  // 스플래시가 끝난 뒤 알림 권한 안내
+  useEffect(() => {
+    if (showAnimatedSplash) return;
+
+    let cancelled = false;
+    const requestNotificationPermission = async () => {
+      const settings = await notifee.requestPermission();
+      if (cancelled) return;
+      if (settings.authorizationStatus === 0) {
+        openPermissionModal({
+          kind: "notification",
+          onConfirm: () => {
+            Linking.openSettings();
+          },
+        });
+      }
+    };
+
+    void requestNotificationPermission();
+    return () => {
+      cancelled = true;
+    };
+  }, [showAnimatedSplash]);
+
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider mode="dark">
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Stack screenOptions={{ headerShown: false }} />
-            <CustomAlert
-              showAlertDialog={modalVisible}
-              handleClose={() => setModalVisible(false)}
-              title="알림 권한이 필요해요"
-              description="퍼피런에서 알림을 받으려면 권한이 필요해요. 설정에서 권한을 허용해주세요."
-              confirmText="설정으로 이동"
-              cancelText="취소"
-              onConfirm={() => {
-                Linking.openSettings();
-                setModalVisible(false);
-              }}
-            />
+            <PermissionAlert />
             {showAnimatedSplash ? (
               <AnimatedSplashScreen onFinish={onAnimatedSplashFinish} />
             ) : null}
