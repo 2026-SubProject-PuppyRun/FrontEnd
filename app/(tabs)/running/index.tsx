@@ -19,6 +19,7 @@ const Index = () => {
               coordinates={selectedRoute}
               strokeWidth={3}
               strokeColor="#F25857"
+              zIndex={1}
             />
           )}
         </GoogleMap>

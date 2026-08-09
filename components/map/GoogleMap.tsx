@@ -6,10 +6,15 @@ import { useCompassHeading } from "@/hooks/use-compass-heading";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useRunStore } from "@/store/useRunStore";
 import { getCurrentPositionWithRetry } from "@/util/location";
+import {
+  applyHeadingDeadzone,
+  smoothHeading,
+} from "@/util/map/headingFilter";
+import { getSmoothedDisplayCoords, seedDisplayCoords } from "@/util/run/gpsFilter";
 import { recordRunLocation } from "@/util/run/recordRunLocation";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Spinner } from "../ui/spinner";
@@ -34,6 +39,11 @@ const DEFAULT_SUMMARY_PADDING = {
   bottom: 48,
   left: 48,
 };
+
+/** GPS course를 신뢰할 최소 속도 (m/s) — 너무 낮으면 해딩이 늦게 바뀜 */
+const GPS_HEADING_MIN_SPEED_MPS = 1.4;
+const GPS_HEADING_SMOOTH_ALPHA = 0.4;
+const GPS_HEADING_DEADZONE_DEG = 3;
 
 const getRouteCenter = (
   route: { latitude: number; longitude: number }[],
@@ -75,7 +85,12 @@ const GoogleMap = ({
     React.useRef<Location.LocationSubscription | null>(null);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const finalRoute = useRunStore((state) => state.runData?.route);
-  const heading = useCompassHeading(permission === true && !isSummary);
+  const compassHeading = useCompassHeading(permission === true && !isSummary);
+  const [gpsHeading, setGpsHeading] = useState<number | null>(null);
+  const [useGpsHeading, setUseGpsHeading] = useState(false);
+  const gpsHeadingFilteredRef = useRef<number | null>(null);
+
+  const heading = useGpsHeading && gpsHeading != null ? gpsHeading : compassHeading;
 
   const summaryRoute = useMemo(
     () => (isSummary ? finalRoute ?? [] : []),
@@ -118,6 +133,7 @@ const GoogleMap = ({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       };
+      seedDisplayCoords(next);
       setCoordinates(next);
       mapRef.current?.animateToRegion(
         {
@@ -167,10 +183,12 @@ const GoogleMap = ({
         }
 
         const location = await getCurrentPositionWithRetry();
-        setCoordinates({
+        const next = {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-        });
+        };
+        seedDisplayCoords(next);
+        setCoordinates(next);
         setErrorMsg(null);
         isLocationInitialized.current = true;
       } catch (error) {
@@ -196,17 +214,46 @@ const GoogleMap = ({
       locationSubscription.current = await Location.watchPositionAsync(
         MAP_LOCATION_WATCH,
         (location) => {
-          const { latitude, longitude } = location.coords;
+          const coords = location.coords;
+          recordRunLocation(coords, "watch");
 
-          setCoordinates({ latitude, longitude });
-          recordRunLocation(location.coords, "watch");
+          const speed = coords.speed ?? 0;
+          const rawGpsHeading = coords.heading;
+          const hasGpsCourse =
+            speed >= GPS_HEADING_MIN_SPEED_MPS &&
+            rawGpsHeading != null &&
+            rawGpsHeading >= 0;
+
+          if (hasGpsCourse) {
+            const previous = gpsHeadingFilteredRef.current ?? rawGpsHeading;
+            const smoothed = smoothHeading(
+              previous,
+              rawGpsHeading,
+              GPS_HEADING_SMOOTH_ALPHA,
+            );
+            const published = applyHeadingDeadzone(
+              previous,
+              smoothed,
+              GPS_HEADING_DEADZONE_DEG,
+            );
+            gpsHeadingFilteredRef.current = published;
+            setGpsHeading(published);
+            setUseGpsHeading(true);
+          } else {
+            setUseGpsHeading(false);
+          }
+
+          const display = getSmoothedDisplayCoords(coords);
+          if (!display) return;
+
+          setCoordinates(display);
 
           const running = useRunStore.getState().isRunning;
           if (running && mapRef.current) {
             mapRef.current.animateToRegion(
               {
-                latitude,
-                longitude,
+                latitude: display.latitude,
+                longitude: display.longitude,
                 latitudeDelta: DEFAULT_REGION.latitudeDelta,
                 longitudeDelta: DEFAULT_REGION.longitudeDelta,
               },
@@ -312,6 +359,7 @@ const GoogleMap = ({
         showsMyLocationButton={false}
         pointerEvents={isSummary ? "none" : "auto"}
       >
+        {children}
         {!isSummary && (
           <RunLocationMarker
             latitude={coordinates.latitude}
@@ -319,7 +367,6 @@ const GoogleMap = ({
             heading={heading}
           />
         )}
-        {children}
       </MapView>
       {!isSummary && (
         <TouchableOpacity
