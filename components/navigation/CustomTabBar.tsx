@@ -1,6 +1,7 @@
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { Image } from "expo-image";
 import { type Href, router } from "expo-router";
 import { useState } from "react";
 import { LayoutChangeEvent, Pressable, View } from "react-native";
@@ -270,7 +271,12 @@ const CustomTabBar = ({
                     (r) => r.key === runningRoute.key,
                   );
                   const isFocused = state.index === routeIndex;
-                  handleTabPress(navigation, runningRoute, isFocused, "running");
+                  handleTabPress(
+                    navigation,
+                    runningRoute,
+                    isFocused,
+                    "running",
+                  );
                 }}
                 className="h-full w-full items-center justify-center"
                 style={({ pressed }) =>
@@ -281,10 +287,14 @@ const CustomTabBar = ({
                 accessibilityRole="button"
                 accessibilityLabel="산책"
               >
-                <MaterialCommunityIcons
-                  name="dog-side"
-                  size={FAB_ICON_SIZE + 4}
-                  color="#FFFFFF"
+                <Image
+                  source={require("@/assets/images/splash-puppy.png")}
+                  contentFit="contain"
+                  style={{
+                    width: FAB_ICON_SIZE + 12,
+                    height: FAB_ICON_SIZE + 12,
+                  }}
+                  transition={1000}
                 />
               </Pressable>
             </RedButtonSurface>
