@@ -24,6 +24,7 @@ export const usePetStore = create<PetStore>((set) => ({
   totalPetCount: null,
   petList: null,
   setPetList: (petList, totalPetCount) => {
+    // console.log("setPetList", petList, totalPetCount);
     set({ petList, totalPetCount: totalPetCount || petList?.length || 0 });
   },
 }));

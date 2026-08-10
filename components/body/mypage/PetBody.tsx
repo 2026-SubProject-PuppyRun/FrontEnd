@@ -5,16 +5,21 @@ import { usePetStore } from "@/store/usePetStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const PetBody = () => {
   const router = useRouter();
   const petList = usePetStore((state) => state.petList);
   const petCount = petList?.length ?? 0;
+  const insets = useSafeAreaInsets();
 
   return (
     <ScrollView
       className="flex-1 pt-4"
-      contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
+      contentContainerStyle={{
+        paddingHorizontal: 24,
+        paddingBottom: 96 + insets.bottom,
+      }}
       showsVerticalScrollIndicator={false}
     >
       <View className="mb-5 rounded-3xl bg-white px-5 py-5 shadow-sm">

@@ -2,11 +2,10 @@ import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { BREED_DATA } from "@/constants/breedData";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
-import { getBreedDefaultColor, getBreedName } from "@/util/pet";
+import { getBreedDefaultColor } from "@/util/pet";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
 import { ReactNode, useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import DatePicker from "react-native-date-picker";
@@ -84,10 +83,19 @@ const FormSection = ({
 
 interface PetFormProps {
   initialData?: Pet;
-  onSubmit: (data: Partial<Pet>) => void;
+  onSubmit: (data: Partial<Pet>) => void | Promise<void>;
+  isSubmitting?: boolean;
+  onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
-const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
+const PetForm = ({
+  initialData,
+  onSubmit,
+  isSubmitting = false,
+  onDelete,
+  isDeleting = false,
+}: PetFormProps) => {
   const [name, setName] = useState(initialData?.name || "");
   const [birthYear, setBirthYear] = useState<string | null>(
     initialData?.birthYear ?? "",
@@ -96,9 +104,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
     initialData?.weight?.toString() || "",
   );
   const [color, setColor] = useState(initialData?.color || "#F2F2F2");
-  const [breedCode, setBreedCode] = useState(
-    getBreedName(initialData?.breedCode) || "",
-  );
+  const [breedCode, setBreedCode] = useState(initialData?.breedCode || "");
   const [profileImageUrl, setProfileImageUrl] = useState(
     initialData?.profileImageUrl || "",
   );
@@ -114,7 +120,6 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
   const [dateModalOpen, setDateModalOpen] = useState(false);
   const [colorModalOpen, setColorModalOpen] = useState(false);
 
-  const router = useRouter();
   const { showToast } = useCustomToast();
   const submitLabel = initialData ? "저장하기" : "등록하기";
 
@@ -159,12 +164,13 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
   };
 
   const handleSubmit = () => {
+    if (isSubmitting) return;
+
     setHasSubmitted(true);
     const weightNum = Number(weight);
     if (
       !name.trim() ||
       !gender ||
-      birthYear === "" ||
       !weight ||
       isNaN(weightNum) ||
       weightNum <= 0 ||
@@ -183,10 +189,10 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
       return;
     }
 
-    onSubmit({
+    void onSubmit({
       ...initialData,
-      name,
-      birthYear,
+      name: name.trim(),
+      birthYear: birthYear || null,
       weight: weightNum,
       color,
       breedCode,
@@ -194,7 +200,6 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
       isNeutered,
       gender,
     });
-    router.replace("/mypage/pets");
   };
 
   const birthLabel =
@@ -313,7 +318,7 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
             </FormControlError>
           </FormControl>
 
-          <FormControl isInvalid={hasSubmitted && birthYear === ""}>
+          <FormControl>
             <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
               생년월일
             </FormControlLabelText>
@@ -374,12 +379,6 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
                 <CheckboxLabel className="text-[#0D0F1B]">모름</CheckboxLabel>
               </Checkbox>
             </HStack>
-            <FormControlError>
-              <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText>
-                생년월일을 선택하거나 모름을 체크해주세요.
-              </FormControlErrorText>
-            </FormControlError>
           </FormControl>
 
           <FormControl isInvalid={hasSubmitted && !weight}>
@@ -515,14 +514,40 @@ const PetForm = ({ initialData, onSubmit }: PetFormProps) => {
         >
           <Pressable
             onPress={handleSubmit}
+            disabled={isSubmitting || isDeleting}
             className="h-full w-full items-center justify-center"
-            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+            style={({ pressed }) =>
+              pressed || isSubmitting || isDeleting
+                ? { opacity: 0.85 }
+                : undefined
+            }
           >
             <Text className="text-base font-semibold text-white">
-              {submitLabel}
+              {isSubmitting
+                ? initialData
+                  ? "저장 중..."
+                  : "등록 중..."
+                : submitLabel}
             </Text>
           </Pressable>
         </RedButtonSurface>
+
+        {onDelete ? (
+          <Pressable
+            onPress={onDelete}
+            disabled={isSubmitting || isDeleting}
+            className="mt-3 h-14 w-full items-center justify-center rounded-2xl border border-[#FECACA] bg-white"
+            style={({ pressed }) =>
+              pressed || isSubmitting || isDeleting
+                ? { opacity: 0.7 }
+                : undefined
+            }
+          >
+            <Text className="text-base font-semibold text-[#F25857]">
+              {isDeleting ? "삭제 중..." : "반려견 삭제"}
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
 
       <Modal visible={colorModalOpen} transparent animationType="slide">

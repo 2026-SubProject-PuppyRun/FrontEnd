@@ -8,7 +8,7 @@ import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { Text } from "@/components/ui/text";
 import { mbtiResultData } from "@/constants/mbtiResultData";
 import { useCustomToast } from "@/hooks/use-custom-toast";
-import { usePetStore } from "@/store/usePetStore";
+import { ApiError, useUpdatePetMbtiMutation } from "@/util/api";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -61,26 +61,32 @@ const MbtiResultCard = ({
 }: MbtiResultCardProps) => {
   const router = useRouter();
   const { showToast } = useCustomToast();
-  const petList = usePetStore((state) => state.petList);
-  const setPetList = usePetStore((state) => state.setPetList);
+  const { mutateAsync, isPending } = useUpdatePetMbtiMutation();
   const captureViewRef = useRef<View>(null);
 
   const mbtiImage = mbtiImages[resultMbti] || mbtiImages.ENFP;
   const resultInfo = mbtiResultData[resultMbti] ?? mbtiResultData.ENFP;
 
-  const handleSave = () => {
-    if (!petList) return;
+  const handleSave = async () => {
+    if (!petId || isPending) return;
 
-    const updatedList = petList.map((pet) =>
-      pet.petId === petId ? { ...pet, mbti: resultMbti } : pet,
-    );
-    setPetList(updatedList, updatedList.length);
-
-    showToast({
-      message: `${petName}의 멍BTI가 저장되었어요!`,
-      icon: CheckCircleIcon,
-    });
-    router.back();
+    try {
+      await mutateAsync({ petId, mbti: resultMbti });
+      showToast({
+        message: `${petName}의 멍BTI가 저장되었어요!`,
+        icon: CheckCircleIcon,
+      });
+      router.back();
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message || "멍BTI 저장에 실패했어요."
+          : "멍BTI 저장에 실패했어요. 잠시 후 다시 시도해 주세요.";
+      showToast({
+        message,
+        icon: AlertCircleIcon,
+      });
+    }
   };
 
   const handleShare = async () => {
@@ -219,11 +225,20 @@ const MbtiResultCard = ({
           >
             <Pressable
               onPress={isSaved ? onRetake : handleSave}
+              disabled={!isSaved && isPending}
               className="h-full w-full items-center justify-center"
-              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+              style={({ pressed }) =>
+                pressed || (!isSaved && isPending)
+                  ? { opacity: 0.85 }
+                  : undefined
+              }
             >
               <Text className="text-base font-semibold text-white">
-                {isSaved ? "다시 검사하기" : "결과 저장하기"}
+                {isSaved
+                  ? "다시 검사하기"
+                  : isPending
+                    ? "저장 중..."
+                    : "결과 저장하기"}
               </Text>
             </Pressable>
           </RedButtonSurface>

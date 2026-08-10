@@ -1,6 +1,6 @@
 import { delay } from "@/util/location/delay";
 import { getAccessToken } from "./authToken";
-import { ApiError, ApiErrorBody } from "./errors";
+import { ApiError, ApiErrorBody, getApiErrorMessage } from "./errors";
 import type { ApiRequestOptions } from "./types";
 
 const DEFAULT_BASE_URL = process.env.EXPO_PUBLIC_BASE_URL ?? "";
@@ -107,11 +107,11 @@ export async function apiClient<T>(
 
   if (!response.ok) {
     const errorBody = isJson ? (data as ApiErrorBody) : null;
-    const message =
-      errorBody?.message ??
-      (typeof data === "string" && data.length > 0
+    const fallback =
+      typeof data === "string" && data.length > 0
         ? data
-        : `HTTP ${response.status}`);
+        : `HTTP ${response.status}`;
+    const message = getApiErrorMessage(errorBody, fallback);
 
     throw new ApiError(response.status, message, errorBody);
   }
@@ -137,6 +137,13 @@ export const apiPatch = <T>(
   options?: ApiRequestOptions,
 ) => apiClient<T>(path, { ...options, method: "PATCH", json });
 
+/** PUT shorthand */
+export const apiPut = <T>(
+  path: string,
+  json?: unknown,
+  options?: ApiRequestOptions,
+) => apiClient<T>(path, { ...options, method: "PUT", json });
+
 /** DELETE shorthand */
 export const apiDelete = <T>(path: string, options?: ApiRequestOptions) =>
   apiClient<T>(path, { ...options, method: "DELETE" });
@@ -147,3 +154,10 @@ export const apiPostForm = <T>(
   formData: FormData,
   options?: ApiRequestOptions,
 ) => apiClient<T>(path, { ...options, method: "POST", formData });
+
+/** multipart/form-data PUT */
+export const apiPutForm = <T>(
+  path: string,
+  formData: FormData,
+  options?: ApiRequestOptions,
+) => apiClient<T>(path, { ...options, method: "PUT", formData });
