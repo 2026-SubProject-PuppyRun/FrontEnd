@@ -122,8 +122,12 @@ const Basics = () => {
       return;
     }
 
-    if (!name.trim() || !gender || birthDate === "") {
+    if (!name.trim() || !gender) {
       return;
+    }
+
+    if (birthDate === "") {
+      setField("birthDate", null);
     }
 
     router.push("/(onboarding)/profile");
@@ -220,7 +224,7 @@ const Basics = () => {
             </FormControlError>
           </FormControl>
 
-          <FormControl isInvalid={hasSubmitted && birthDate === ""}>
+          <FormControl>
             <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
               생년월일
             </FormControlLabelText>
@@ -276,12 +280,6 @@ const Basics = () => {
                 <CheckboxLabel className="text-[#0D0F1B]">모름</CheckboxLabel>
               </Checkbox>
             </HStack>
-            <FormControlError>
-              <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText>
-                생년월일을 선택하거나 모름을 체크해주세요.
-              </FormControlErrorText>
-            </FormControlError>
           </FormControl>
         </View>
       </OnboardingScreen>
