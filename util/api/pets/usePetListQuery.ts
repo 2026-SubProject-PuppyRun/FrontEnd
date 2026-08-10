@@ -10,29 +10,19 @@ type UsePetListQueryOptions = {
 };
 
 /**
- * React Query + pets API 사용 예시.
- *
- * @example
- * const { data, isLoading, error, refetch } = usePetListQuery();
- *
- * // app/_layout.tsx 등에서:
- * useEffect(() => {
- *   if (data?.items) setPetList(data.items, data.totalCount);
- * }, [data]);
+ * 반려견 목록 조회 (React Query)
  */
-export const usePetListQuery = ({ enabled = true }: UsePetListQueryOptions = {}) =>
+export const usePetListQuery = ({
+  enabled = true,
+}: UsePetListQueryOptions = {}) =>
   useQuery({
     queryKey: queryKeys.pets.list(),
     queryFn: getPetList,
     enabled,
     staleTime: 1000 * 60 * 5,
-    select: (response) => ({
-      items: response.items,
-      totalCount: response.totalCount,
-    }),
   });
 
-/** 쿼리 성공 시 Zustand pet store와 동기화하는 헬퍼 예시 */
+/** 쿼리 성공 시 Zustand pet store와 동기화 */
 export const useSyncPetListFromQuery = (enabled = true) => {
   const setPetList = usePetStore((state) => state.setPetList);
   const query = usePetListQuery({ enabled });
@@ -42,6 +32,12 @@ export const useSyncPetListFromQuery = (enabled = true) => {
       setPetList(query.data.items, query.data.totalCount);
     }
   }, [query.isSuccess, query.data, setPetList]);
+
+  useEffect(() => {
+    if (query.isError) {
+      console.warn("반려견 목록 조회 실패:", query.error);
+    }
+  }, [query.isError, query.error]);
 
   return query;
 };
