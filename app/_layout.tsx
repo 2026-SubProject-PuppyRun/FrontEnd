@@ -7,10 +7,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import PermissionAlert from "@/components/modal/PermissionAlert";
 import AnimatedSplashScreen from "@/components/splash/AnimatedSplashScreen";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import { DUMMY_PET_LIST } from "@/constants/dummyPetList";
 import "@/global.css";
 import { openPermissionModal } from "@/store/usePermissionModalStore";
-import { usePetStore } from "@/store/usePetStore";
+import { useSyncPetListFromQuery } from "@/util/api/pets";
 import { getFirebaseMessaging, initFCM } from "@/util/notification";
 import notifee from "@notifee/react-native";
 import { onMessage } from "@react-native-firebase/messaging";
@@ -22,11 +21,15 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
+/** QueryClient 안에서 펫 목록을 스토어에 동기화 */
+const PetListBootstrap = () => {
+  useSyncPetListFromQuery(true);
+  return null;
+};
+
 export default function RootLayout() {
   const queryClient = new QueryClient();
-  const setPetList = usePetStore((state) => state.setPetList);
   const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
-  const dummyBreedSignature = DUMMY_PET_LIST.map((p) => p.breedCode).join(",");
 
   const onAnimatedSplashReady = useCallback(() => {
     SplashScreen.hideAsync().catch(() => undefined);
@@ -43,12 +46,6 @@ export default function RootLayout() {
   }, [showAnimatedSplash, onAnimatedSplashReady]);
 
   useEffect(() => {
-    const fetchPetList = async () => {
-      // Todo API 연동 — 연동 전까지 더미 데이터 사용
-      setPetList(DUMMY_PET_LIST, DUMMY_PET_LIST.length);
-    };
-    fetchPetList();
-
     let unsubscribeForeground: (() => void) | undefined;
 
     if (Device.isDevice) {
@@ -90,7 +87,7 @@ export default function RootLayout() {
     return () => {
       unsubscribeForeground?.();
     };
-  }, [setPetList, dummyBreedSignature]);
+  }, []);
 
   // 스플래시가 끝난 뒤 알림 권한 안내
   useEffect(() => {
@@ -121,6 +118,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider mode="dark">
           <GestureHandlerRootView style={{ flex: 1 }}>
+            <PetListBootstrap />
             <Stack screenOptions={{ headerShown: false }} />
             <PermissionAlert />
             {showAnimatedSplash ? (
