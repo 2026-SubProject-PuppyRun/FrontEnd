@@ -1,5 +1,5 @@
 import type { Pet } from "@/store/usePetStore";
-import { apiGet, apiPost, apiPut, apiPutForm } from "../core/client";
+import { apiDelete, apiGet, apiPost, apiPut, apiPutForm } from "../core/client";
 
 /** GET /pets — 펫 요약 (snake_case) */
 export type PetSummaryDto = {
@@ -12,6 +12,8 @@ export type PetSummaryDto = {
   breed_code: string;
   gender?: "F" | "M";
   is_neutered?: boolean;
+  mbti?: string | null;
+  badge_code?: string;
 };
 
 /** GET /pets 응답 */
@@ -33,9 +35,10 @@ export const mapPetSummaryToPet = (dto: PetSummaryDto): Pet => ({
   color: dto.color,
   profileImageUrl: dto.profile_image_url,
   breedCode: dto.breed_code,
-  badgeCode: "000",
+  badgeCode: dto.badge_code ?? "000",
   gender: dto.gender,
   isNeutered: dto.is_neutered,
+  mbti: dto.mbti?.trim() || undefined,
 });
 
 export const mapPetListResponse = (
@@ -203,6 +206,37 @@ export const uploadPetProfile = (
 
   return apiPutForm<unknown>(`/pets/${petId}/profile`, formData);
 };
+
+/** PUT /pets/{petId}/mbti */
+export type UpdatePetMbtiRequest = {
+  mbti: string;
+};
+
+export type UpdatePetMbtiResponse = {
+  name?: string;
+  birth_year?: string | null;
+  weight?: number;
+  color?: string;
+  is_neutered?: boolean;
+  gender?: "F" | "M";
+  profile_image_url?: string | null;
+  mbti?: string;
+};
+
+/**
+ * 반려견 MBTI 변경
+ * PUT /pets/{petId}/mbti
+ */
+export const updatePetMbti = (petId: string, mbti: string) =>
+  apiPut<UpdatePetMbtiResponse>(`/pets/${petId}/mbti`, { mbti });
+
+/**
+ * 반려견 삭제
+ * DELETE /pets/{petId}
+ * 성공 시 본문 없음
+ */
+export const deletePet = (petId: string) =>
+  apiDelete<void>(`/pets/${petId}`);
 
 export const getCreatedPetId = (response: CreatePetResponse) =>
   response.pet_id;

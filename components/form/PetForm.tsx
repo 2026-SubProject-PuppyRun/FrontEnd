@@ -85,12 +85,16 @@ interface PetFormProps {
   initialData?: Pet;
   onSubmit: (data: Partial<Pet>) => void | Promise<void>;
   isSubmitting?: boolean;
+  onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
 const PetForm = ({
   initialData,
   onSubmit,
   isSubmitting = false,
+  onDelete,
+  isDeleting = false,
 }: PetFormProps) => {
   const [name, setName] = useState(initialData?.name || "");
   const [birthYear, setBirthYear] = useState<string | null>(
@@ -510,10 +514,12 @@ const PetForm = ({
         >
           <Pressable
             onPress={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isDeleting}
             className="h-full w-full items-center justify-center"
             style={({ pressed }) =>
-              pressed || isSubmitting ? { opacity: 0.85 } : undefined
+              pressed || isSubmitting || isDeleting
+                ? { opacity: 0.85 }
+                : undefined
             }
           >
             <Text className="text-base font-semibold text-white">
@@ -525,6 +531,23 @@ const PetForm = ({
             </Text>
           </Pressable>
         </RedButtonSurface>
+
+        {onDelete ? (
+          <Pressable
+            onPress={onDelete}
+            disabled={isSubmitting || isDeleting}
+            className="mt-3 h-14 w-full items-center justify-center rounded-2xl border border-[#FECACA] bg-white"
+            style={({ pressed }) =>
+              pressed || isSubmitting || isDeleting
+                ? { opacity: 0.7 }
+                : undefined
+            }
+          >
+            <Text className="text-base font-semibold text-[#F25857]">
+              {isDeleting ? "삭제 중..." : "반려견 삭제"}
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
 
       <Modal visible={colorModalOpen} transparent animationType="slide">
