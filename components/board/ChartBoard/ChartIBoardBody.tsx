@@ -1,5 +1,6 @@
 import ChartTapButton from "@/components/button/ChartTapButton";
 import { Text } from "@/components/ui/text";
+import dayjs from "dayjs";
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import Animated, {
@@ -30,8 +31,17 @@ const TIMING = { duration: 220, easing: Easing.out(Easing.cubic) };
 const ChartBoardBody = () => {
   const [selectedChart, setSelectedChart] = useState<ChartTab>("weekly");
   const [direction, setDirection] = useState<1 | -1>(1);
+  const [referenceDate, setReferenceDate] = useState(dayjs());
   const tabWidth = useSharedValue(0);
   const selectedIndex = useSharedValue(0);
+
+  const handlePrevWeek = () => {
+    setReferenceDate((prev) => prev.subtract(7, "day"));
+  };
+
+  const handleNextWeek = () => {
+    setReferenceDate((prev) => prev.add(7, "day"));
+  };
 
   const handleSelectChart = (value: string) => {
     const next = value as ChartTab;
@@ -56,7 +66,13 @@ const ChartBoardBody = () => {
   const renderChart = () => {
     switch (selectedChart) {
       case "weekly":
-        return <WeeklyChart />;
+        return (
+          <WeeklyChart
+            referenceDate={referenceDate}
+            onPrevWeek={handlePrevWeek}
+            onNextWeek={handleNextWeek}
+          />
+        );
       case "monthly":
         return <MonthlyChart />;
       default:

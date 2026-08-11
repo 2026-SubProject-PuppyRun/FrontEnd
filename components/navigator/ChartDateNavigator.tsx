@@ -10,6 +10,7 @@ interface ChartDateNavigatorProps {
   onPrev: () => void;
   onNext: () => void;
   chartType: "week" | "month" | "year";
+  disableNext?: boolean;
 }
 
 const ChartDateNavigator: React.FC<ChartDateNavigatorProps> = ({
@@ -18,8 +19,10 @@ const ChartDateNavigator: React.FC<ChartDateNavigatorProps> = ({
   dateText,
   currentDate,
   chartType,
+  disableNext,
 }) => {
-  const isCurrentPeriod = currentDate.isSame(dayjs(), chartType);
+  const isCurrentPeriod =
+    disableNext ?? currentDate.isSame(dayjs(), chartType);
 
   return (
     <View className="mb-4 flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-3 py-2">
