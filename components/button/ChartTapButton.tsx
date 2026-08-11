@@ -1,5 +1,5 @@
-import React from "react";
 import { Text } from "@/components/ui/text";
+import React from "react";
 import { Pressable } from "../ui/pressable";
 
 interface ChartTapButtonProps {
@@ -18,9 +18,7 @@ const ChartTapButton = ({
   return (
     <Pressable
       onPress={() => handleSelectChart(value)}
-      className={`flex-1 items-center rounded-xl py-2.5 ${
-        isActive ? "bg-[#F25857]" : "bg-transparent"
-      }`}
+      className="z-10 flex-1 items-center rounded-xl py-2.5"
       style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
     >
       <Text
