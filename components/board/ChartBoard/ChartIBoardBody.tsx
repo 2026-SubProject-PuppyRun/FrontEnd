@@ -139,7 +139,10 @@ const ChartBoardBody = () => {
       <Text className="mb-3 mt-5 text-base font-semibold text-[#0D0F1B]">
         주간 활동 비교
       </Text>
-      <StarChart />
+      <StarChart
+        key={`radar-${referenceDate.format("YYYY-MM-DD")}`}
+        referenceDate={referenceDate}
+      />
 
       <Text className="mb-3 mt-5 text-base font-semibold text-[#0D0F1B]">
         산책 잔디심기
