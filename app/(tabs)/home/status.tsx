@@ -1,8 +1,11 @@
 import ChartBoardBody from "@/components/board/ChartBoard/ChartIBoardBody";
 import Header from "@/components/header/Header";
+import { useRefreshActivityTrackingOnFocus } from "@/util/api/activity-tracking";
 import { View } from "react-native";
 
 const Status = () => {
+  useRefreshActivityTrackingOnFocus();
+
   return (
     <View className="flex-1 bg-[#F7F7F7]">
       <Header
