@@ -37,4 +37,11 @@ export const queryKeys = {
     detail: (trackingId: string) =>
       [...queryKeys.tracking.all, "detail", trackingId] as const,
   },
+  activityTracking: {
+    all: ["activityTracking"] as const,
+    monthlyContributions: (date: string) =>
+      [...queryKeys.activityTracking.all, "monthlyContributions", date] as const,
+    grassChart: (endDate: string) =>
+      [...queryKeys.activityTracking.all, "grassChart", endDate] as const,
+  },
 } as const;
