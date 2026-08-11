@@ -131,10 +131,10 @@ const ChartBoardBody = () => {
         </View>
       </View>
 
-      <Text className="mb-3 text-base font-semibold text-[#0D0F1B]">
-        반려견별 산책 비율
-      </Text>
-      <CompareChart />
+      <CompareChart
+        key={`compare-${referenceDate.format("YYYY-MM-DD")}`}
+        referenceDate={referenceDate}
+      />
 
       <Text className="mb-3 mt-5 text-base font-semibold text-[#0D0F1B]">
         주간 활동 비교

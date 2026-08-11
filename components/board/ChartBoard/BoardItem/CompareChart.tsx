@@ -1,84 +1,132 @@
+import ChartSkeleton from "@/components/skeleton/ChartSkeleton";
 import { Text } from "@/components/ui/text";
-import { useEffect, useState } from "react";
+import { usePetStore } from "@/store/usePetStore";
+import {
+  resolveDogColor,
+  useWeeklyStatisticsQuery,
+} from "@/util/api/activity-tracking";
+import dayjs, { Dayjs } from "dayjs";
+import React, { useMemo, useState } from "react";
 import { View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
-interface ChartData {
-  value: number;
-  label: string;
-  color: string;
-}
+type CompareChartProps = {
+  referenceDate: Dayjs;
+};
 
-const dummyData = [
-  { value: 40, label: "PuppyA", color: "#F25857" },
-  { value: 30, label: "PuppyB", color: "#FFB3B2" },
-  { value: 20, label: "PuppyC", color: "#0D0F1B" },
-];
+const CompareChart = ({ referenceDate }: CompareChartProps) => {
+  const knownPetCount = usePetStore(
+    (state) => state.totalPetCount ?? state.petList?.length,
+  );
+  const { data, isLoading } = useWeeklyStatisticsQuery(referenceDate);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-const CompareChart = () => {
-  const [data, setData] = useState<ChartData[] | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const apiDogCount =
+    data?.family_report.total_dogs ?? data?.family_report.dog_stats.length ?? 0;
 
-  const totalValue = data ? data.reduce((sum, item) => sum + item.value, 0) : 0;
+  const chartData = useMemo(() => {
+    if (!data?.family_report.dog_stats.length) return [];
 
-  useEffect(() => {
-    setData(dummyData);
-  }, []);
+    return data.family_report.dog_stats.map((dog, index) => ({
+      value: dog.share_percentage,
+      label: dog.name,
+      color: resolveDogColor(dog.theme_color, index),
+    }));
+  }, [data]);
 
-  if (!data) return null;
+  if (
+    (knownPetCount != null && knownPetCount <= 1) ||
+    (!isLoading && apiDogCount <= 1)
+  ) {
+    return null;
+  }
 
-  const selectedItem = data[selectedIndex];
+  if (isLoading) {
+    return (
+      <>
+        <Text className="mb-3 text-base font-semibold text-[#0D0F1B]">
+          반려견별 산책 비율
+        </Text>
+        <View className="rounded-3xl bg-white p-5 shadow-sm">
+          <ChartSkeleton />
+        </View>
+      </>
+    );
+  }
+
+  if (!chartData.length) {
+    return (
+      <>
+        <Text className="mb-3 text-base font-semibold text-[#0D0F1B]">
+          반려견별 산책 비율
+        </Text>
+        <View className="rounded-3xl bg-white p-5 shadow-sm">
+          <Text className="text-center text-sm text-gray-500">
+            이번 주 반려견 산책 기록이 없어요.
+          </Text>
+        </View>
+      </>
+    );
+  }
+
+  const selectedItem = chartData[selectedIndex] ?? chartData[0];
+  const periodLabel = data
+    ? `${dayjs(data.period.start_date).format("M/D")} ~ ${dayjs(data.period.end_date).format("M/D")}`
+    : "";
 
   return (
-    <View className="flex-row items-center justify-center rounded-3xl bg-white p-5 shadow-sm">
-      <PieChart
-        data={data}
-        donut
-        sectionAutoFocus
-        radius={88}
-        innerRadius={58}
-        innerCircleColor="#FFFFFF"
-        focusOnPress
-        toggleFocusOnPress={false}
-        onPress={(_item: ChartData, index: number) => {
-          setSelectedIndex(index);
-        }}
-        selectedIndex={selectedIndex}
-        centerLabelComponent={() => {
-          if (!selectedItem || totalValue === 0) return null;
-          const percentage = Math.round(
-            (selectedItem.value / totalValue) * 100,
-          );
-          return (
+    <>
+      <Text className="mb-3 text-base font-semibold text-[#0D0F1B]">
+        반려견별 산책 비율
+      </Text>
+      <View className="rounded-3xl bg-white p-5 shadow-sm">
+      {periodLabel ? (
+        <Text className="mb-3 text-xs text-gray-500">{periodLabel}</Text>
+      ) : null}
+
+      <View className="flex-row items-center justify-center">
+        <PieChart
+          data={chartData}
+          donut
+          sectionAutoFocus
+          radius={88}
+          innerRadius={58}
+          innerCircleColor="#FFFFFF"
+          focusOnPress
+          toggleFocusOnPress={false}
+          onPress={(_item, index) => setSelectedIndex(index)}
+          selectedIndex={selectedIndex}
+          centerLabelComponent={() => (
             <View className="items-center justify-center">
               <Text className="text-xl font-bold text-[#0D0F1B]">
-                {percentage}%
+                {Math.round(selectedItem.value)}%
               </Text>
               <Text className="text-sm text-gray-500">{selectedItem.label}</Text>
             </View>
-          );
-        }}
-      />
-      <View className="ml-4 gap-3">
-        {data.map((item, index) => (
-          <View key={index} className="flex-row items-center">
-            <View
-              style={{ backgroundColor: item.color }}
-              className="mr-2.5 h-3.5 w-3.5 rounded-full"
-            />
-            <Text
-              className={`text-sm ${
-                selectedIndex === index
-                  ? "font-bold text-[#0D0F1B]"
-                  : "text-gray-500"
-              }`}
-            >
-              {item.label}
-            </Text>
-          </View>
-        ))}
+          )}
+        />
+        <View className="ml-4 gap-3">
+          {chartData.map((item, index) => (
+            <View key={item.label} className="flex-row items-center">
+              <View
+                style={{ backgroundColor: item.color }}
+                className="mr-2.5 h-3.5 w-3.5 rounded-full"
+              />
+              <Text
+                className={`text-sm ${
+                  selectedIndex === index
+                    ? "font-bold text-[#0D0F1B]"
+                    : "text-gray-500"
+                }`}
+              >
+                {item.label}
+              </Text>
+            </View>
+          ))}
+        </View>
       </View>
     </View>
+    </>
   );
 };
 
