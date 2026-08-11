@@ -8,12 +8,10 @@ import MonthlyChart from "./BoardItem/MonthlyChart";
 import StarChart from "./BoardItem/StarChart";
 import UserInsight from "./BoardItem/UserInsight";
 import WeeklyChart from "./BoardItem/WeeklyChart";
-import YearlyChart from "./BoardItem/YearlyChart";
 
 const CHART_TABS = [
   { label: "주간", value: "weekly" },
   { label: "월간", value: "monthly" },
-  { label: "연간", value: "yearly" },
 ] as const;
 
 const ChartBoardBody = () => {
@@ -25,8 +23,6 @@ const ChartBoardBody = () => {
         return <WeeklyChart />;
       case "monthly":
         return <MonthlyChart />;
-      case "yearly":
-        return <YearlyChart />;
       default:
         return null;
     }
