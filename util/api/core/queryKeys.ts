@@ -7,6 +7,8 @@ export const queryKeys = {
     all: ["pets"] as const,
     list: () => [...queryKeys.pets.all, "list"] as const,
     detail: (petId: string) => [...queryKeys.pets.all, "detail", petId] as const,
+    progress: (petIds?: string[]) =>
+      [...queryKeys.pets.all, "progress", petIds?.join(",") ?? "all"] as const,
   },
   walks: {
     all: ["walks"] as const,
