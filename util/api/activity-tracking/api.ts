@@ -27,21 +27,26 @@ export type DailyParticipatingPet = {
   theme_color: string;
 };
 
+export type DailyTrackingImage = {
+  order: number;
+  image: string;
+};
+
 export type DailyTrackingItem = {
   tracking_id: string;
   started_at: string;
   ended_at: string;
-  distance_km: number;
-  duration_min: number;
+  distance_m: number;
+  duration_sec: number;
   average_pace: string;
   diary: DailyTrackingDiary;
-  tracking_images: string[];
+  tracking_images: DailyTrackingImage[];
   participating_pets: DailyParticipatingPet[];
 };
 
 export type DailyStatisticsSummary = {
-  total_distance_km: number;
-  total_duration_min: number;
+  total_distance_m: number;
+  total_duration_sec: number;
   walk_count: number;
 };
 
@@ -70,8 +75,8 @@ export const getDailyStatistics = async (
 export type WeeklyActivityChartItem = {
   date: string;
   label: string;
-  distance_km: number;
-  duration_min: number;
+  distance_m: number;
+  duration_sec: number;
 };
 
 export type WeeklyDogStat = {
@@ -79,8 +84,8 @@ export type WeeklyDogStat = {
   name: string;
   profile_image_url: string | null;
   theme_color: string;
-  distance_km: number;
-  duration_min: number;
+  distance_m: number;
+  duration_sec: number;
   share_percentage: number;
   total_count: number;
   badge: string;
@@ -109,8 +114,8 @@ export type WeeklyStatisticsResponse = {
     end_date: string;
   };
   summary: {
-    total_distance_km: number;
-    total_duration_min: number;
+    total_distance_m: number;
+    total_duration_sec: number;
     total_count: number;
   };
   activity_chart: WeeklyActivityChartItem[];

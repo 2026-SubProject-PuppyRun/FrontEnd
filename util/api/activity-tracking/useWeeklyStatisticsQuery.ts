@@ -44,7 +44,7 @@ export const mapWeeklyBarItems = (
   const { period, activity_chart } = response;
   const start = dayjs(period.start_date);
   const distanceByDate = Object.fromEntries(
-    activity_chart.map((item) => [item.date, item.distance_km]),
+    activity_chart.map((item) => [item.date, item.distance_m / 1000]),
   );
 
   return Array.from({ length: 7 }, (_, index) => {

@@ -12,6 +12,13 @@ type WeeklyDaySummaryProps = {
   isError: boolean;
 };
 
+const formatDistanceKm = (meters: number) => {
+  const km = meters / 1000;
+  return km >= 10 ? Math.round(km).toString() : km.toFixed(1);
+};
+
+const formatDurationMin = (seconds: number) => Math.round(seconds / 60);
+
 const WeeklyDaySummary = ({
   date,
   data,
@@ -58,8 +65,8 @@ const WeeklyDaySummary = ({
       <View className="rounded-2xl bg-[#FFF3F3] p-4">
         <Text className="text-sm font-semibold text-[#0D0F1B]">{dateLabel}</Text>
         <Text className="mt-2 text-base font-bold text-[#F25857]">
-          {summary.total_distance_km} km · {summary.total_duration_min}분 ·{" "}
-          {summary.walk_count}회
+          {formatDistanceKm(summary.total_distance_m)} km ·{" "}
+          {formatDurationMin(summary.total_duration_sec)}분 · {summary.walk_count}회
         </Text>
       </View>
 
@@ -100,7 +107,7 @@ const WeeklyDaySummary = ({
             페이스 {item.average_pace}
           </Text>
           <Text className="mt-0.5 text-xs text-gray-500">
-            {item.distance_km} km · {item.duration_min}분
+            {formatDistanceKm(item.distance_m)} km · {formatDurationMin(item.duration_sec)}분
           </Text>
         </View>
       ))}
