@@ -240,3 +240,77 @@ export const deletePet = (petId: string) =>
 
 export const getCreatedPetId = (response: CreatePetResponse) =>
   response.pet_id;
+
+/** GET /pets/progress — tracking_progress */
+export type TrackingProgressDto = {
+  code: string;
+  walked_distance: number;
+  required_distance: number;
+  next_required_distance: number;
+};
+
+export type PetProgressDto = {
+  pet_id: string;
+  name: string;
+  profile_image: string | null;
+  tracking_progress: TrackingProgressDto;
+};
+
+export type PetProgressResponse = {
+  pet_progresses: PetProgressDto[];
+};
+
+export type TrackingProgress = {
+  code: string;
+  walkedDistance: number;
+  requiredDistance: number;
+  nextRequiredDistance: number;
+};
+
+export type PetProgress = {
+  petId: string;
+  name: string;
+  profileImageUrl: string | null;
+  trackingProgress: TrackingProgress;
+};
+
+export const mapTrackingProgress = (
+  dto: TrackingProgressDto,
+): TrackingProgress => ({
+  code: dto.code,
+  walkedDistance: dto.walked_distance,
+  requiredDistance: dto.required_distance,
+  nextRequiredDistance: dto.next_required_distance,
+});
+
+export const mapPetProgress = (dto: PetProgressDto): PetProgress => ({
+  petId: dto.pet_id,
+  name: dto.name,
+  profileImageUrl: dto.profile_image,
+  trackingProgress: mapTrackingProgress(dto.tracking_progress),
+});
+
+/**
+ * 반려견 산책 진행도 조회
+ * GET /pets/progress
+ *
+ * - petIds 미전달: 소유 펫 전체 (펫 없으면 404)
+ * - petIds 1건: ?petIds={UUID}
+ * - petIds 여러 건: ?petIds={UUID1}&petIds={UUID2}
+ * - 응답은 항상 배열, 중복 UUID는 1회만 반환, 요청 순서 유지
+ * - 존재하지 않거나 타인 소유 UUID 포함 시 전체 실패
+ */
+export const getPetProgress = async (
+  petIds?: string[],
+): Promise<PetProgress[]> => {
+  const uniquePetIds = petIds?.length
+    ? [...new Set(petIds.filter(Boolean))]
+    : [];
+
+  const query = uniquePetIds.length
+    ? `?${uniquePetIds.map((id) => `petIds=${encodeURIComponent(id)}`).join("&")}`
+    : "";
+
+  const response = await apiGet<PetProgressResponse>(`/pets/progress${query}`);
+  return (response.pet_progresses ?? []).map(mapPetProgress);
+};
