@@ -3,12 +3,16 @@ import {
   AuthorizationStatus,
   getMessaging,
   getToken,
+  onTokenRefresh,
   requestPermission,
   setBackgroundMessageHandler,
 } from "@react-native-firebase/messaging";
+import { registerFcmToken } from "@/util/api/notifications";
+import { getAccessToken } from "@/util/api/core";
 
 let messagingInstance: ReturnType<typeof getMessaging> | null = null;
 let backgroundHandlerRegistered = false;
+let tokenRefreshUnsubscribe: (() => void) | null = null;
 
 const getFirebaseMessaging = () => {
   if (!messagingInstance) {
@@ -27,6 +31,22 @@ const registerBackgroundHandler = () => {
   } catch (error) {
     console.warn("FCM background handler 등록 실패:", error);
   }
+};
+
+/** 서버에 FCM 토큰 등록 (Bearer 인증 필요) */
+export const submitFcmTokenToBackend = async (token: string) => {
+  const trimmed = token.trim();
+  if (!trimmed) {
+    console.warn("FCM 토큰이 비어 있어 서버 등록을 건너뜁니다.");
+    return;
+  }
+
+  if (!getAccessToken()) {
+    console.warn("Access Token이 없어 FCM 토큰 서버 등록을 건너뜁니다.");
+    return;
+  }
+
+  await registerFcmToken(trimmed);
 };
 
 // FCM 토큰 가져오기
@@ -57,23 +77,26 @@ export const requestUserPermission = async () => {
   }
 };
 
-export { getFirebaseMessaging };
+/** 토큰 갱신 시 서버에 재등록 */
+export const subscribeFcmTokenRefresh = () => {
+  if (tokenRefreshUnsubscribe) return tokenRefreshUnsubscribe;
 
-const submitNotificationToBackend = async (tokenString: string) => {
   try {
-    const response = await fetch(
-      "https://maybell-unelicitable-uninterestingly.ngrok-free.dev/api/admin/notice/send-push?title=푸푸런 알림&body=푸푸런에서 새로운 알림이 도착했습니다.&fcmToken=" +
-        tokenString,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.EXPO_PUBLIC_TEM_ADMIN_KEY}`,
-        },
+    tokenRefreshUnsubscribe = onTokenRefresh(
+      getFirebaseMessaging(),
+      async (token) => {
+        try {
+          await submitFcmTokenToBackend(token);
+        } catch (error) {
+          console.warn("갱신된 FCM 토큰 서버 등록 실패:", error);
+        }
       },
     );
-    console.log("백엔드 API 호출 결과 상태:", response.status);
   } catch (error) {
-    console.error("백엔드 API 호출 실패:", error);
+    console.warn("FCM 토큰 갱신 리스너 등록 실패:", error);
   }
+
+  return tokenRefreshUnsubscribe;
 };
+
+export { getFirebaseMessaging };
