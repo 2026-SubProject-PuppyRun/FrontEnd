@@ -43,6 +43,15 @@ const MedicationFormSheet = ({
     onClose();
   };
 
+  const handleDelete = async () => {
+    try {
+      await onDelete();
+      onClose();
+    } catch {
+      // 실패 시 시트 유지 — 토스트는 hook에서 처리
+    }
+  };
+
   const initialValues: Partial<MedicationFormValues> | undefined = editingRecord
     ? {
         name: editingRecord.name,
@@ -101,7 +110,7 @@ const MedicationFormSheet = ({
               isEdit={isEdit}
               isSubmitting={isSubmitting}
               onSubmit={handleSubmit}
-              onDelete={onDelete}
+              onDelete={handleDelete}
             />
           ) : null}
         </ActionsheetScrollView>

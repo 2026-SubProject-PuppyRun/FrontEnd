@@ -147,5 +147,10 @@ export const updateMedicationLog = async (
  * 투약 기록 삭제
  * DELETE /pets/{petId}/medication-logs/{medicationLogId}
  */
-export const deleteMedicationLog = (petId: string, medicationLogId: string) =>
-  apiDelete<void>(`/pets/${petId}/medication-logs/${medicationLogId}`);
+export const deleteMedicationLog = (
+  petId: string,
+  medicationLogId: string,
+) =>
+  apiDelete<void>(
+    `/pets/${petId}/medication-logs/${encodeURIComponent(medicationLogId)}`,
+  );

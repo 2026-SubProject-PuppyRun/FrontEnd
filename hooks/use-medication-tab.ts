@@ -166,13 +166,12 @@ export const useMedicationTab = () => {
   };
 
   const handleDelete = async () => {
-    if (!editingRecord?.id) return;
+    if (!petId || !editingRecord?.id) return;
 
     try {
       await deleteMutation.mutateAsync(editingRecord.id);
       toast.showToast({ message: "투약 기록이 삭제되었습니다." });
       setEditingRecord(null);
-      closeSheet();
     } catch {
       toast.showToast({
         message: "투약 기록 삭제에 실패했습니다.",
