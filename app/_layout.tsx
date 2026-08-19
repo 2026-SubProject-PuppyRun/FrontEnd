@@ -10,13 +10,19 @@ import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
 import { openPermissionModal } from "@/store/usePermissionModalStore";
 import { useSyncPetListFromQuery } from "@/util/api/pets";
-import { getFirebaseMessaging, initFCM } from "@/util/notification";
+import {
+  getFirebaseMessaging,
+  initFCM,
+  registerPushConsentOnAllow,
+  requestUserPermission,
+  androidNotificationIcons,
+} from "@/util/notification";
 import notifee from "@notifee/react-native";
 import { onMessage } from "@react-native-firebase/messaging";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Device from "expo-device";
 import { useCallback, useEffect, useState } from "react";
-import { Linking } from "react-native";
+import { AppState, Linking } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -70,8 +76,7 @@ export default function RootLayout() {
               body: remoteMessage.notification?.body,
               android: {
                 channelId,
-                smallIcon: "notification_icon",
-                color: "#F25857",
+                ...androidNotificationIcons,
                 pressAction: {
                   id: "default",
                 },
@@ -89,13 +94,33 @@ export default function RootLayout() {
     };
   }, []);
 
-  // 스플래시가 끝난 뒤 알림 권한 안내
+  // 스플래시가 끝난 뒤 알림 권한 요청 → 허용 시 최초 동의/토큰 등록
   useEffect(() => {
     if (showAnimatedSplash) return;
 
     let cancelled = false;
+    let hasSyncedPushConsent = false;
+
+    const syncPushConsentIfAllowed = async () => {
+      if (hasSyncedPushConsent) return true;
+
+      const enabled = await requestUserPermission();
+      if (cancelled || !enabled) return false;
+
+      try {
+        await registerPushConsentOnAllow();
+        hasSyncedPushConsent = true;
+      } catch (error) {
+        console.warn("알림 동의/FCM 토큰 등록 실패:", error);
+      }
+      return true;
+    };
+
     const requestNotificationPermission = async () => {
-      const settings = await notifee.requestPermission();
+      const registered = await syncPushConsentIfAllowed();
+      if (cancelled || registered) return;
+
+      const settings = await notifee.getNotificationSettings();
       if (cancelled) return;
       if (settings.authorizationStatus === 0) {
         openPermissionModal({
@@ -108,8 +133,16 @@ export default function RootLayout() {
     };
 
     void requestNotificationPermission();
+
+    const appStateSub = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        void syncPushConsentIfAllowed();
+      }
+    });
+
     return () => {
       cancelled = true;
+      appStateSub.remove();
     };
   }, [showAnimatedSplash]);
 

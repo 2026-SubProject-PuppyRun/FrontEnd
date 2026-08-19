@@ -52,4 +52,8 @@ export const queryKeys = {
     dailyStatistics: (date: string) =>
       [...queryKeys.activityTracking.all, "dailyStatistics", date] as const,
   },
+  notifications: {
+    all: ["notifications"] as const,
+    settings: () => [...queryKeys.notifications.all, "settings"] as const,
+  },
 } as const;

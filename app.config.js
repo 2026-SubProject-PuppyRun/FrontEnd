@@ -44,7 +44,8 @@ module.exports = {
       [
         "./withNotificationIcon.js",
         {
-          icon: "./assets/images/notification_icon.png",
+          // 앱 아이콘과 동일 소스 → status bar / FCM 기본 아이콘
+          icon: "./assets/images/icon.png",
         },
       ],
       [

@@ -50,7 +50,7 @@ const AlarmBody = () => {
   const today = new Date().getDay();
   const [dayOfWeek, setDayOfWeek] = useState(daysOfWeek[today].label);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
-  const [alarmTitle, setAlarmTitle] = useState("");
+  const [alarmBody, setAlarmBody] = useState("");
   const [alarmList, setAlarmList] = useState<AlarmItem[]>([]);
 
   useFocusEffect(
@@ -108,8 +108,8 @@ const AlarmBody = () => {
           className="rounded-2xl bg-[#F7F7F7] px-4 py-3.5 text-base text-[#0D0F1B]"
           placeholder="예: 산책 시간이에요!"
           placeholderTextColor="#9CA3AF"
-          value={alarmTitle}
-          onChangeText={setAlarmTitle}
+          value={alarmBody}
+          onChangeText={setAlarmBody}
         />
 
         <View className="mt-5">
@@ -142,18 +142,17 @@ const AlarmBody = () => {
         showAlertDialog={showAlertDialog}
         handleClose={() => setShowAlertDialog(false)}
         title="알람을 추가할까요?"
-        description={`${dayOfWeek}요일 ${formattedTime} · ${alarmTitle || "제목 없음"}`}
+        description={`${dayOfWeek}요일 ${formattedTime} · ${alarmBody || "내용 없음"}`}
         confirmText="추가"
         cancelText="취소"
         onConfirm={async () => {
           const newAlarmDate = getTargetDate(dayOfWeek, date);
 
           const notiId = await scheduleLocalNotification(
-            alarmTitle,
+            "알림이 도착했어요",
             newAlarmDate,
             {
-              body: "퍼피런에서 온 알림입니다!",
-              smallIcon: "notification_icon",
+              body: alarmBody,
             },
             "puppyrun_alarm_channel",
           );
@@ -165,7 +164,7 @@ const AlarmBody = () => {
               {
                 dayOfWeek,
                 time: date,
-                title: alarmTitle,
+                title: alarmBody,
                 notificationId: notiId,
               },
             ];
@@ -175,7 +174,7 @@ const AlarmBody = () => {
               return dayA - dayB;
             });
           });
-          setAlarmTitle("");
+          setAlarmBody("");
           setShowAlertDialog(false);
         }}
       />
