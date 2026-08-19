@@ -10,3 +10,4 @@ export * from "./pets";
 export * from "./tracking";
 export * from "./walks";
 export * from "./weather";
+export * from "./weights";
