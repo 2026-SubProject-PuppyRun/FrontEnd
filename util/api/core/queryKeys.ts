@@ -56,4 +56,9 @@ export const queryKeys = {
     all: ["notifications"] as const,
     settings: () => [...queryKeys.notifications.all, "settings"] as const,
   },
+  medications: {
+    all: ["medications"] as const,
+    list: (petId: string) =>
+      [...queryKeys.medications.all, "list", petId] as const,
+  },
 } as const;

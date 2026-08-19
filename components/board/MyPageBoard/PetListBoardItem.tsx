@@ -97,7 +97,7 @@ const PetListBoardItem = ({
 
       <View className="mt-4 flex-row gap-2">
         <Pressable
-          onPress={() => router.push(`/care/pets/${petId}/diet`)}
+          onPress={() => router.push(`/care/pets/${petId}/medication`)}
           className="flex-1 items-center justify-center rounded-2xl bg-[#F7F7F7] py-3"
           style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
         >

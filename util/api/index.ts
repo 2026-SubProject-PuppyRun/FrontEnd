@@ -4,6 +4,7 @@
 export * from "./activity-tracking";
 export * from "./core";
 export * from "./diaries";
+export * from "./medications";
 export * from "./notifications";
 export * from "./pets";
 export * from "./tracking";

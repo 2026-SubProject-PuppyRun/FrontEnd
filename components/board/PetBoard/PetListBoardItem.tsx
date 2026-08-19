@@ -50,7 +50,7 @@ const PetListBoardItem = ({
   return (
     <View className="mb-3 rounded-3xl bg-white px-5 py-4 shadow-sm">
       <Pressable
-        onPress={() => router.push(`/care/pets/${petId}/diet`)}
+        onPress={() => router.push(`/care/pets/${petId}/medication`)}
         className="flex-row items-center gap-4"
         style={({ pressed }) => (pressed ? { opacity: 0.92 } : undefined)}
       >
@@ -107,9 +107,9 @@ const PetListBoardItem = ({
       </Pressable>
 
       <View className="mt-3 flex-row gap-2 border-t border-[#F7F7F7] pt-3">
-        {(["diet", "weight", "vaccine", "allergy"] as const).map((tab) => {
+        {(["medication", "weight", "vaccine", "allergy"] as const).map((tab) => {
           const labels = {
-            diet: "식단",
+            medication: "투약",
             weight: "체중",
             vaccine: "백신",
             allergy: "알러지",
