@@ -6,7 +6,7 @@ interface WeightAddFooterProps {
 }
 
 const WeightAddFooter = ({ onPressAdd }: WeightAddFooterProps) => (
-  <View className="absolute bottom-0 left-0 right-0 rounded-3xl border-t border-gray-100 bg-white px-6 pb-8 pt-4">
+  <View className="absolute bottom-0 left-0 right-0 rounded-3xl border-t border-gray-100 bg-white px-6 pb-12 pt-4">
     <RedButtonSurface
       borderRadius={30}
       backgroundColor="#F25857"

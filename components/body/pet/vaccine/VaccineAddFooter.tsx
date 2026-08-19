@@ -11,7 +11,7 @@ const VaccineAddFooter = ({
   onPressAdd,
   onPressShare,
 }: VaccineAddFooterProps) => (
-  <View className="absolute bottom-0 left-0 right-0 rounded-t-3xl border-t border-gray-100 bg-white px-6 pb-8 pt-4">
+  <View className="absolute bottom-0 left-0 right-0 rounded-t-3xl border-t border-gray-100 bg-white px-6 pb-12 pt-4">
     <View className="flex-row items-center gap-3">
       <View className="flex-1">
         <RedButtonSurface
