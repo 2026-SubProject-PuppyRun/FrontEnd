@@ -4,10 +4,15 @@ import notifee, {
   TimestampTrigger,
   TriggerType,
 } from "@notifee/react-native";
+import {
+  APP_NOTIFICATION_COLOR,
+  APP_NOTIFICATION_LARGE_ICON,
+  APP_NOTIFICATION_SMALL_ICON,
+} from "./androidNotificationIcon";
 
 export interface LocalNotificationOptions {
   body: string;
-  smallIcon: string;
+  smallIcon?: string;
 }
 
 export const scheduleLocalNotification = async (
@@ -36,7 +41,9 @@ export const scheduleLocalNotification = async (
       body: options.body,
       android: {
         channelId: ChannelId,
-        smallIcon: options.smallIcon,
+        smallIcon: options.smallIcon ?? APP_NOTIFICATION_SMALL_ICON,
+        largeIcon: APP_NOTIFICATION_LARGE_ICON,
+        color: APP_NOTIFICATION_COLOR,
         importance: AndroidImportance.DEFAULT,
       },
       ios: {

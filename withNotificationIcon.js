@@ -1,12 +1,18 @@
+const {
+  AndroidConfig,
+  withAndroidColors,
+  withAndroidManifest,
+  withDangerousMod,
+} = require("expo/config-plugins");
 const { generateImageAsync } = require("@expo/image-utils");
-const { withDangerousMod } = require("expo/config-plugins");
 const { existsSync, mkdirSync, writeFileSync } = require("fs");
 const { resolve } = require("path");
 
 const ANDROID_RES_PATH = "android/app/src/main/res";
 const ICON_NAME = "notification_icon";
+const NOTIFICATION_COLOR = "#F25857";
 
-/** Android 알림 아이콘 기준 크기(dp) */
+/** Android status bar 알림 아이콘 기준 크기(dp) */
 const BASELINE_SIZE = 24;
 
 const DENSITIES = [
@@ -17,16 +23,8 @@ const DENSITIES = [
   { folder: "drawable-xxxhdpi", scale: 4 },
 ];
 
-/**
- * notifee의 smallIcon으로 쓸 아이콘을 density별 drawable 폴더에 생성.
- *
- * expo-notifications는 firebase-messaging 버전을 하드코딩해
- * @react-native-firebase/messaging과 충돌하므로 아이콘 생성만 직접 처리한다.
- */
-const withNotificationIcon = (config, { icon } = {}) => {
-  if (!icon) return config;
-
-  return withDangerousMod(config, [
+const withNotificationIconDrawables = (config, icon) =>
+  withDangerousMod(config, [
     "android",
     async (modConfig) => {
       const { projectRoot } = modConfig.modRequest;
@@ -58,6 +56,50 @@ const withNotificationIcon = (config, { icon } = {}) => {
       return modConfig;
     },
   ]);
+
+const withFirebaseDefaultNotificationIcon = (config) =>
+  withAndroidManifest(config, (modConfig) => {
+    const application = AndroidConfig.Manifest.getMainApplicationOrThrow(
+      modConfig.modResults,
+    );
+    AndroidConfig.Manifest.addMetaDataItemToMainApplication(
+      application,
+      "com.google.firebase.messaging.default_notification_icon",
+      `@drawable/${ICON_NAME}`,
+    );
+    AndroidConfig.Manifest.addMetaDataItemToMainApplication(
+      application,
+      "com.google.firebase.messaging.default_notification_color",
+      "@color/notification_color",
+    );
+    return modConfig;
+  });
+
+const withNotificationColor = (config) =>
+  withAndroidColors(config, (modConfig) => {
+    modConfig.modResults = AndroidConfig.Colors.assignColorValue(
+      modConfig.modResults,
+      {
+        name: "notification_color",
+        value: NOTIFICATION_COLOR,
+      },
+    );
+    return modConfig;
+  });
+
+/**
+ * notifee / FCM 알림 아이콘을 앱 아이콘 기준으로 맞춘다.
+ *
+ * - drawable/notification_icon: status bar smallIcon
+ * - Firebase default_notification_icon / color: 백그라운드 시스템 푸시
+ */
+const withNotificationIcon = (config, { icon } = {}) => {
+  if (!icon) return config;
+
+  let next = withNotificationIconDrawables(config, icon);
+  next = withNotificationColor(next);
+  next = withFirebaseDefaultNotificationIcon(next);
+  return next;
 };
 
 module.exports = withNotificationIcon;

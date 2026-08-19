@@ -15,6 +15,7 @@ import {
   initFCM,
   registerPushConsentOnAllow,
   requestUserPermission,
+  androidNotificationIcons,
 } from "@/util/notification";
 import notifee from "@notifee/react-native";
 import { onMessage } from "@react-native-firebase/messaging";
@@ -75,8 +76,7 @@ export default function RootLayout() {
               body: remoteMessage.notification?.body,
               android: {
                 channelId,
-                smallIcon: "notification_icon",
-                color: "#F25857",
+                ...androidNotificationIcons,
                 pressAction: {
                   id: "default",
                 },
