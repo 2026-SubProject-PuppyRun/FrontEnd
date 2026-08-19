@@ -1,4 +1,4 @@
-import { CalendarDayCell } from "@/types/diet";
+import { CalendarDayCell } from "@/types/calendar";
 import dayjs, { Dayjs } from "dayjs";
 
 const WEEK_STARTS_ON_SUNDAY = 0;

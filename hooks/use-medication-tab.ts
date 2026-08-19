@@ -10,7 +10,7 @@ import {
   MedicationRecord,
 } from "@/types/medication";
 import { useCustomToast } from "@/hooks/use-custom-toast";
-import { buildCalendarGrid } from "@/util/diet";
+import { buildCalendarGrid } from "@/util/calendar";
 import { buildMedicationDayMarkers } from "@/util/medication";
 import { resolveRouteParam } from "@/util/navigation";
 import { CloseIcon } from "@/components/ui/icon";

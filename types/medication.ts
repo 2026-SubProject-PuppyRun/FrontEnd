@@ -1,5 +1,5 @@
 import type { MedicationDoseUnit } from "@/constants/medicationDoseUnits";
-import type { CalendarDayCell } from "@/types/diet";
+import type { CalendarDayCell } from "@/types/calendar";
 
 export type { CalendarDayCell };
 
