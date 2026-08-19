@@ -1,6 +1,6 @@
+import NotificationSettingsSection from "@/components/body/mypage/NotificationSettingsSection";
 import WarningAlert from "@/components/modal/WarningAlert";
 import ChangeNameSheet from "@/components/sheet/ChangeNameSheet";
-import AlarmSetSwitch from "@/components/switch/AlarmSetSwitch";
 import {
   Accordion,
   AccordionContent,
@@ -14,78 +14,14 @@ import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
 const SettingBody = () => {
-  const [isFirstAlarmEnabled, setIsFirstAlarmEnabled] =
-    useState<boolean>(false);
-  const [isSecondAlarmEnabled, setIsSecondAlarmEnabled] =
-    useState<boolean>(false);
   const toast = useCustomToast();
   const [showActionsheet, setShowActionsheet] = useState(false);
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
   const [showWithdrawalAlert, setShowWithdrawalAlert] = useState(false);
-
-  useEffect(() => {
-    const fetchAlarmSettings = async () => {
-      setIsFirstAlarmEnabled(false);
-      setIsSecondAlarmEnabled(true);
-    };
-    fetchAlarmSettings();
-  }, []);
-
-  const handleAllAlarmToggle = async () => {
-    const newValue = !isFirstAlarmEnabled || !isSecondAlarmEnabled;
-
-    setIsFirstAlarmEnabled(newValue);
-    setIsSecondAlarmEnabled(newValue);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      toast.showToast({
-        message: "알림 설정이 변경되었습니다.",
-      });
-    } catch (error) {
-      setIsFirstAlarmEnabled(!newValue);
-      setIsSecondAlarmEnabled(!newValue);
-      toast.showToast({
-        message: "알림 설정 변경에 실패했습니다. 다시 시도해주세요.",
-        icon: CloseIcon,
-      });
-    }
-  };
-
-  const handleFirstAlarmToggle = async () => {
-    setIsFirstAlarmEnabled((prev) => !prev);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      toast.showToast({
-        message: "알림 설정이 변경되었습니다.",
-      });
-    } catch (error) {
-      setIsFirstAlarmEnabled((prev) => !prev);
-      toast.showToast({
-        message: "알림 설정 변경에 실패했습니다. 다시 시도해주세요.",
-        icon: CloseIcon,
-      });
-    }
-  };
-
-  const handleSecondAlarmToggle = async () => {
-    setIsSecondAlarmEnabled((prev) => !prev);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      toast.showToast({
-        message: "알림 설정이 변경되었습니다.",
-      });
-    } catch (error) {
-      setIsSecondAlarmEnabled((prev) => !prev);
-      toast.showToast({
-        message: "알림 설정 변경에 실패했습니다. 다시 시도해주세요.",
-        icon: CloseIcon,
-      });
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -155,21 +91,7 @@ const SettingBody = () => {
                 </AccordionTrigger>
               </AccordionHeader>
               <AccordionContent className="gap-3 px-5 pb-5">
-                <AlarmSetSwitch
-                  alarmName="전체 알림 설정"
-                  isEnabled={isFirstAlarmEnabled && isSecondAlarmEnabled}
-                  onToggle={handleAllAlarmToggle}
-                />
-                <AlarmSetSwitch
-                  alarmName="알람 1"
-                  isEnabled={isFirstAlarmEnabled}
-                  onToggle={handleFirstAlarmToggle}
-                />
-                <AlarmSetSwitch
-                  alarmName="알람 2"
-                  isEnabled={isSecondAlarmEnabled}
-                  onToggle={handleSecondAlarmToggle}
-                />
+                <NotificationSettingsSection />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
