@@ -1,13 +1,15 @@
+import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { AllergyFormValues, AllergySeverity } from "@/types/allergy";
 import {
-  ALLERGY_CATEGORIES,
   ALLERGY_SEVERITIES,
-  getCategoryLabel,
+  ALLERGY_SEVERITY_COLORS,
   getSeverityLabel,
 } from "@/util/allergy";
-import { useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { Button, ButtonText } from "../ui/button";
+import DatePicker from "react-native-date-picker";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 import {
   FormControl,
   FormControlError,
@@ -15,42 +17,74 @@ import {
   FormControlErrorText,
   FormControlLabelText,
 } from "../ui/form-control";
-import { HStack } from "../ui/hstack";
-import { AlertCircleIcon, CircleIcon } from "../ui/icon";
+import { AlertCircleIcon, CalendarDaysIcon, Icon } from "../ui/icon";
 import { Input, InputField } from "../ui/input";
-import {
-  Radio,
-  RadioGroup,
-  RadioIcon,
-  RadioIndicator,
-  RadioLabel,
-} from "../ui/radio";
 import { Switch } from "../ui/switch";
-import { VStack } from "../ui/vstack";
+import { Textarea, TextareaInput } from "../ui/textarea";
+
+const INPUT_TEXT_STYLE = { color: "#0D0F1B" } as const;
 
 const defaultValues: AllergyFormValues = {
-  category: "food",
   allergen: "",
   severity: undefined,
   symptoms: "",
   diagnosedAt: null,
   isActive: true,
+  memo: "",
 };
+
+const formatDate = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const formatDateLabel = (dateStr: string) =>
+  dayjs(dateStr).locale("ko").format("YYYY년 M월 D일");
 
 interface AllergyFormProps {
   initialValues?: Partial<AllergyFormValues>;
   submitLabel?: string;
-  onSubmit: (values: AllergyFormValues) => void;
+  isEdit?: boolean;
+  isSubmitting?: boolean;
+  onSubmit: (values: AllergyFormValues) => void | Promise<void>;
+  onDelete: () => void;
 }
+
+const FormField = ({
+  label,
+  error,
+  errorMessage,
+  children,
+}: {
+  label: string;
+  error?: boolean;
+  errorMessage?: string;
+  children: ReactNode;
+}) => (
+  <FormControl isInvalid={error}>
+    <FormControlLabelText className="mb-2 text-sm font-semibold text-gray-500">
+      {label}
+    </FormControlLabelText>
+    {children}
+    {errorMessage ? (
+      <FormControlError>
+        <FormControlErrorIcon as={AlertCircleIcon} />
+        <FormControlErrorText>{errorMessage}</FormControlErrorText>
+      </FormControlError>
+    ) : null}
+  </FormControl>
+);
 
 const AllergyForm = ({
   initialValues,
-  submitLabel = "저장",
+  submitLabel = "저장하기",
+  isEdit = false,
+  isSubmitting = false,
   onSubmit,
+  onDelete,
 }: AllergyFormProps) => {
-  const [category, setCategory] = useState(
-    initialValues?.category ?? defaultValues.category,
-  );
   const [allergen, setAllergen] = useState(
     initialValues?.allergen ?? defaultValues.allergen,
   );
@@ -60,141 +94,197 @@ const AllergyForm = ({
   const [symptoms, setSymptoms] = useState(
     initialValues?.symptoms ?? defaultValues.symptoms,
   );
+  const [diagnosedAt, setDiagnosedAt] = useState<string | null>(
+    initialValues?.diagnosedAt ?? defaultValues.diagnosedAt ?? null,
+  );
+  const [memo, setMemo] = useState(initialValues?.memo ?? defaultValues.memo);
   const [isActive, setIsActive] = useState(
     initialValues?.isActive ?? defaultValues.isActive,
   );
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const handleSubmit = () => {
-    setHasSubmitted(true);
-    if (!allergen.trim()) return;
+  const pickerDate = useMemo(
+    () => (diagnosedAt ? new Date(diagnosedAt) : new Date()),
+    [diagnosedAt],
+  );
 
-    onSubmit({
-      category,
+  const handleSubmit = async () => {
+    setHasSubmitted(true);
+    if (!allergen.trim() || isSubmitting) return;
+
+    await onSubmit({
       allergen: allergen.trim(),
       severity,
       symptoms: symptoms?.trim() || undefined,
-      diagnosedAt: initialValues?.diagnosedAt ?? null,
+      diagnosedAt,
       isActive,
+      memo: memo?.trim() || undefined,
     });
   };
 
   return (
-    <VStack className="w-full gap-4 pb-4">
-      <FormControl>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          분류
-        </FormControlLabelText>
-        <View className="mt-2 flex-row flex-wrap gap-2">
-          {ALLERGY_CATEGORIES.map((value) => {
-            const selected = category === value;
+    <View className="w-full gap-5 pb-2">
+      <FormField
+        label="알러지 유발 물질"
+        error={hasSubmitted && !allergen.trim()}
+        errorMessage="알러젠을 입력해주세요."
+      >
+        <View className="rounded-2xl bg-[#F7F7F7] px-4 py-1">
+          <Input className="border-0 bg-transparent" size="md">
+            <InputField
+              placeholder="예: 닭고기, 꽃가루"
+              placeholderTextColor="#9CA3AF"
+              style={INPUT_TEXT_STYLE}
+              value={allergen}
+              onChangeText={setAllergen}
+              editable={!isSubmitting}
+            />
+          </Input>
+        </View>
+      </FormField>
+
+      <FormField label="심각도 (선택)">
+        <View className="flex-row flex-wrap gap-2">
+          {ALLERGY_SEVERITIES.map((value) => {
+            const selected = severity === value;
+            const theme = ALLERGY_SEVERITY_COLORS[value];
             return (
               <Pressable
                 key={value}
-                onPress={() => setCategory(value)}
-                className={`rounded-full border px-3 py-1.5 ${
-                  selected
-                    ? "border-primary-500 bg-primary-50"
-                    : "border-gray-200 bg-gray-50"
-                }`}
+                onPress={() => setSeverity(selected ? undefined : value)}
+                disabled={isSubmitting}
+                className="rounded-full px-3 py-1.5 active:opacity-80"
+                style={{
+                  backgroundColor: selected ? theme.bg : "#F7F7F7",
+                  borderWidth: 1,
+                  borderColor: selected ? theme.color : "transparent",
+                }}
               >
                 <Text
-                  className={`text-sm ${
-                    selected
-                      ? "font-semibold text-primary-600"
-                      : "text-gray-700"
-                  }`}
+                  className="text-xs font-semibold"
+                  style={{ color: selected ? theme.color : "#6B7280" }}
                 >
-                  {getCategoryLabel(value)}
+                  {getSeverityLabel(value)}
                 </Text>
               </Pressable>
             );
           })}
         </View>
-      </FormControl>
+      </FormField>
 
-      <FormControl isInvalid={hasSubmitted && !allergen.trim()}>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          알러지 유발 물질
-        </FormControlLabelText>
-        <Input size="md" variant="underlined" className="mt-1 border-gray-300">
-          <InputField
-            placeholder="예: 닭고기, 꽃가루"
-            placeholderTextColor="#9CA3AF"
-            className="text-[#0D0F1B]"
-            value={allergen}
-            onChangeText={setAllergen}
-          />
-        </Input>
-        <FormControlError>
-          <FormControlErrorIcon as={AlertCircleIcon} />
-          <FormControlErrorText>알러젠을 입력해주세요.</FormControlErrorText>
-        </FormControlError>
-      </FormControl>
+      <FormField label="증상 (선택)">
+        <View className="rounded-2xl bg-[#F7F7F7] px-4 py-3">
+          <Textarea className="min-h-[88px] border-0 bg-transparent" size="md">
+            <TextareaInput
+              placeholder="가려움, 설사 등"
+              placeholderTextColor="#9CA3AF"
+              value={symptoms}
+              onChangeText={setSymptoms}
+              editable={!isSubmitting}
+              multiline
+              textAlignVertical="top"
+              className="min-h-[72px] text-base"
+              style={INPUT_TEXT_STYLE}
+            />
+          </Textarea>
+        </View>
+      </FormField>
 
-      <FormControl>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          심각도 (선택)
-        </FormControlLabelText>
-        <RadioGroup
-          value={severity ?? ""}
-          onChange={(value) =>
-            setSeverity(value ? (value as AllergySeverity) : undefined)
-          }
+      <FormField label="확인일 (선택)">
+        <Pressable
+          onPress={() => setDatePickerOpen(true)}
+          disabled={isSubmitting}
+          className="flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-4 py-3.5 active:opacity-80"
         >
-          <HStack space="md" className="my-2 flex-wrap">
-            {ALLERGY_SEVERITIES.map((value) => (
-              <Radio key={value} value={value} size="md">
-                <RadioIndicator>
-                  <RadioIcon as={CircleIcon} />
-                </RadioIndicator>
-                <RadioLabel className="text-[#0D0F1B]">
-                  {getSeverityLabel(value)}
-                </RadioLabel>
-              </Radio>
-            ))}
-          </HStack>
-        </RadioGroup>
-      </FormControl>
+          <Text className={diagnosedAt ? "text-[#0D0F1B]" : "text-gray-400"}>
+            {diagnosedAt ? formatDateLabel(diagnosedAt) : "날짜를 선택하세요"}
+          </Text>
+          <Icon as={CalendarDaysIcon} size="sm" className="text-gray-400" />
+        </Pressable>
+      </FormField>
+
+      <FormField label="메모 (선택)">
+        <View className="rounded-2xl bg-[#F7F7F7] px-4 py-3">
+          <Textarea className="min-h-[72px] border-0 bg-transparent" size="md">
+            <TextareaInput
+              placeholder="예: 간식 섭취 후 반응"
+              placeholderTextColor="#9CA3AF"
+              value={memo}
+              onChangeText={setMemo}
+              editable={!isSubmitting}
+              multiline
+              textAlignVertical="top"
+              className="min-h-[56px] text-base"
+              style={INPUT_TEXT_STYLE}
+            />
+          </Textarea>
+        </View>
+      </FormField>
 
       <FormControl>
-        <FormControlLabelText className="text-[#0D0F1B]">
-          증상 메모 (선택)
-        </FormControlLabelText>
-        <Input size="md" variant="underlined" className="mt-1 border-gray-300">
-          <InputField
-            placeholder="가려움, 설사 등"
-            placeholderTextColor="#9CA3AF"
-            className="text-[#0D0F1B]"
-            value={symptoms}
-            onChangeText={setSymptoms}
-            multiline
-          />
-        </Input>
-      </FormControl>
-
-      <FormControl>
-        <HStack className="items-center justify-between">
-          <FormControlLabelText className="text-[#0D0F1B]">
+        <View className="flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-4 py-3">
+          <FormControlLabelText className="text-sm font-semibold text-[#0D0F1B]">
             현재 해당
           </FormControlLabelText>
           <Switch
-            trackColor={{ false: "#d4d4d4", true: "#525252" }}
-            thumbColor="#fafafa"
-            ios_backgroundColor="#d4d4d4"
+            trackColor={{ false: "#D1D5DB", true: "#F25857" }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#D1D5DB"
             value={isActive}
             onValueChange={setIsActive}
+            disabled={isSubmitting}
           />
-        </HStack>
+        </View>
       </FormControl>
 
-      <Button
-        onPress={handleSubmit}
-        className="mt-2 w-full rounded-2xl bg-primary-500"
+      <RedButtonSurface
+        borderRadius={30}
+        backgroundColor="#F25857"
+        shadowPadding={8}
+        hostStyle={{ width: "100%" }}
+        style={{ width: "100%", height: 56 }}
       >
-        <ButtonText>{submitLabel}</ButtonText>
-      </Button>
-    </VStack>
+        <Pressable
+          onPress={handleSubmit}
+          disabled={isSubmitting}
+          className="h-full w-full items-center justify-center"
+          style={({ pressed }) =>
+            pressed || isSubmitting ? { opacity: 0.85 } : undefined
+          }
+        >
+          <Text className="text-base font-semibold text-white">
+            {submitLabel}
+          </Text>
+        </Pressable>
+      </RedButtonSurface>
+
+      {isEdit ? (
+        <Pressable
+          onPress={onDelete}
+          disabled={isSubmitting}
+          className="items-center py-2 active:opacity-70"
+        >
+          <Text className="text-sm font-medium text-[#F25857]">기록 삭제</Text>
+        </Pressable>
+      ) : null}
+
+      <DatePicker
+        modal
+        open={datePickerOpen}
+        mode="date"
+        locale="ko"
+        date={pickerDate}
+        title="날짜 선택"
+        confirmText="확인"
+        cancelText="취소"
+        onConfirm={(date) => {
+          setDiagnosedAt(formatDate(date));
+          setDatePickerOpen(false);
+        }}
+        onCancel={() => setDatePickerOpen(false)}
+      />
+    </View>
   );
 };
 

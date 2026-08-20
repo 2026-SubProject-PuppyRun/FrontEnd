@@ -1,4 +1,7 @@
-import { getPathLength } from "geolib";
+import { calculatePaceFromDistanceAndTime } from "@/util/run/calcPace";
+import { getRouteDistanceMeters } from "@/util/run/getRouteDistance";
+import { resetPaceTracking } from "@/util/run/recordRunLocation";
+import { submitWalkDiary } from "@/util/run/submitWalkDiary";
 import { create } from "zustand";
 
 interface Coordinate {
@@ -6,101 +9,80 @@ interface Coordinate {
   longitude: number;
 }
 
+const EMPTY_RUN_DATA = {
+  pace: "0'00''",
+  distance: 0,
+  duration: 0,
+  averagePace: "0'00''",
+  startTime: undefined as number | undefined,
+  accumulatedMs: 0,
+  route: null as Coordinate[] | null,
+  routeImg: null as string | null,
+  selfie: null as string | null,
+  totalTime: 0,
+  stopTime: null as Date | null,
+  title: "",
+  contents: "",
+  /** 서버 트래킹 기록 ID — 일기 등록 시 필요 */
+  trackingId: null as string | null,
+};
+
 interface RunState {
-  // 0. 추천 경로 리스트
   recommendedRoutes: Coordinate[][] | null;
-
-  // 1. 추천 경로 (가이드 라인 - null이면 자유 러닝)
   selectedRoute: Coordinate[] | null;
-
-  // 2. 실제 내가 뛴 경로 (기록용)
+  /** 이번 산책에 참여할 반려견 ID 목록 */
+  selectedPetIds: string[];
   actualRoute: Coordinate[][];
-
-  // 3. 현재 내 위치 (지도 중심용)
   currentLocation: Coordinate | null;
-
-  // 4. 러닝 상태
   isRunning: boolean;
-
-  // 5. 페이스, 거리, 시간 등 러닝 관련 정보 (추후 확장 가능)
-  runData?: {
-    pace?: string; // min/km
-    distance?: number; // m
-    duration?: number; // s
-    averagePace?: string; // min/km
-    startTime?: number; // 타이머 시작 시간 (밀리초)
-    accumulatedMs?: number; // 일시정지 동안 누적된 시간 (밀리초)
-    route?: Coordinate[] | null; // 최종 러닝 결과를 저장할 실제 경로
-    totalTime?: number; // 총 러닝 시간 (초)
-    selfie?: string | null; // 인증샷 URI
-    routeImg?: string | null; // 서버에 보낼 PNG 이미지 URI
-    stopTime?: Date | null; // 러닝 종료 시간, 러닝 날짜 기록용
-    title?: string; // 러닝 기록 제목
-    contents?: string; // 산책 일기
-  };
-  // 6. 일시정지 상태
+  runData: typeof EMPTY_RUN_DATA;
   isPaused: boolean;
 
   setRecommendedRoutes: (routes: Coordinate[][] | null) => void;
   setSelectedRoute: (route: Coordinate[] | null) => void;
+  setSelectedPetIds: (petIds: string[]) => void;
   setCurrentLocation: (location: Coordinate) => void;
   startRun: () => void;
   stopRun: () => void;
   pauseRun: () => void;
   resumeRun: () => void;
   addActualLocation: (location: Coordinate) => void;
-  addRunData: (data: Partial<RunState["runData"]>) => void;
+  addRunData: (data: Partial<typeof EMPTY_RUN_DATA>) => void;
   resetRunData: () => void;
+  resetRunSession: () => void;
   submitRunData: (title: string, contents: string) => Promise<void>;
 }
 
 export const useRunStore = create<RunState>((set) => ({
   recommendedRoutes: null,
   selectedRoute: null,
+  selectedPetIds: [],
   actualRoute: [[]],
   currentLocation: null,
   isRunning: false,
-  runData: {
-    pace: "0'00''",
-    distance: 0,
-    duration: 0,
-    averagePace: "0'00''",
-    startTime: undefined,
-    accumulatedMs: 0,
-    totalTime: 0,
-    route: null,
-    routeImg: null,
-    selfie: null,
-    stopTime: null,
-    title: "",
-    contents: "",
-  },
+  runData: { ...EMPTY_RUN_DATA },
   isPaused: false,
 
   setRecommendedRoutes: (routes) => set({ recommendedRoutes: routes }),
 
   setSelectedRoute: (route) => set({ selectedRoute: route }),
 
+  setSelectedPetIds: (petIds) => set({ selectedPetIds: petIds }),
+
   setCurrentLocation: (location) => set({ currentLocation: location }),
 
-  startRun: () =>
-    set((state) => ({
+  startRun: () => {
+    resetPaceTracking();
+    set({
       isRunning: true,
       isPaused: false,
+      actualRoute: [[]],
       runData: {
-        ...state.runData,
+        ...EMPTY_RUN_DATA,
         startTime: Date.now(),
-        accumulatedMs: 0,
-        routeImg: null,
-        selfie: null,
-        totalTime: 0,
-        distance: 0,
-        pace: "0'00''",
-        averagePace: "0'00''",
-        title: "",
-        contents: "",
       },
-    })),
+    });
+  },
 
   stopRun: () =>
     set((state) => {
@@ -108,15 +90,24 @@ export const useRunStore = create<RunState>((set) => ({
       const accumulatedMs = state.runData?.accumulatedMs || 0;
       const activeMs = currentStartTime ? Date.now() - currentStartTime : 0;
       const totalTime = Math.floor((activeMs + accumulatedMs) / 1000);
+      const distance = getRouteDistanceMeters(state.actualRoute);
+      const averagePace =
+        distance > 0 && totalTime > 0
+          ? calculatePaceFromDistanceAndTime(distance, totalTime)
+          : "0'00''";
+
+      resetPaceTracking();
 
       return {
         isRunning: false,
         isPaused: false,
         actualRoute: [[]],
         runData: {
-          ...state.runData,
+          ...(state.runData ?? EMPTY_RUN_DATA),
           totalTime,
-          distance: getPathLength(state.actualRoute.flat()),
+          distance,
+          pace: averagePace,
+          averagePace,
           route: state.actualRoute.flat(),
           stopTime: new Date(),
         },
@@ -135,32 +126,29 @@ export const useRunStore = create<RunState>((set) => ({
       return { actualRoute: routes };
     }),
 
-  addRunData: (data: Partial<RunState["runData"]>) =>
+  addRunData: (data: Partial<typeof EMPTY_RUN_DATA>) =>
     set((state) => ({
       runData: {
-        ...(state.runData || {}),
+        ...(state.runData || EMPTY_RUN_DATA),
         ...data,
       },
     })),
 
   resetRunData: () =>
     set((state) => ({
-      runData: {
-        pace: "0'00''",
-        distance: 0,
-        duration: 0,
-        averagePace: "0'00''",
-        startTime: undefined,
-        accumulatedMs: 0,
-        route: null,
-        routeImg: null,
-        selfie: null,
-        totalTime: 0,
-        stopTime: null,
-        title: "",
-        contents: "",
-      },
+      runData: { ...EMPTY_RUN_DATA },
     })),
+
+  resetRunSession: () => {
+    resetPaceTracking();
+    set({
+      isRunning: false,
+      isPaused: false,
+      selectedPetIds: [],
+      actualRoute: [[]],
+      runData: { ...EMPTY_RUN_DATA },
+    });
+  },
 
   pauseRun: () =>
     set((state) => {
@@ -171,7 +159,7 @@ export const useRunStore = create<RunState>((set) => ({
       return {
         isPaused: true,
         runData: {
-          ...state.runData,
+          ...(state.runData ?? EMPTY_RUN_DATA),
           accumulatedMs: currentAccumulated + addedMs,
           startTime: undefined,
         },
@@ -184,7 +172,7 @@ export const useRunStore = create<RunState>((set) => ({
       const lastSegment = routes[routes.length - 1];
 
       const newRunData = {
-        ...state.runData,
+        ...(state.runData ?? EMPTY_RUN_DATA),
         startTime: Date.now(),
       };
 
@@ -199,8 +187,6 @@ export const useRunStore = create<RunState>((set) => ({
     }),
 
   submitRunData: async (title, contents) => {
-    const { runData } = useRunStore.getState();
-    if (!runData) throw new Error("No run data to submit");
-    console.log("submitData :", { ...runData, title, contents });
+    await submitWalkDiary(title, contents);
   },
 }));

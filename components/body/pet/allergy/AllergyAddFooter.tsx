@@ -1,8 +1,6 @@
-import { Button, ButtonText } from "@/components/ui/button";
-import { HStack } from "@/components/ui/hstack";
+import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { Icon, ShareIcon } from "@/components/ui/icon";
-import { Pressable } from "@/components/ui/pressable";
-import { View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 interface AllergyAddFooterProps {
   onPressAdd: () => void;
@@ -13,23 +11,37 @@ const AllergyAddFooter = ({
   onPressAdd,
   onPressShare,
 }: AllergyAddFooterProps) => (
-  <View className="border-t border-gray-100 px-4 py-3">
-    <HStack className="items-center gap-2">
-      <Button
-        onPress={onPressAdd}
-        className="min-h-12 flex-1 rounded-2xl bg-primary-500"
-      >
-        <ButtonText>알러지 추가</ButtonText>
-      </Button>
+  <View className="absolute bottom-0 left-0 right-0 rounded-t-3xl border-t border-gray-100 bg-white px-6 pb-12 pt-4">
+    <View className="flex-row items-center gap-3">
+      <View className="flex-1">
+        <RedButtonSurface
+          borderRadius={30}
+          backgroundColor="#F25857"
+          shadowPadding={8}
+          hostStyle={{ width: "100%" }}
+          style={{ width: "100%", height: 52 }}
+        >
+          <Pressable
+            onPress={onPressAdd}
+            className="h-full w-full items-center justify-center"
+            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          >
+            <Text className="text-base font-semibold text-white">
+              알러지 추가
+            </Text>
+          </Pressable>
+        </RedButtonSurface>
+      </View>
+
       <Pressable
         onPress={onPressShare}
         accessibilityRole="button"
         accessibilityLabel="알러지 기록 공유"
-        className="h-12 w-12 items-center justify-center rounded-2xl border border-gray-200 bg-white active:opacity-70"
+        className="h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl border border-gray-100 bg-[#F7F7F7] active:opacity-70"
       >
-        <Icon as={ShareIcon} size="xl" className="text-[#0D0F1B]" />
+        <Icon as={ShareIcon} size="md" className="text-[#0D0F1B]" />
       </Pressable>
-    </HStack>
+    </View>
   </View>
 );
 

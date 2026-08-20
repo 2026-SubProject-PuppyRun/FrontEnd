@@ -1,7 +1,8 @@
+import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 interface ChartDateNavigatorProps {
   dateText: string;
@@ -9,6 +10,7 @@ interface ChartDateNavigatorProps {
   onPrev: () => void;
   onNext: () => void;
   chartType: "week" | "month" | "year";
+  disableNext?: boolean;
 }
 
 const ChartDateNavigator: React.FC<ChartDateNavigatorProps> = ({
@@ -17,21 +19,35 @@ const ChartDateNavigator: React.FC<ChartDateNavigatorProps> = ({
   dateText,
   currentDate,
   chartType,
+  disableNext,
 }) => {
+  const isCurrentPeriod =
+    disableNext ?? currentDate.isSame(dayjs(), chartType);
+
   return (
-    <View className="mx-10 mb-8 flex-row items-center justify-between">
-      <TouchableOpacity onPress={onPrev}>
-        <Ionicons name="caret-back" size={24} color="black" />
-      </TouchableOpacity>
-      <Text>{dateText}</Text>
-      {currentDate.isSame(dayjs(), chartType) ? (
-        <View className="opacity-30">
-          <Ionicons name="caret-forward" size={24} color="black" />
+    <View className="mb-4 flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-3 py-2">
+      <Pressable
+        onPress={onPrev}
+        className="h-9 w-9 items-center justify-center rounded-full bg-white"
+        style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+      >
+        <Ionicons name="chevron-back" size={20} color="#0D0F1B" />
+      </Pressable>
+
+      <Text className="text-sm font-semibold text-[#0D0F1B]">{dateText}</Text>
+
+      {isCurrentPeriod ? (
+        <View className="h-9 w-9 items-center justify-center opacity-30">
+          <Ionicons name="chevron-forward" size={20} color="#0D0F1B" />
         </View>
       ) : (
-        <TouchableOpacity onPress={onNext}>
-          <Ionicons name="caret-forward" size={24} color="black" />
-        </TouchableOpacity>
+        <Pressable
+          onPress={onNext}
+          className="h-9 w-9 items-center justify-center rounded-full bg-white"
+          style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+        >
+          <Ionicons name="chevron-forward" size={20} color="#0D0F1B" />
+        </Pressable>
       )}
     </View>
   );

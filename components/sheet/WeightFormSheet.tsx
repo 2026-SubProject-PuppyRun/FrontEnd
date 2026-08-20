@@ -1,5 +1,9 @@
 import WeightForm from "@/components/form/WeightForm";
-import { WeightFormValues, WeightRecord } from "@/types/weight";
+import { WeightFormValues } from "@/types/weight";
+import { Pressable } from "@/components/ui/pressable";
+import { Text } from "@/components/ui/text";
+import { CloseIcon, Icon } from "@/components/ui/icon";
+import { View } from "react-native";
 import {
   Actionsheet,
   ActionsheetBackdrop,
@@ -8,51 +12,65 @@ import {
   ActionsheetDragIndicatorWrapper,
   ActionsheetScrollView,
 } from "../ui/actionsheet";
-import { Text } from "../ui/text";
 
 interface WeightFormSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  editingRecord?: WeightRecord | null;
-  onSubmit: (values: WeightFormValues) => void;
-  onDelete: () => void;
+  isSubmitting?: boolean;
+  onSubmit: (values: WeightFormValues) => void | Promise<void>;
 }
 
 const WeightFormSheet = ({
   isOpen,
   onClose,
-  editingRecord,
+  isSubmitting = false,
   onSubmit,
-  onDelete,
 }: WeightFormSheetProps) => {
-  const isEdit = Boolean(editingRecord);
-
-  const handleSubmit = (values: WeightFormValues) => {
-    onSubmit(values);
-    onClose();
+  const handleSubmit = async (values: WeightFormValues) => {
+    try {
+      await onSubmit(values);
+      onClose();
+    } catch {
+      // 실패 시 시트 유지 — 토스트는 hook에서 처리
+    }
   };
 
   return (
-    <Actionsheet isOpen={isOpen} onClose={onClose} snapPoints={[78]}>
+    <Actionsheet isOpen={isOpen} onClose={onClose} snapPoints={[52]}>
       <ActionsheetBackdrop />
-      <ActionsheetContent className="bg-white px-4 pb-6">
+      <ActionsheetContent className="rounded-t-3xl bg-white px-6 pb-8 pt-2">
         <ActionsheetDragIndicatorWrapper>
-          <ActionsheetDragIndicator className="bg-gray-300" />
+          <ActionsheetDragIndicator className="bg-gray-200" />
         </ActionsheetDragIndicatorWrapper>
-        <Text className="mb-2 text-lg font-bold text-[#0D0F1B]">
-          {isEdit ? "체중 수정" : "체중 기록"}
-        </Text>
+
+        <View className="mb-4 mt-2 w-full flex-row items-start justify-between">
+          <View className="flex-1 pr-3">
+            <Text className="text-lg font-bold text-[#0D0F1B]">체중 기록</Text>
+            <Text className="mt-1 text-sm text-gray-500">
+              오늘 측정한 체중을 기록해 보세요
+            </Text>
+          </View>
+          <Pressable
+            onPress={onClose}
+            disabled={isSubmitting}
+            accessibilityRole="button"
+            accessibilityLabel="닫기"
+            className="h-8 w-8 items-center justify-center rounded-full bg-[#F7F7F7] active:opacity-70"
+          >
+            <Icon as={CloseIcon} size="sm" className="text-gray-500" />
+          </Pressable>
+        </View>
+
         <ActionsheetScrollView
           className="w-full"
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {isOpen ? (
             <WeightForm
-              key={editingRecord?.id ?? "new"}
-              initialValues={editingRecord ?? undefined}
-              submitLabel={isEdit ? "수정" : "저장"}
+              key="new"
+              isSubmitting={isSubmitting}
               onSubmit={handleSubmit}
-              onDelete={onDelete}
             />
           ) : null}
         </ActionsheetScrollView>

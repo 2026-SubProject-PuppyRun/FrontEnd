@@ -4,25 +4,26 @@ import { Skeleton } from "../ui/skeleton";
 
 const WalkScoreSkeleton = () => {
   return (
-    <View className="m-4 gap-4">
+    <View className="gap-4 px-6 pb-4">
+      <Skeleton variant="rounded" className="h-5 w-32" startColor="bg-gray-200" />
       <Skeleton
         variant="rounded"
-        className="h-16 w-full"
+        className="h-16 w-full rounded-3xl"
         startColor="bg-gray-200"
       />
       <Skeleton
         variant="rounded"
-        className="h-52 w-full"
+        className="h-52 w-full rounded-3xl"
         startColor="bg-gray-200"
       />
       <Skeleton
         variant="rounded"
-        className="h-20 w-full"
+        className="h-28 w-full rounded-3xl"
         startColor="bg-gray-200"
       />
       <Skeleton
         variant="rounded"
-        className="h-40 w-full"
+        className="h-36 w-full rounded-3xl"
         startColor="bg-gray-200"
       />
     </View>

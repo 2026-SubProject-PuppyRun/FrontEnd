@@ -1,12 +1,15 @@
 import PetBody from "@/components/body/pet/PetBody";
 import Header from "@/components/header/Header";
-import React from "react";
 import { View } from "react-native";
 
 const Index = () => {
   return (
-    <View>
-      <Header title="반려견 목록" />
+    <View className="flex-1 bg-[#F7F7F7]">
+      <Header
+        showLogo
+        disableBack
+        subtitle="목장에서 뛰어놀고, 건강 기록도 챙겨요"
+      />
       <PetBody />
     </View>
   );

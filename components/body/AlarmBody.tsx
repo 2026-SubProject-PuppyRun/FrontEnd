@@ -1,13 +1,14 @@
+import RedButtonSurface from "@/components/ui/RedButtonSurface";
+import { Text } from "@/components/ui/text";
 import { getTargetDate } from "@/util/date";
 import { scheduleLocalNotification } from "@/util/notification";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { TextInput, View } from "react-native";
+import { Pressable, ScrollView, TextInput, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import AlarmList from "../board/AlarmListBoard/AlarmList";
 import DayOfWeekChoiceButton from "../button/DayOfWeekChoiceButton";
 import CustomAlert from "../modal/CustomAlert";
-import { Button, ButtonText } from "../ui/button";
 
 const daysOfWeek = [
   { label: "일", value: "sun" },
@@ -18,12 +19,14 @@ const daysOfWeek = [
   { label: "금", value: "fri" },
   { label: "토", value: "sat" },
 ];
+
 export interface AlarmItem {
   title: string;
   dayOfWeek: string;
   time: Date;
   notificationId?: string;
 }
+
 const dummyAlarmList: AlarmItem[] = [
   {
     title: "산책 시간이에요!",
@@ -41,84 +44,119 @@ const dummyAlarmList: AlarmItem[] = [
     time: new Date("2024-01-01T09:00:00"),
   },
 ];
+
 const AlarmBody = () => {
   const [date, setDate] = useState(new Date());
   const today = new Date().getDay();
   const [dayOfWeek, setDayOfWeek] = useState(daysOfWeek[today].label);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
-  const [alarmTitle, setAlarmTitle] = useState("");
+  const [alarmBody, setAlarmBody] = useState("");
   const [alarmList, setAlarmList] = useState<AlarmItem[]>([]);
 
   useFocusEffect(
     useCallback(() => {
-      //서버에서 알람 리스트를 가져오는 API 호출을 하는 부분입니다.
-
       setAlarmList(dummyAlarmList);
-      return () => {
-        //서버에 알람 리스트를 저장하는 API 호출을 하는 부분입니다.
-      };
+      return () => {};
     }, []),
   );
 
+  const formattedTime = date.toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
   return (
-    <View className="m-4 flex-1 rounded-lg bg-white p-4 ">
-      <View className=" m-4 flex-row items-center justify-around pb-4">
-        {daysOfWeek.map((day) => (
-          <DayOfWeekChoiceButton
-            key={day.value}
-            dayOfWeek={day.label}
-            selectedDayOfWeek={dayOfWeek}
-            handleSelectDayOfWeek={setDayOfWeek}
+    <ScrollView
+      className="flex-1"
+      contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View className="mb-5 rounded-3xl bg-white px-5 py-5 shadow-sm">
+        <Text className="mb-4 text-sm font-semibold text-gray-500">
+          새 알람 추가
+        </Text>
+
+        <Text className="mb-3 text-xs font-medium text-gray-500">요일</Text>
+        <View className="mb-5 flex-row justify-between">
+          {daysOfWeek.map((day) => (
+            <DayOfWeekChoiceButton
+              key={day.value}
+              dayOfWeek={day.label}
+              selectedDayOfWeek={dayOfWeek}
+              handleSelectDayOfWeek={setDayOfWeek}
+            />
+          ))}
+        </View>
+
+        <Text className="mb-2 text-xs font-medium text-gray-500">시간</Text>
+        <View className="items-center rounded-2xl bg-[#F7F7F7] py-2">
+          <DatePicker
+            date={date}
+            onDateChange={setDate}
+            mode="time"
+            theme="light"
+            locale="ko"
           />
-        ))}
-      </View>
+        </View>
 
-      <View className=" items-center justify-center ">
-        <DatePicker
-          date={date}
-          onDateChange={setDate}
-          mode="time"
-          theme="light"
-          style={{ transform: [{ scale: 1.2 }] }}
-        />
-      </View>
-      <View className="mt-2 w-full flex-row justify-end">
+        <Text className="mb-2 mt-5 text-xs font-medium text-gray-500">
+          알람 제목
+        </Text>
         <TextInput
-          className="flex-1 border-b border-gray-300 px-4 py-2 placeholder:color-gray-400"
-          placeholder="알람 제목을 입력하세요"
-          value={alarmTitle}
-          onChangeText={setAlarmTitle}
+          className="rounded-2xl bg-[#F7F7F7] px-4 py-3.5 text-base text-[#0D0F1B]"
+          placeholder="예: 산책 시간이에요!"
+          placeholderTextColor="#9CA3AF"
+          value={alarmBody}
+          onChangeText={setAlarmBody}
         />
 
-        <Button
-          className="ml-2 h-10 rounded-full px-4 py-2"
-          onPress={() => {
-            setShowAlertDialog(true);
-          }}
-        >
-          <ButtonText className="text-sm ">추가</ButtonText>
-        </Button>
+        <View className="mt-5">
+          <RedButtonSurface
+            borderRadius={30}
+            backgroundColor="#F25857"
+            shadowPadding={8}
+            hostStyle={{ width: "100%" }}
+            style={{ width: "100%", height: 52 }}
+          >
+            <Pressable
+              onPress={() => setShowAlertDialog(true)}
+              className="h-full w-full items-center justify-center"
+              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+            >
+              <Text className="text-base font-semibold text-white">
+                알람 추가하기
+              </Text>
+            </Pressable>
+          </RedButtonSurface>
+        </View>
       </View>
+
+      <Text className="mb-3 text-base font-semibold text-[#0D0F1B]">
+        등록된 알람
+      </Text>
       <AlarmList alarmList={alarmList} setAlarmList={setAlarmList} />
+
       <CustomAlert
         showAlertDialog={showAlertDialog}
         handleClose={() => setShowAlertDialog(false)}
-        title="알림이 추가되었습니다."
-        description={`제목: ${alarmTitle}, 요일: ${dayOfWeek}, 시간: ${date.toLocaleTimeString().slice(0, 7)} `}
-        confirmText="확인"
+        title="알람을 추가할까요?"
+        description={`${dayOfWeek}요일 ${formattedTime} · ${alarmBody || "내용 없음"}`}
+        confirmText="추가"
         cancelText="취소"
         onConfirm={async () => {
           const newAlarmDate = getTargetDate(dayOfWeek, date);
 
           const notiId = await scheduleLocalNotification(
-            alarmTitle,
+            "알림이 도착했어요",
             newAlarmDate,
             {
-              body: `퍼피런에서 온 알림입니다!`,
-              smallIcon: "ic_launcher",
+              body: alarmBody,
             },
             "puppyrun_alarm_channel",
           );
+
           setAlarmList((prev) => {
             const dayOrder = ["일", "월", "화", "수", "목", "금", "토"];
             const newList = [
@@ -126,7 +164,7 @@ const AlarmBody = () => {
               {
                 dayOfWeek,
                 time: date,
-                title: alarmTitle,
+                title: alarmBody,
                 notificationId: notiId,
               },
             ];
@@ -136,11 +174,11 @@ const AlarmBody = () => {
               return dayA - dayB;
             });
           });
-          setAlarmTitle("");
+          setAlarmBody("");
           setShowAlertDialog(false);
         }}
       />
-    </View>
+    </ScrollView>
   );
 };
 

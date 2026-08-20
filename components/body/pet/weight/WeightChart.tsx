@@ -3,6 +3,8 @@ import { WeightChartPoint, WeightRecord } from "@/types/weight";
 import { View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 
+const CHART_COLOR = "#F25857";
+
 interface WeightChartProps {
   chartPoints: WeightChartPoint[];
   selectedRecordId: string | null;
@@ -18,8 +20,9 @@ const WeightChart = ({
 }: WeightChartProps) => {
   if (chartPoints.length === 0) {
     return (
-      <View className="mx-4 mt-4 min-h-[220px] items-center justify-center rounded-2xl bg-gray-50">
-        <Text className="text-sm text-gray-500">
+      <View className="min-h-[200px] items-center justify-center rounded-2xl bg-[#F7F7F7] px-4">
+        <Text className="text-2xl">📊</Text>
+        <Text className="mt-2 text-sm text-gray-500">
           선택한 기간에 표시할 체중 기록이 없어요
         </Text>
       </View>
@@ -33,7 +36,7 @@ const WeightChart = ({
     return {
       value: point.value,
       label: point.label,
-      dataPointColor: selected ? "#F97316" : "#9CA3AF",
+      dataPointColor: selected ? CHART_COLOR : "#D1D5DB",
       dataPointRadius: selected ? 8 : 5.5,
       onPress: () => {
         const record = recordMap.get(point.recordId);
@@ -52,7 +55,7 @@ const WeightChart = ({
     .join("|");
 
   return (
-    <View className="mx-4 mt-4 min-h-[220px] rounded-2xl bg-gray-50 px-2 py-4">
+    <View className="min-h-[200px] rounded-2xl bg-[#F7F7F7] px-1 py-3">
       <LineChart
         key={chartKey}
         data={data}
@@ -67,11 +70,11 @@ const WeightChart = ({
         endSpacing={20}
         xAxisThickness={0}
         yAxisThickness={0}
-        color="#F97316"
+        color={CHART_COLOR}
         thickness={2}
         areaChart
-        startFillColor="#F97316"
-        endFillColor="#F97316"
+        startFillColor={CHART_COLOR}
+        endFillColor={CHART_COLOR}
         startOpacity={0.15}
         endOpacity={0.02}
       />

@@ -1,8 +1,14 @@
 import { CloseIcon } from "@/components/ui/icon";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { usePetStore } from "@/store/usePetStore";
-import { useVaccineStore } from "@/store/useVaccineStore";
 import { VaccineFormValues, VaccineRecord } from "@/types/vaccine";
+import {
+  useCreateVaccinationMutation,
+  useDeleteVaccinationMutation,
+  useRefreshVaccineLogsOnFocus,
+  useUpdateVaccinationMutation,
+  useVaccineLogsQuery,
+} from "@/util/api/vaccines";
 import { resolveRouteParam } from "@/util/navigation";
 import { useGlobalSearchParams } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
@@ -13,10 +19,10 @@ const buildVaccineShareMessage = (
   records: VaccineRecord[],
 ) => {
   if (records.length === 0) return null;
-  const lines = records.map(
-    (record) =>
-      `• ${record.name} · 접종일 ${record.vaccinatedAt} · 다음 ${record.nextVaccinationAt}`,
-  );
+  const lines = records.map((record) => {
+    const base = `• ${record.name} · 접종일 ${record.vaccinatedAt} · 다음 ${record.nextVaccinationAt}`;
+    return record.memo ? `${base}\n  메모: ${record.memo}` : base;
+  });
   return [`[${petName}] 접종 기록`, "", ...lines].join("\n");
 };
 
@@ -28,49 +34,89 @@ export const useVaccineTab = () => {
     petId ? state.petList?.find((p) => p.petId === petId)?.name : undefined,
   );
 
-  const records = useVaccineStore((state) => state.records);
-  const addRecord = useVaccineStore((state) => state.addRecord);
-  const updateRecord = useVaccineStore((state) => state.updateRecord);
-  const deleteRecord = useVaccineStore((state) => state.deleteRecord);
+  useRefreshVaccineLogsOnFocus(petId);
+
+  const { data, isLoading, isError } = useVaccineLogsQuery(petId);
+
+  const petRecords = useMemo(
+    () => data?.records ?? [],
+    [data?.records],
+  );
+
+  const createMutation = useCreateVaccinationMutation(petId);
+  const updateMutation = useUpdateVaccinationMutation(petId);
+  const deleteMutation = useDeleteVaccinationMutation(petId);
+  const isSubmitting =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<VaccineRecord | null>(
     null,
   );
 
-  const petRecords = useMemo(
-    () => (petId ? records.filter((r) => r.petId === petId) : []),
-    [records, petId],
-  );
-
   const openAdd = () => {
+    if (isSubmitting) return;
     setEditingRecord(null);
     setSheetOpen(true);
   };
 
   const openEdit = (record: VaccineRecord) => {
+    if (isSubmitting) return;
     setEditingRecord(record);
     setSheetOpen(true);
   };
 
   const closeSheet = () => {
+    if (isSubmitting) return;
     setSheetOpen(false);
     setEditingRecord(null);
   };
 
-  const handleSubmit = (values: VaccineFormValues) => {
+  const handleSubmit = async (values: VaccineFormValues) => {
     if (!petId) return;
-    if (editingRecord) {
-      updateRecord(editingRecord.id, values);
-      return;
+
+    try {
+      if (editingRecord) {
+        if (!editingRecord.id) {
+          throw new Error("수정할 접종 기록 ID가 없습니다.");
+        }
+        await updateMutation.mutateAsync({
+          vaccinationId: editingRecord.id,
+          values,
+        });
+        toast.showToast({ message: "접종 기록이 수정되었습니다." });
+        setEditingRecord(null);
+      } else {
+        await createMutation.mutateAsync(values);
+        toast.showToast({ message: "접종 기록이 등록되었습니다." });
+      }
+    } catch {
+      toast.showToast({
+        message: editingRecord
+          ? "접종 기록 수정에 실패했습니다."
+          : "접종 기록 등록에 실패했습니다.",
+        icon: CloseIcon,
+      });
+      throw new Error("vaccine mutation failed");
     }
-    addRecord({ ...values, petId });
   };
 
-  const handleDelete = () => {
-    if (!editingRecord) return;
-    deleteRecord(editingRecord.id);
-    closeSheet();
+  const handleDelete = async () => {
+    if (!petId || !editingRecord?.id) return;
+
+    try {
+      await deleteMutation.mutateAsync(editingRecord.id);
+      toast.showToast({ message: "접종 기록이 삭제되었습니다." });
+      setEditingRecord(null);
+    } catch {
+      toast.showToast({
+        message: "접종 기록 삭제에 실패했습니다.",
+        icon: CloseIcon,
+      });
+      throw new Error("vaccine delete failed");
+    }
   };
 
   const shareVaccine = useCallback(async () => {
@@ -103,5 +149,8 @@ export const useVaccineTab = () => {
     handleSubmit,
     shareVaccine,
     handleDelete,
+    isLoading,
+    isError,
+    isSubmitting,
   };
 };

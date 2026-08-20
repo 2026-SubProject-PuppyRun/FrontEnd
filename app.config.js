@@ -1,6 +1,6 @@
 module.exports = {
   expo: {
-    name: "PuppyRun_FE",
+    name: "퍼피런",
     slug: "PuppyRun_FE",
     version: "1.0.0",
     orientation: "portrait",
@@ -49,14 +49,22 @@ module.exports = {
         },
       ],
       [
+        "./withNotificationIcon.js",
+        {
+          // 앱 아이콘과 동일 소스 → status bar / FCM 기본 아이콘
+          icon: "./assets/images/icon.png",
+        },
+      ],
+      [
         "expo-splash-screen",
         {
           image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
+          imageWidth: 400,
           resizeMode: "contain",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#F25857",
           dark: {
-            backgroundColor: "#000000",
+            image: "./assets/images/splash-icon.png",
+            backgroundColor: "#F25857",
           },
         },
       ],

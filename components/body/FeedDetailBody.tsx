@@ -1,16 +1,16 @@
-import { FeedDetail } from "@/app/(tabs)/mypage/feed/[id]";
+import SelfieRouteCard from "@/components/swiper/SelfieRouteCard";
+import RedButtonSurface from "@/components/ui/RedButtonSurface";
+import { CheckCircleIcon, EditIcon } from "@/components/ui/icon";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { useCustomToast } from "@/hooks/use-custom-toast";
-import { formatTime } from "@/util/run";
+import { FeedDetail } from "@/types/feed";
+import { formatTime } from "@/util/run/formatTime";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView } from "react-native";
-import SelfieAndRouteSwiper from "../swiper/SelfieAndRouteSwiper";
-import { Button, ButtonText } from "../ui/button";
-import { HStack } from "../ui/hstack";
-import { CheckCircleIcon } from "../ui/icon";
-import { Input, InputField } from "../ui/input";
-import { Text } from "../ui/text";
-import { Textarea, TextareaInput } from "../ui/textarea";
+import { Pressable, View } from "react-native";
+
 interface FeedDetailBodyProps extends FeedDetail {}
 
 const FeedDetailBody = (props: FeedDetailBodyProps) => {
@@ -32,51 +32,75 @@ const FeedDetailBody = (props: FeedDetailBodyProps) => {
     showToast({ message: "피드가 저장되었습니다!", icon: CheckCircleIcon });
 
     router.back();
-
-    // TODO: 서버 전송
   };
 
   return (
-    <ScrollView>
-      <Input className="m-4" variant="underlined" size="xl">
-        <InputField
-          className="text-black"
-          type="text"
-          value={editForm.title}
-          onChangeText={(text: string) =>
-            setEditForm((prev) => ({ ...prev, title: text }))
-          }
-        />
-      </Input>
+    <>
+      <View className="mx-6 mb-4 mt-2 rounded-3xl bg-white px-5 py-4 shadow-sm">
+        <Text className="mb-2 text-sm font-semibold text-gray-500">제목</Text>
+        <Input variant="underlined" className="border-outline-200">
+          <InputField
+            placeholder="제목을 입력해주세요..."
+            value={editForm.title}
+            onChangeText={(text) =>
+              setEditForm((prev) => ({ ...prev, title: text }))
+            }
+            className="text-[#0D0F1B]"
+          />
+          <InputSlot className="pl-3">
+            <InputIcon as={EditIcon} />
+          </InputSlot>
+        </Input>
+      </View>
 
-      <SelfieAndRouteSwiper
+      <SelfieRouteCard
+        route={props.route}
         routeImgUrl={props.routeImgUrl}
         selfieImgUrl={props.selfieImgUrl}
+        captureRoute={false}
+        stats={{
+          pace: props.pace,
+          distanceLabel: `${(props.distance / 1000).toFixed(2)}km`,
+          timeLabel: formatTime(props.duration),
+        }}
       />
-      <HStack space="xl" className=" self-center py-4">
-        <Text size="3xl" className="text-black">
-          {props.pace}
-        </Text>
-        <Text size="3xl" className="text-black">
-          {((props.distance ?? 0) / 1000).toFixed(2)}km
-        </Text>
-        <Text size="3xl" className="text-black">
-          {formatTime(props.duration ?? 0)}
-        </Text>
-      </HStack>
-      <Textarea className="border-0 bg-transparent px-4" size="xl">
-        <TextareaInput
-          className="!text-black"
-          value={editForm.contents}
-          onChangeText={(text: string) =>
-            setEditForm((prev) => ({ ...prev, contents: text }))
-          }
-        />
-      </Textarea>
-      <Button className="m-4" size="lg" onPress={handleSubmit}>
-        <ButtonText>저장하기</ButtonText>
-      </Button>
-    </ScrollView>
+
+      <View className="mx-6 mt-4 rounded-3xl bg-white px-5 py-4 shadow-sm">
+        <Text className="mb-2 text-sm font-semibold text-gray-500">일기</Text>
+        <Textarea className="min-h-[140px] border-0 bg-transparent " size="md">
+          <TextareaInput
+            placeholder="산책 내용을 작성해주세요..."
+            placeholderTextColor="#9CA3AF"
+            value={editForm.contents}
+            onChangeText={(text) =>
+              setEditForm((prev) => ({ ...prev, contents: text }))
+            }
+            multiline
+            textAlignVertical="top"
+            className="min-h-[120px] text-base"
+            style={{ color: "#0D0F1B" }}
+          />
+        </Textarea>
+      </View>
+
+      <View className="mx-6 mb-8 mt-6">
+        <RedButtonSurface
+          borderRadius={30}
+          backgroundColor="#F25857"
+          shadowPadding={8}
+          hostStyle={{ width: "100%" }}
+          style={{ width: "100%", height: 64 }}
+        >
+          <Pressable
+            onPress={handleSubmit}
+            className="h-full w-full items-center justify-center"
+            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          >
+            <Text className="text-lg font-semibold text-white">저장 하기</Text>
+          </Pressable>
+        </RedButtonSurface>
+      </View>
+    </>
   );
 };
 

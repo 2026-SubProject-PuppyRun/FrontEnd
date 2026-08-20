@@ -1,76 +1,119 @@
+import { useRunStore } from "@/store/useRunStore";
 import React from "react";
-import Svg, { Polyline } from "react-native-svg";
+import Svg, { Polyline, Rect } from "react-native-svg";
 
-const dummyRouteData = [
-  [
-    { latitude: 37.16024976004391, longitude: 127.05596863884455 },
-    { latitude: 37.15989961393599, longitude: 127.05762014831095 },
-    { latitude: 37.15917190738391, longitude: 127.05919131757969 },
-    { latitude: 37.1584342485709, longitude: 127.0610183222525 },
-    { latitude: 37.158341473416584, longitude: 127.06252489379744 },
-    { latitude: 37.15722905023573, longitude: 127.06248432612614 },
-    { latitude: 37.1572691487399, longitude: 127.06030205274038 },
-    { latitude: 37.156928161853386, longitude: 127.06027347933548 },
-    { latitude: 37.157153355344136, longitude: 127.05888067131497 },
-    { latitude: 37.15755271295674, longitude: 127.0578815377782 },
-    { latitude: 37.15806888054634, longitude: 127.05669804585852 },
-    { latitude: 37.15821334977841, longitude: 127.05521554987001 },
-    { latitude: 37.1582298669273, longitude: 127.0542942425584 },
-    { latitude: 37.16012184770064, longitude: 127.05427246142739 },
-    { latitude: 37.16027650234487, longitude: 127.05588993045222 },
-  ],
-];
+interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
 
-const RouteSvg = () => {
-  //   const coordinates = useRunStore((state) => state.runData?.route!);
-  const coordinates = dummyRouteData[0];
-  const lats = coordinates.map((coord) => coord.latitude);
-  const lngs = coordinates.map((coord) => coord.longitude);
-  const svgWidth = 300;
-  const svgHeight = 300;
-  const padding = 30;
+type RouteSvgProps = {
+  size?: number;
+  padding?: number;
+  /** store 대신 외부에서 경로를 넘길 때 (피드 목업 등) */
+  route?: Coordinate[] | null;
+  /** false면 배경 없음 (셀피 오버레이용) */
+  withBackground?: boolean;
+  backgroundColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  /** 셀피 위 가독성용 외곽선 */
+  withOutline?: boolean;
+};
 
+const coordsToPoints = (
+  coords: Coordinate[],
+  minLat: number,
+  latDiff: number,
+  minLng: number,
+  lngDiff: number,
+  size: number,
+  padding: number,
+): string => {
+  const drawable = size - padding * 2;
+  return coords
+    .map(({ latitude, longitude }) => {
+      const x = padding + ((longitude - minLng) / lngDiff) * drawable;
+      const y = padding + (1 - (latitude - minLat) / latDiff) * drawable;
+      return `${x},${y}`;
+    })
+    .join(" ");
+};
+
+const RouteSvg = ({
+  size = 280,
+  padding = 24,
+  route: routeProp,
+  withBackground = true,
+  backgroundColor = "#0D0F1B",
+  strokeColor = "#F25857",
+  strokeWidth = 5,
+  withOutline = false,
+}: RouteSvgProps) => {
+  const storeRoute = useRunStore((state) => state.runData?.route);
+  const route = routeProp ?? storeRoute;
+
+  const segments: Coordinate[][] =
+    route && route.length > 0 ? [route] : [];
+
+  if (segments.length === 0 || segments.every((s) => s.length === 0)) {
+    if (!withBackground) return null;
+    return (
+      <Svg width={size} height={size}>
+        <Rect width={size} height={size} fill={backgroundColor} />
+      </Svg>
+    );
+  }
+
+  const allCoords = segments.flat();
+  const lats = allCoords.map((c) => c.latitude);
+  const lngs = allCoords.map((c) => c.longitude);
   const minLat = Math.min(...lats);
   const maxLat = Math.max(...lats);
   const minLng = Math.min(...lngs);
   const maxLng = Math.max(...lngs);
-
-  // 차이가 0일 경우(점이 하나일 때) 예외 처리 방지용
-  const latDiff = maxLat - minLat || 1;
-  const lngDiff = maxLng - minLng || 1;
-
-  const drawableWidth = svgWidth - padding * 2;
-  const drawableHeight = svgHeight - padding * 2;
-
-  // 2. 위경도 좌표를 SVG의 X, Y 좌표로 변환 (여백 적용)
-  const points = coordinates
-    .map((coord) => {
-      // 비율 계산 (0 ~ 1)
-      const ratioX = (coord.longitude - minLng) / lngDiff;
-      const ratioY = (coord.latitude - minLat) / latDiff;
-
-      const x = padding + ratioX * drawableWidth;
-
-      const y = padding + drawableHeight - ratioY * drawableHeight;
-
-      return `${x},${y}`;
-    })
-    .join(" ");
+  const latDiff = maxLat - minLat || 0.0001;
+  const lngDiff = maxLng - minLng || 0.0001;
 
   return (
-    <Svg
-      width={svgWidth}
-      height={svgHeight}
-      style={{ backgroundColor: "#1A0F0A" }}
-    >
-      <Polyline
-        points={points}
-        fill="none"
-        stroke="blue"
-        strokeWidth="5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <Svg width={size} height={size}>
+      {withBackground ? (
+        <Rect width={size} height={size} fill={backgroundColor} />
+      ) : null}
+      {segments.map((seg, i) => {
+        if (seg.length < 2) return null;
+        const points = coordsToPoints(
+          seg,
+          minLat,
+          latDiff,
+          minLng,
+          lngDiff,
+          size,
+          padding,
+        );
+        return (
+          <React.Fragment key={i}>
+            {withOutline ? (
+              <Polyline
+                points={points}
+                fill="none"
+                stroke="rgba(255,255,255,0.9)"
+                strokeWidth={strokeWidth + 4}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ) : null}
+            <Polyline
+              points={points}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </React.Fragment>
+        );
+      })}
     </Svg>
   );
 };

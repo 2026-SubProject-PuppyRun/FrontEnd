@@ -1,27 +1,56 @@
 import { useRunStore } from "@/store/useRunStore";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Button } from "../ui/button";
+import { Pressable } from "react-native";
+import RedButtonSurface from "../ui/RedButtonSurface";
 import { Text } from "../ui/text";
 import { View } from "../ui/view";
+
 const WriteDiaryButton = () => {
   const router = useRouter();
+
   return (
-    <View className="flex h-32 w-full items-center justify-center bg-primary-200">
-      <Button
-        className="mb-4"
-        onPress={() => router.push("/(tabs)/running/diary")} // 이때 러닝 결과 서버 전송 한번 해야할듯
-      >
-        <Text className="text-white">일기 쓰러 가기</Text>
-      </Button>
-      <Button
-        onPress={() => {
-          router.replace("/");
-          useRunStore.getState().resetRunData();
-        }} // 이때 러닝 결과 서버 전송 한번 해야할듯, 스토어 초기화
-      >
-        <Text className="text-white">다음에 일기 쓰기</Text>
-      </Button>
+    <View className="w-full px-6 pb-8">
+      <View className="gap-2">
+        <RedButtonSurface
+          borderRadius={30}
+          backgroundColor="#F25857"
+          shadowPadding={8}
+          hostStyle={{ width: "100%" }}
+          style={{ width: "100%", height: 64 }}
+        >
+          <Pressable
+            onPress={() => router.push("/(tabs)/running/diary")}
+            className="h-full w-full items-center justify-center"
+            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          >
+            <Text className="text-lg font-semibold text-white">
+              일기 쓰러 가기
+            </Text>
+          </Pressable>
+        </RedButtonSurface>
+
+        <RedButtonSurface
+          borderRadius={30}
+          backgroundColor="#FFFFFF"
+          shadowPadding={8}
+          hostStyle={{ width: "100%" }}
+          style={{ width: "100%", height: 64 }}
+        >
+          <Pressable
+            onPress={() => {
+              useRunStore.getState().resetRunSession();
+              router.replace("/");
+            }}
+            className="h-full w-full items-center justify-center"
+            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          >
+            <Text className="text-lg font-semibold text-primary-500">
+              다음에 일기 쓰기
+            </Text>
+          </Pressable>
+        </RedButtonSurface>
+      </View>
     </View>
   );
 };

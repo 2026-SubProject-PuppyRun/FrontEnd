@@ -1,42 +1,57 @@
 import "@/tasks/backgroundLocationTask";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import CustomAlert from "@/components/modal/CustomAlert";
+import PermissionAlert from "@/components/modal/PermissionAlert";
+import AnimatedSplashScreen from "@/components/splash/AnimatedSplashScreen";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import { DUMMY_PET_LIST } from "@/constants/dummyPetList";
 import "@/global.css";
-import { usePetStore } from "@/store/usePetStore";
-import { getFirebaseMessaging, initFCM } from "@/util/notification";
+import { openPermissionModal } from "@/store/usePermissionModalStore";
+import { useSyncPetListFromQuery } from "@/util/api/pets";
+import {
+  getFirebaseMessaging,
+  initFCM,
+  registerPushConsentOnAllow,
+  requestUserPermission,
+  androidNotificationIcons,
+} from "@/util/notification";
 import notifee from "@notifee/react-native";
 import { onMessage } from "@react-native-firebase/messaging";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Device from "expo-device";
-import { useEffect, useState } from "react";
-import { Linking } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { AppState, Linking } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+/** QueryClient 안에서 펫 목록을 스토어에 동기화 */
+const PetListBootstrap = () => {
+  useSyncPetListFromQuery(true);
+  return null;
+};
+
 export default function RootLayout() {
   const queryClient = new QueryClient();
-  const setPetList = usePetStore((state) => state.setPetList);
-  const [modalVisible, setModalVisible] = useState(false);
-  const dummyBreedSignature = DUMMY_PET_LIST.map((p) => p.breedCode).join(",");
+  const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
+
+  const onAnimatedSplashReady = useCallback(() => {
+    SplashScreen.hideAsync().catch(() => undefined);
+  }, []);
+
+  const onAnimatedSplashFinish = useCallback(() => {
+    setShowAnimatedSplash(false);
+  }, []);
 
   useEffect(() => {
-    const fetchPetList = async () => {
-      // Todo API 연동 — 연동 전까지 더미 데이터 사용
-      setPetList(DUMMY_PET_LIST, DUMMY_PET_LIST.length);
-    };
-    async function requestNotificationPermission() {
-      const settings = await notifee.requestPermission();
-      if (settings.authorizationStatus === 0) {
-        // TODO: 유저에게 권한이 필요하다는 안내 모달 띄우기
-        setModalVisible(true);
-      }
+    if (showAnimatedSplash) {
+      onAnimatedSplashReady();
     }
-    requestNotificationPermission();
-    fetchPetList();
+  }, [showAnimatedSplash, onAnimatedSplashReady]);
 
+  useEffect(() => {
     let unsubscribeForeground: (() => void) | undefined;
 
     if (Device.isDevice) {
@@ -61,7 +76,7 @@ export default function RootLayout() {
               body: remoteMessage.notification?.body,
               android: {
                 channelId,
-                smallIcon: "ic_launcher",
+                ...androidNotificationIcons,
                 pressAction: {
                   id: "default",
                 },
@@ -77,26 +92,71 @@ export default function RootLayout() {
     return () => {
       unsubscribeForeground?.();
     };
-  }, [setPetList, dummyBreedSignature]);
+  }, []);
+
+  // 스플래시가 끝난 뒤 알림 권한 요청 → 허용 시 최초 동의/토큰 등록
+  useEffect(() => {
+    if (showAnimatedSplash) return;
+
+    let cancelled = false;
+    let hasSyncedPushConsent = false;
+
+    const syncPushConsentIfAllowed = async () => {
+      if (hasSyncedPushConsent) return true;
+
+      const enabled = await requestUserPermission();
+      if (cancelled || !enabled) return false;
+
+      try {
+        await registerPushConsentOnAllow();
+        hasSyncedPushConsent = true;
+      } catch (error) {
+        console.warn("알림 동의/FCM 토큰 등록 실패:", error);
+      }
+      return true;
+    };
+
+    const requestNotificationPermission = async () => {
+      const registered = await syncPushConsentIfAllowed();
+      if (cancelled || registered) return;
+
+      const settings = await notifee.getNotificationSettings();
+      if (cancelled) return;
+      if (settings.authorizationStatus === 0) {
+        openPermissionModal({
+          kind: "notification",
+          onConfirm: () => {
+            Linking.openSettings();
+          },
+        });
+      }
+    };
+
+    void requestNotificationPermission();
+
+    const appStateSub = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        void syncPushConsentIfAllowed();
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      appStateSub.remove();
+    };
+  }, [showAnimatedSplash]);
 
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider mode="dark">
           <GestureHandlerRootView style={{ flex: 1 }}>
+            <PetListBootstrap />
             <Stack screenOptions={{ headerShown: false }} />
-            <CustomAlert
-              showAlertDialog={modalVisible}
-              handleClose={() => setModalVisible(false)}
-              title="알림 권한이 필요해요"
-              description="퍼피런에서 알림을 받으려면 권한이 필요해요. 설정에서 권한을 허용해주세요."
-              confirmText="설정으로 이동"
-              cancelText="취소"
-              onConfirm={() => {
-                Linking.openSettings();
-                setModalVisible(false);
-              }}
-            />
+            <PermissionAlert />
+            {showAnimatedSplash ? (
+              <AnimatedSplashScreen onFinish={onAnimatedSplashFinish} />
+            ) : null}
           </GestureHandlerRootView>
         </GluestackUIProvider>
       </QueryClientProvider>

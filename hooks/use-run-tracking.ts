@@ -1,4 +1,6 @@
 import { RUN_LOCATION_TRACKING } from "@/constants/locationTracking";
+import { requestLocationPermission } from "@/hooks/use-location-permission";
+import { openPermissionModal } from "@/store/usePermissionModalStore";
 import { LOCATION_TASK_NAME } from "@/tasks/backgroundLocationTask";
 import { useRunStore } from "@/store/useRunStore";
 import {
@@ -21,38 +23,33 @@ const stopBackgroundTask = async () => {
 };
 
 const ensureForegroundPermission = async () => {
-  const foreground = await Location.getForegroundPermissionsAsync();
-  if (foreground.status === "granted") return true;
-
-  const { status } = await Location.requestForegroundPermissionsAsync();
-  if (status === "granted") return true;
-
-  Alert.alert(
-    "위치 권한 필요",
-    "산책 경로 기록을 위해 위치 권한을 허용해 주세요.",
-    [
-      { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-      { text: "취소", style: "cancel" },
-    ],
-  );
-  return false;
+  const granted = await requestLocationPermission();
+  return granted === true;
 };
 
 const ensureBackgroundPermission = async () => {
   const background = await Location.getBackgroundPermissionsAsync();
   if (background.status === "granted") return true;
 
+  // 포그라운드가 먼저 있어야 Android/iOS 모두 백그라운드 요청 가능
+  const hasForeground = await ensureForegroundPermission();
+  if (!hasForeground) return false;
+
+  if (!background.canAskAgain) {
+    openPermissionModal({
+      kind: "backgroundLocation",
+      onConfirm: () => Linking.openSettings(),
+    });
+    return false;
+  }
+
   const { status } = await Location.requestBackgroundPermissionsAsync();
   if (status === "granted") return true;
 
-  Alert.alert(
-    "백그라운드 위치 권한",
-    "화면을 끈 상태에서도 경로를 기록하려면 '항상 허용'이 필요합니다. 앱 사용 중에는 경로가 기록됩니다.",
-    [
-      { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-      { text: "확인", style: "cancel" },
-    ],
-  );
+  openPermissionModal({
+    kind: "backgroundLocation",
+    onConfirm: () => Linking.openSettings(),
+  });
   return false;
 };
 

@@ -3,13 +3,9 @@ export interface WeightRecord {
   petId: string;
   weight: number;
   measuredAt: string;
-  memo?: string;
 }
 
-export type WeightFormValues = Pick<
-  WeightRecord,
-  "weight" | "measuredAt" | "memo"
->;
+export type WeightFormValues = Pick<WeightRecord, "weight">;
 
 export type WeightPeriod = "1m" | "3m" | "6m" | "1y";
 
