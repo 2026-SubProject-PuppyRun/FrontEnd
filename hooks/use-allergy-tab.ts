@@ -1,8 +1,14 @@
 import { CloseIcon } from "@/components/ui/icon";
 import { useCustomToast } from "@/hooks/use-custom-toast";
-import { useAllergyStore } from "@/store/useAllergyStore";
 import { usePetStore } from "@/store/usePetStore";
 import { AllergyFormValues, AllergyRecord } from "@/types/allergy";
+import {
+  useAllergyLogsQuery,
+  useCreateAllergyMutation,
+  useDeleteAllergyMutation,
+  useRefreshAllergyLogsOnFocus,
+  useUpdateAllergyMutation,
+} from "@/util/api/allergies";
 import {
   buildActiveAllergySummary,
   formatAllergyShareMessage,
@@ -20,19 +26,21 @@ export const useAllergyTab = () => {
     petId ? state.petList?.find((p) => p.petId === petId)?.name : undefined,
   );
 
-  const records = useAllergyStore((state) => state.records);
-  const addRecord = useAllergyStore((state) => state.addRecord);
-  const updateRecord = useAllergyStore((state) => state.updateRecord);
-  const deleteRecord = useAllergyStore((state) => state.removeRecord);
+  useRefreshAllergyLogsOnFocus(petId);
 
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<AllergyRecord | null>(
-    null,
-  );
+  const { data, isLoading, isError } = useAllergyLogsQuery(petId);
+
+  const createMutation = useCreateAllergyMutation(petId);
+  const updateMutation = useUpdateAllergyMutation(petId);
+  const deleteMutation = useDeleteAllergyMutation(petId);
+  const isSubmitting =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   const petRecords = useMemo(
-    () => (petId ? records.filter((r) => r.petId === petId) : []),
-    [records, petId],
+    () => data?.records ?? [],
+    [data?.records],
   );
 
   const activeSummary = useMemo(
@@ -40,36 +48,72 @@ export const useAllergyTab = () => {
     [petRecords],
   );
 
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<AllergyRecord | null>(
+    null,
+  );
+
   const openAdd = () => {
+    if (isSubmitting) return;
     setEditingRecord(null);
     setSheetOpen(true);
   };
 
   const openEdit = (record: AllergyRecord) => {
+    if (isSubmitting) return;
     setEditingRecord(record);
     setSheetOpen(true);
   };
 
   const closeSheet = () => {
+    if (isSubmitting) return;
     setSheetOpen(false);
     setEditingRecord(null);
   };
 
-  const handleSubmit = (values: AllergyFormValues) => {
+  const handleSubmit = async (values: AllergyFormValues) => {
     if (!petId) return;
 
-    if (editingRecord) {
-      updateRecord(editingRecord.id, values);
-      return;
+    try {
+      if (editingRecord) {
+        if (!editingRecord.id) {
+          throw new Error("수정할 알러지 기록 ID가 없습니다.");
+        }
+        await updateMutation.mutateAsync({
+          allergyId: editingRecord.id,
+          values,
+        });
+        toast.showToast({ message: "알러지 기록이 수정되었습니다." });
+        setEditingRecord(null);
+      } else {
+        await createMutation.mutateAsync(values);
+        toast.showToast({ message: "알러지 기록이 등록되었습니다." });
+      }
+    } catch {
+      toast.showToast({
+        message: editingRecord
+          ? "알러지 기록 수정에 실패했습니다."
+          : "알러지 기록 등록에 실패했습니다.",
+        icon: CloseIcon,
+      });
+      throw new Error("allergy mutation failed");
     }
-
-    addRecord({ ...values, petId });
   };
 
-  const handleDelete = () => {
-    if (!editingRecord) return;
-    deleteRecord(editingRecord.id);
-    closeSheet();
+  const handleDelete = async () => {
+    if (!petId || !editingRecord?.id) return;
+
+    try {
+      await deleteMutation.mutateAsync(editingRecord.id);
+      toast.showToast({ message: "알러지 기록이 삭제되었습니다." });
+      setEditingRecord(null);
+    } catch {
+      toast.showToast({
+        message: "알러지 기록 삭제에 실패했습니다.",
+        icon: CloseIcon,
+      });
+      throw new Error("allergy delete failed");
+    }
   };
 
   const shareAllergy = useCallback(async () => {
@@ -109,5 +153,8 @@ export const useAllergyTab = () => {
     handleSubmit,
     handleDelete,
     shareAllergy,
+    isLoading,
+    isError,
+    isSubmitting,
   };
 };

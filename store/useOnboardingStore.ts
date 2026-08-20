@@ -1,9 +1,8 @@
-import { AllergyCategory, AllergySeverity } from "@/types/allergy";
+import { AllergySeverity } from "@/types/allergy";
 import { create } from "zustand";
 
 export type OnboardingAllergy = {
   id: string;
-  category: AllergyCategory;
   allergen: string;
   severity?: AllergySeverity;
 };

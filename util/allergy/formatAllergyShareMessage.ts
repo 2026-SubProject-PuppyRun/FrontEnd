@@ -1,13 +1,9 @@
 import { AllergyRecord } from "@/types/allergy";
-import {
-  formatAllergyDate,
-  getCategoryLabel,
-  getSeverityLabel,
-} from "./allergyLabels";
+import { formatAllergyDate, getSeverityLabel } from "./allergyLabels";
 
 const formatRecordLine = (record: AllergyRecord): string => {
   const parts = [
-    `[${getCategoryLabel(record.category)}] ${record.allergen}`,
+    record.allergen,
     record.severity ? getSeverityLabel(record.severity) : null,
     record.symptoms ?? null,
     record.diagnosedAt ? formatAllergyDate(record.diagnosedAt) : null,

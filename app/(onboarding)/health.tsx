@@ -8,11 +8,7 @@ import { usePetStore } from "@/store/usePetStore";
 import { useVaccineStore } from "@/store/useVaccineStore";
 import { AllergyFormValues } from "@/types/allergy";
 import { VaccineFormValues } from "@/types/vaccine";
-import {
-  ALLERGY_CATEGORY_COLORS,
-  getCategoryLabel,
-  getSeverityLabel,
-} from "@/util/allergy";
+import { getSeverityLabel } from "@/util/allergy";
 import { CheckCircleIcon } from "@/components/ui/icon";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -54,7 +50,6 @@ const Health = () => {
 
   const handleAddAllergy = (values: AllergyFormValues) => {
     addAllergy({
-      category: values.category,
       allergen: values.allergen,
       severity: values.severity,
     });
@@ -93,7 +88,6 @@ const Health = () => {
     allergies.forEach((item) => {
       addAllergyRecord({
         petId,
-        category: item.category,
         allergen: item.allergen,
         severity: item.severity,
         isActive: true,
@@ -147,24 +141,11 @@ const Health = () => {
             </Text>
           ) : (
             <View className="gap-2">
-              {allergies.map((item) => {
-                const colors = ALLERGY_CATEGORY_COLORS[item.category];
-                return (
+              {allergies.map((item) => (
                   <View
                     key={item.id}
                     className="flex-row items-center gap-3 rounded-2xl bg-[#F7F7F7] px-3 py-3"
                   >
-                    <View
-                      className="rounded-full px-2.5 py-1"
-                      style={{ backgroundColor: colors.bg }}
-                    >
-                      <Text
-                        className="text-xs font-semibold"
-                        style={{ color: colors.color }}
-                      >
-                        {getCategoryLabel(item.category)}
-                      </Text>
-                    </View>
                     <View className="flex-1">
                       <Text className="text-sm font-semibold text-[#0D0F1B]">
                         {item.allergen}
@@ -183,8 +164,7 @@ const Health = () => {
                       <Ionicons name="close" size={18} color="#9CA3AF" />
                     </Pressable>
                   </View>
-                );
-              })}
+                ))}
             </View>
           )}
         </View>

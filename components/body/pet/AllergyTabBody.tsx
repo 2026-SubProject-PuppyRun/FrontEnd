@@ -18,6 +18,7 @@ const AllergyTabBody = () => {
     handleSubmit,
     handleDelete,
     shareAllergy,
+    isSubmitting,
   } = useAllergyTab();
 
   const renderListHeader = useCallback(
@@ -46,6 +47,7 @@ const AllergyTabBody = () => {
         isOpen={sheetOpen}
         onClose={closeSheet}
         editingRecord={editingRecord}
+        isSubmitting={isSubmitting}
         onSubmit={handleSubmit}
         onDelete={handleDelete}
       />

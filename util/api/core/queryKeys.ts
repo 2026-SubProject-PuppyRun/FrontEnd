@@ -71,4 +71,9 @@ export const queryKeys = {
     list: (petId: string) =>
       [...queryKeys.vaccines.all, "list", petId] as const,
   },
+  allergies: {
+    all: ["allergies"] as const,
+    list: (petId: string) =>
+      [...queryKeys.allergies.all, "list", petId] as const,
+  },
 } as const;
