@@ -7,18 +7,6 @@ import { Alert, Image, Text, View } from "react-native";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
-// 백엔드 로그인 API 호출
-const signInToServer = async (email: string, idToken: string) => {
-  const response = await fetch(`${BASE_URL}/api/auth/sign-in`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password: idToken }),
-  });
-
-  if (!response.ok) throw new Error("로그인 실패");
-  return response.json(); // { access_token, refresh_token }
-};
-
 export default function Onboarding() {
   const router = useRouter();
 
@@ -32,22 +20,49 @@ export default function Onboarding() {
   const handleGoogleLogin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      const idToken = userInfo.data?.idToken;
-      const email = userInfo.data?.user.email;
+      await GoogleSignin.signIn();
 
-      if (!idToken || !email) throw new Error("구글 로그인 정보 없음");
+      const tokens = await GoogleSignin.getTokens();
+      const accessToken = tokens.accessToken;
 
-      const { access_token, refresh_token } = await signInToServer(
-        email,
-        idToken,
-      );
+      if (!accessToken) throw new Error("ACCESS_TOKEN_MISSING");
 
-      console.log("로그인 성공!", access_token);
+      const response = await fetch(`${BASE_URL}/api/oauth2/google/sign-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_access_token: accessToken }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 400) {
+        // 지원하지 않는 제공자 또는 인가코드 누락
+        console.error("400 에러:", data.message);
+        Alert.alert("로그인 실패", data.message ?? "잘못된 요청입니다.");
+        return;
+      }
+
+      if (response.status === 401) {
+        // 유효하지 않은 인가 코드
+        console.error("401 에러:", data.message);
+        Alert.alert(
+          "로그인 실패",
+          data.message ?? "google 액세스 토큰이 유효하지 않습니다.",
+        );
+        return;
+      }
+
+      if (!response.ok) {
+        Alert.alert("로그인 실패", "알 수 없는 오류가 발생했습니다.");
+        return;
+      }
+
+      const { access_token, refresh_token } = data;
+      console.log("구글 로그인 성공!", access_token);
       router.replace("/(tabs)/home");
     } catch (error) {
       console.error("구글 로그인 실패:", error);
-      Alert.alert("로그인 실패", "구글 로그인에 실패했습니다.");
+      Alert.alert("로그인 실패", "구글 로그인 중 오류가 발생했습니다.");
     }
   };
 
@@ -55,27 +70,44 @@ export default function Onboarding() {
   const handleKakaoLogin = async () => {
     try {
       const token = await kakaoLogin();
-      const idToken = token.idToken;
+      const accessToken = token.accessToken;
 
-      // 카카오 사용자 이메일 가져오기
-      const profileRes = await fetch("https://kapi.kakao.com/v2/user/me", {
-        headers: { Authorization: `Bearer ${token.accessToken}` },
+      if (!accessToken) throw new Error("ACCESS_TOKEN_MISSING");
+
+      const response = await fetch(`${BASE_URL}/api/oauth2/kakao/sign-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider_access_token: accessToken }),
       });
-      const profile = await profileRes.json();
-      const email = profile.kakao_account?.email;
 
-      if (!idToken || !email) throw new Error("카카오 로그인 정보 없음");
+      const data = await response.json();
 
-      const { access_token, refresh_token } = await signInToServer(
-        email,
-        idToken,
-      );
+      if (response.status === 400) {
+        console.error("400 에러:", data.message);
+        Alert.alert("로그인 실패", data.message ?? "잘못된 요청입니다.");
+        return;
+      }
 
-      console.log("로그인 성공!", access_token);
+      if (response.status === 401) {
+        console.error("401 에러:", data.message);
+        Alert.alert(
+          "로그인 실패",
+          data.message ?? "카카오 액세스 토큰이 유효하지 않습니다.",
+        );
+        return;
+      }
+
+      if (!response.ok) {
+        Alert.alert("로그인 실패", "알 수 없는 오류가 발생했습니다.");
+        return;
+      }
+
+      const { access_token, refresh_token } = data;
+      console.log("카카오 로그인 성공!", access_token);
       router.replace("/(tabs)/home");
     } catch (error) {
       console.error("카카오 로그인 실패:", error);
-      Alert.alert("로그인 실패", "카카오 로그인에 실패했습니다.");
+      Alert.alert("로그인 실패", "카카오 로그인 중 오류가 발생했습니다.");
     }
   };
 
