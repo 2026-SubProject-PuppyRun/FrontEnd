@@ -26,7 +26,8 @@ interface VaccineFormProps {
   initialValues?: Partial<VaccineFormValues>;
   submitLabel?: string;
   isEdit?: boolean;
-  onSubmit: (values: VaccineFormValues) => void;
+  isSubmitting?: boolean;
+  onSubmit: (values: VaccineFormValues) => void | Promise<void>;
   onDelete: () => void;
 }
 
@@ -69,6 +70,7 @@ const VaccineForm = ({
   initialValues,
   submitLabel = "저장하기",
   isEdit = false,
+  isSubmitting = false,
   onSubmit,
   onDelete,
 }: VaccineFormProps) => {
@@ -78,6 +80,9 @@ const VaccineForm = ({
   );
   const [nextVaccinationAt, setNextVaccinationAt] = useState(
     initialValues?.nextVaccinationAt ?? "",
+  );
+  const [hospitalName, setHospitalName] = useState(
+    initialValues?.hospitalName ?? "",
   );
   const [memo, setMemo] = useState(initialValues?.memo ?? "");
   const [pickField, setPickField] = useState<
@@ -94,14 +99,15 @@ const VaccineForm = ({
     return new Date();
   }, [pickField, vaccinatedAt, nextVaccinationAt]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setHasSubmitted(true);
-    if (!name.trim() || !vaccinatedAt || !nextVaccinationAt) return;
+    if (!name.trim() || !vaccinatedAt || isSubmitting) return;
 
-    onSubmit({
+    await onSubmit({
       name: name.trim(),
       vaccinatedAt,
-      nextVaccinationAt,
+      nextVaccinationAt: nextVaccinationAt || "",
+      hospitalName: hospitalName.trim() || undefined,
       memo: memo.trim() || undefined,
     });
   };
@@ -186,13 +192,28 @@ const VaccineForm = ({
         </Pressable>
       </FormField>
 
+      <FormField label="병원명 (선택)">
+        <View className="rounded-2xl bg-[#F7F7F7] px-4 py-1">
+          <Input className="border-0 bg-transparent" size="md">
+            <InputField
+              value={hospitalName}
+              onChangeText={setHospitalName}
+              placeholder="예: 퍼피동물병원"
+              placeholderTextColor="#9CA3AF"
+              style={INPUT_TEXT_STYLE}
+              editable={!isSubmitting}
+            />
+          </Input>
+        </View>
+      </FormField>
+
       <FormField label="메모 (선택)">
         <View className="rounded-2xl bg-[#F7F7F7] px-4 py-3">
           <Textarea className="min-h-[88px] border-0 bg-transparent" size="md">
             <TextareaInput
               value={memo}
               onChangeText={setMemo}
-              placeholder="예: 병원 이름, 부작용 여부"
+              placeholder="예: 부작용 여부, 특이사항"
               placeholderTextColor="#9CA3AF"
               multiline
               textAlignVertical="top"
@@ -212,8 +233,11 @@ const VaccineForm = ({
       >
         <Pressable
           onPress={handleSubmit}
+          disabled={isSubmitting}
           className="h-full w-full items-center justify-center"
-          style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+          style={({ pressed }) =>
+            pressed || isSubmitting ? { opacity: 0.85 } : undefined
+          }
         >
           <Text className="text-base font-semibold text-white">
             {submitLabel}

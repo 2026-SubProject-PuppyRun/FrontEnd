@@ -66,4 +66,9 @@ export const queryKeys = {
     list: (petId: string) =>
       [...queryKeys.weights.all, "list", petId] as const,
   },
+  vaccines: {
+    all: ["vaccines"] as const,
+    list: (petId: string) =>
+      [...queryKeys.vaccines.all, "list", petId] as const,
+  },
 } as const;

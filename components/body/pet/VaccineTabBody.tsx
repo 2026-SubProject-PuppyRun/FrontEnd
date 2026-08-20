@@ -18,6 +18,7 @@ const VaccineTabBody = () => {
     handleSubmit,
     shareVaccine,
     handleDelete,
+    isSubmitting,
   } = useVaccineTab();
 
   const renderListHeader = useCallback(
@@ -46,6 +47,7 @@ const VaccineTabBody = () => {
         isOpen={sheetOpen}
         onClose={closeSheet}
         editingRecord={editingRecord}
+        isSubmitting={isSubmitting}
         onSubmit={handleSubmit}
         onDelete={handleDelete}
       />

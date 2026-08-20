@@ -8,7 +8,7 @@ const WEEKDAY_KO = ["일", "월", "화", "수", "목", "금", "토"];
 
 const formatDate = (dateStr: string) => {
   const d = dayjs(dateStr).locale("ko");
-  return `${d.format("M월 D일")} (${WEEKDAY_KO[d.day()]})`;
+  return `${d.format("YYYY년 M월 D일")} (${WEEKDAY_KO[d.day()]})`;
 };
 
 const getNextStatus = (nextVaccinationAt: string) => {
@@ -49,7 +49,10 @@ const VaccineCard = ({ record, onPress }: VaccineCardProps) => {
           className="rounded-full px-2.5 py-1"
           style={{ backgroundColor: status.bg }}
         >
-          <Text className="text-xs font-semibold" style={{ color: status.color }}>
+          <Text
+            className="text-xs font-semibold"
+            style={{ color: status.color }}
+          >
             {status.label}
           </Text>
         </View>
@@ -69,7 +72,12 @@ const VaccineCard = ({ record, onPress }: VaccineCardProps) => {
           </Text>
         </View>
       </View>
-
+      {record.hospitalName ? (
+        <View className="mt-2 flex-row items-center justify-between">
+          <Text className="text-xs text-gray-400">병원</Text>
+          <Text className="text-sm text-[#0D0F1B]">{record.hospitalName}</Text>
+        </View>
+      ) : null}
       {record.memo ? (
         <Text className="mt-2 text-sm text-gray-500">{record.memo}</Text>
       ) : null}

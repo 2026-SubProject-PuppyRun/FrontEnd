@@ -77,7 +77,9 @@ const PetListBoardItem = ({
 
         <View className="min-w-0 flex-1">
           <View className="flex-row flex-wrap items-center gap-2">
-            <Text className="text-base font-bold text-[#0D0F1B]">{info.name}</Text>
+            <Text className="text-base font-bold text-[#0D0F1B]">
+              {info.name}
+            </Text>
             {mbti ? (
               <Pressable
                 onPress={() => router.push(`/mypage/pets/${petId}/mbti`)}
@@ -107,26 +109,30 @@ const PetListBoardItem = ({
       </Pressable>
 
       <View className="mt-3 flex-row gap-2 border-t border-[#F7F7F7] pt-3">
-        {(["medication", "weight", "vaccine", "allergy"] as const).map((tab) => {
-          const labels = {
-            medication: "투약",
-            weight: "체중",
-            vaccine: "백신",
-            allergy: "알러지",
-          };
-          return (
-            <Pressable
-              key={tab}
-              onPress={() => router.push(`/care/pets/${petId}/${tab}`)}
-              className="flex-1 items-center rounded-xl bg-[#F7F7F7] py-2"
-              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
-            >
-              <Text className="text-xs font-semibold text-[#0D0F1B]">
-                {labels[tab]}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {(["medication", "weight", "vaccine", "allergy"] as const).map(
+          (tab) => {
+            const labels = {
+              medication: "투약",
+              weight: "체중",
+              vaccine: "접종",
+              allergy: "알러지",
+            };
+            return (
+              <Pressable
+                key={tab}
+                onPress={() => router.push(`/care/pets/${petId}/${tab}`)}
+                className="flex-1 items-center rounded-xl bg-[#F7F7F7] py-2"
+                style={({ pressed }) =>
+                  pressed ? { opacity: 0.85 } : undefined
+                }
+              >
+                <Text className="text-xs font-semibold text-[#0D0F1B]">
+                  {labels[tab]}
+                </Text>
+              </Pressable>
+            );
+          },
+        )}
       </View>
     </View>
   );

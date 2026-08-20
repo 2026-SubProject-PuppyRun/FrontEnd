@@ -17,22 +17,37 @@ interface VaccineFormSheetProps {
   isOpen: boolean;
   onClose: () => void;
   editingRecord?: VaccineRecord | null;
-  onSubmit: (values: VaccineFormValues) => void;
-  onDelete: () => void;
+  isSubmitting?: boolean;
+  onSubmit: (values: VaccineFormValues) => void | Promise<void>;
+  onDelete: () => void | Promise<void>;
 }
 
 const VaccineFormSheet = ({
   isOpen,
   onClose,
   editingRecord,
+  isSubmitting = false,
   onSubmit,
   onDelete,
 }: VaccineFormSheetProps) => {
   const isEdit = Boolean(editingRecord);
 
-  const handleSubmit = (values: VaccineFormValues) => {
-    onSubmit(values);
-    onClose();
+  const handleSubmit = async (values: VaccineFormValues) => {
+    try {
+      await onSubmit(values);
+      onClose();
+    } catch {
+      // 실패 시 시트 유지 — 토스트는 hook에서 처리
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await onDelete();
+      onClose();
+    } catch {
+      // 실패 시 시트 유지 — 토스트는 hook에서 처리
+    }
   };
 
   return (
@@ -56,6 +71,7 @@ const VaccineFormSheet = ({
           </View>
           <Pressable
             onPress={onClose}
+            disabled={isSubmitting}
             accessibilityRole="button"
             accessibilityLabel="닫기"
             className="h-8 w-8 items-center justify-center rounded-full bg-[#F7F7F7] active:opacity-70"
@@ -75,8 +91,9 @@ const VaccineFormSheet = ({
               initialValues={editingRecord ?? undefined}
               submitLabel={isEdit ? "수정하기" : "저장하기"}
               isEdit={isEdit}
+              isSubmitting={isSubmitting}
               onSubmit={handleSubmit}
-              onDelete={onDelete}
+              onDelete={handleDelete}
             />
           ) : null}
         </ActionsheetScrollView>
