@@ -56,4 +56,24 @@ export const queryKeys = {
     all: ["notifications"] as const,
     settings: () => [...queryKeys.notifications.all, "settings"] as const,
   },
+  medications: {
+    all: ["medications"] as const,
+    list: (petId: string) =>
+      [...queryKeys.medications.all, "list", petId] as const,
+  },
+  weights: {
+    all: ["weights"] as const,
+    list: (petId: string) =>
+      [...queryKeys.weights.all, "list", petId] as const,
+  },
+  vaccines: {
+    all: ["vaccines"] as const,
+    list: (petId: string) =>
+      [...queryKeys.vaccines.all, "list", petId] as const,
+  },
+  allergies: {
+    all: ["allergies"] as const,
+    list: (petId: string) =>
+      [...queryKeys.allergies.all, "list", petId] as const,
+  },
 } as const;

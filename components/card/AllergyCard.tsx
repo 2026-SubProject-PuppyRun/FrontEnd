@@ -1,10 +1,8 @@
 import { Text } from "@/components/ui/text";
 import { AllergyRecord } from "@/types/allergy";
 import {
-  ALLERGY_CATEGORY_COLORS,
   ALLERGY_SEVERITY_COLORS,
   formatAllergyDate,
-  getCategoryLabel,
   getSeverityLabel,
 } from "@/util/allergy";
 import { Pressable, View } from "react-native";
@@ -15,7 +13,6 @@ interface AllergyCardProps {
 }
 
 const AllergyCard = ({ record, onPress }: AllergyCardProps) => {
-  const categoryTheme = ALLERGY_CATEGORY_COLORS[record.category];
   const severityTheme = record.severity
     ? ALLERGY_SEVERITY_COLORS[record.severity]
     : null;
@@ -33,28 +30,17 @@ const AllergyCard = ({ record, onPress }: AllergyCardProps) => {
       <View className="flex-row items-start justify-between gap-2">
         <View className="flex-1">
           <View className="flex-row flex-wrap items-center gap-2">
-            <View
-              className="rounded-full px-2.5 py-1"
-              style={{ backgroundColor: categoryTheme.bg }}
-            >
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: categoryTheme.color }}
-              >
-                {getCategoryLabel(record.category)}
-              </Text>
-            </View>
+            <Text className="text-base font-semibold text-[#0D0F1B]">
+              {record.allergen}
+            </Text>
             {!record.isActive ? (
               <View className="rounded-full bg-gray-200 px-2.5 py-1">
                 <Text className="text-xs font-medium text-gray-600">
-                  비활성
+                  알러지 해제
                 </Text>
               </View>
             ) : null}
           </View>
-          <Text className="mt-2 text-base font-semibold text-[#0D0F1B]">
-            {record.allergen}
-          </Text>
         </View>
         {severityTheme && record.severity ? (
           <View

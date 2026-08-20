@@ -30,7 +30,7 @@ export default function PetCareTabsLayout() {
       <PetDashBoard pet={pet} />
       <View style={styles.tabsWrapper}>
         <MaterialTopTabs
-          initialRouteName="diet"
+          initialRouteName="medication"
           screenOptions={{
             tabBarActiveTintColor: "#0D0F1B",
             tabBarInactiveTintColor: "#9CA3AF",
@@ -40,7 +40,10 @@ export default function PetCareTabsLayout() {
             sceneStyle: styles.scene,
           }}
         >
-          <MaterialTopTabs.Screen name="diet" options={{ title: "식단" }} />
+          <MaterialTopTabs.Screen
+            name="medication"
+            options={{ title: "투약" }}
+          />
           <MaterialTopTabs.Screen
             name="weight"
             options={{ title: "체중", swipeEnabled: false }}

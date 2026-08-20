@@ -17,26 +17,52 @@ interface AllergyFormSheetProps {
   isOpen: boolean;
   onClose: () => void;
   editingRecord?: AllergyRecord | null;
-  onSubmit: (values: AllergyFormValues) => void;
-  onDelete: () => void;
+  isSubmitting?: boolean;
+  onSubmit: (values: AllergyFormValues) => void | Promise<void>;
+  onDelete: () => void | Promise<void>;
 }
 
 const AllergyFormSheet = ({
   isOpen,
   onClose,
   editingRecord,
+  isSubmitting = false,
   onSubmit,
   onDelete,
 }: AllergyFormSheetProps) => {
   const isEdit = Boolean(editingRecord);
 
-  const handleSubmit = (values: AllergyFormValues) => {
-    onSubmit(values);
-    onClose();
+  const handleSubmit = async (values: AllergyFormValues) => {
+    try {
+      await onSubmit(values);
+      onClose();
+    } catch {
+      // 실패 시 시트 유지 — 토스트는 hook에서 처리
+    }
   };
 
+  const handleDelete = async () => {
+    try {
+      await onDelete();
+      onClose();
+    } catch {
+      // 실패 시 시트 유지 — 토스트는 hook에서 처리
+    }
+  };
+
+  const initialValues: Partial<AllergyFormValues> | undefined = editingRecord
+    ? {
+        allergen: editingRecord.allergen,
+        severity: editingRecord.severity,
+        symptoms: editingRecord.symptoms,
+        diagnosedAt: editingRecord.diagnosedAt ?? null,
+        isActive: editingRecord.isActive,
+        memo: editingRecord.memo,
+      }
+    : undefined;
+
   return (
-    <Actionsheet isOpen={isOpen} onClose={onClose} snapPoints={[88]}>
+    <Actionsheet isOpen={isOpen} onClose={onClose} snapPoints={[92]}>
       <ActionsheetBackdrop />
       <ActionsheetContent className="rounded-t-3xl bg-white px-6 pb-8 pt-2">
         <ActionsheetDragIndicatorWrapper>
@@ -56,6 +82,7 @@ const AllergyFormSheet = ({
           </View>
           <Pressable
             onPress={onClose}
+            disabled={isSubmitting}
             accessibilityRole="button"
             accessibilityLabel="닫기"
             className="h-8 w-8 items-center justify-center rounded-full bg-[#F7F7F7] active:opacity-70"
@@ -72,11 +99,12 @@ const AllergyFormSheet = ({
           {isOpen ? (
             <AllergyForm
               key={editingRecord?.id ?? "new"}
-              initialValues={editingRecord ?? undefined}
+              initialValues={initialValues}
               submitLabel={isEdit ? "수정하기" : "저장하기"}
               isEdit={isEdit}
+              isSubmitting={isSubmitting}
               onSubmit={handleSubmit}
-              onDelete={onDelete}
+              onDelete={handleDelete}
             />
           ) : null}
         </ActionsheetScrollView>

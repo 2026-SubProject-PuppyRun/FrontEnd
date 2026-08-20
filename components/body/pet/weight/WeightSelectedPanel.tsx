@@ -14,13 +14,9 @@ const formatMeasuredDate = (dateStr: string) => {
 
 interface WeightSelectedPanelProps {
   record: WeightRecord | null;
-  onPressEdit: (record: WeightRecord) => void;
 }
 
-const WeightSelectedPanel = ({
-  record,
-  onPressEdit,
-}: WeightSelectedPanelProps) => {
+const WeightSelectedPanel = ({ record }: WeightSelectedPanelProps) => {
   if (!record) return null;
 
   return (
@@ -28,24 +24,13 @@ const WeightSelectedPanel = ({
       <Text className="mb-2 text-xs font-semibold text-gray-500">
         선택한 기록
       </Text>
-      <View className="flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-4 py-3">
-        <View className="flex-1">
-          <Text className="text-xl font-bold text-[#0D0F1B]">
-            {record.weight}kg
-          </Text>
-          <Text className="mt-1 text-sm text-gray-500">
-            {formatMeasuredDate(record.measuredAt)}
-          </Text>
-          {record.memo ? (
-            <Text className="mt-1 text-xs text-gray-500">{record.memo}</Text>
-          ) : null}
-        </View>
-        <Pressable
-          onPress={() => onPressEdit(record)}
-          className="rounded-xl bg-white px-3 py-2 active:opacity-80"
-        >
-          <Text className="text-xs font-semibold text-[#0D0F1B]">수정</Text>
-        </Pressable>
+      <View className="rounded-2xl bg-[#F7F7F7] px-4 py-3">
+        <Text className="text-xl font-bold text-[#0D0F1B]">
+          {record.weight}kg
+        </Text>
+        <Text className="mt-1 text-sm text-gray-500">
+          {formatMeasuredDate(record.measuredAt)}
+        </Text>
       </View>
     </View>
   );

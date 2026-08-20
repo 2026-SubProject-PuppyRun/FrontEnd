@@ -279,7 +279,7 @@ const PastureBoard = () => {
                 bounds={bounds}
                 name={pet.name}
                 accentColor={pet.color}
-                onPress={() => router.push(`/care/pets/${pet.petId}/diet`)}
+                onPress={() => router.push(`/care/pets/${pet.petId}/medication`)}
               />
             ))}
         </View>
