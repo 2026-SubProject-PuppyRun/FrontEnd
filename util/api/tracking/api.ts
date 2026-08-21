@@ -1,5 +1,7 @@
 import { appendJsonRequestPart } from "../core/appendJsonRequestPart";
-import { apiGet, apiPostForm } from "../core/client";
+import { apiGet, apiPatch, apiPostForm } from "../core/client";
+
+export type TrackingVisibility = "PRIVATE" | "PUBLIC";
 
 export type TrackingPathPoint = {
   lat: number;
@@ -20,7 +22,7 @@ export type TrackingRestPeriod = {
 export type SaveTrackingRequest = {
   started_at: string;
   ended_at: string;
-  visibility: "PRIVATE" | "PUBLIC";
+  visibility: TrackingVisibility;
   distance: number;
   path: TrackingPathPoint[];
   average_pace: string;
@@ -95,13 +97,17 @@ export type TrackingDetailResponse = {
   started_at: string;
   ended_at: string;
   duration: number;
-  visibility: "PRIVATE" | "PUBLIC";
+  visibility: TrackingVisibility;
   distance: number;
   tracking_images: TrackingDetailImage[];
   average_pace: string;
   path: TrackingPathPoint[];
   diary_info?: TrackingDetailDiaryInfo | null;
   pet_list: TrackingDetailPet[];
+};
+
+export type UpdateTrackingVisibilityRequest = {
+  visibility: TrackingVisibility;
 };
 
 const guessImageMeta = (uri: string, index: number) => {
@@ -134,6 +140,19 @@ export const getTrackingList = () =>
  */
 export const getTrackingById = (trackingId: string) =>
   apiGet<TrackingDetailResponse>(`/tracking/${trackingId}`);
+
+/**
+ * 산책 공개 여부 변경
+ * PATCH /tracking/{id}/visibility
+ */
+export const updateTrackingVisibility = (
+  trackingId: string,
+  request: UpdateTrackingVisibilityRequest,
+) =>
+  apiPatch<void>(
+    `/tracking/${encodeURIComponent(trackingId)}/visibility`,
+    request,
+  );
 
 /** tracking_list → 피드 카드 목록 (path 미사용) */
 export const mapTrackingListToFeedCards = (
