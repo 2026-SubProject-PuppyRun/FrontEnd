@@ -24,14 +24,8 @@ export const submitWalkDiary = async (
   const trimmedTitle = title.trim();
   const trimmedContent = content.trim();
 
-  if (!trimmedTitle) {
-    throw new Error("제목을 입력해 주세요.");
-  }
   if (trimmedTitle.length > 100) {
     throw new Error("제목은 100자 이하로 입력해 주세요.");
-  }
-  if (!trimmedContent) {
-    throw new Error("일기 내용을 입력해 주세요.");
   }
 
   const runData = useRunStore.getState().runData;

@@ -1,5 +1,5 @@
 import { appendJsonRequestPart } from "../core/appendJsonRequestPart";
-import { apiPostForm } from "../core/client";
+import { apiDelete, apiPostForm, apiPut } from "../core/client";
 
 /** 일기 weather — 값은 모두 문자열 코드 */
 export type DiaryWeather = {
@@ -12,6 +12,30 @@ export type DiaryWeather = {
 export type CreateDiaryRequest = {
   tracking_id: string;
   writing_time: string;
+  title: string;
+  content: string;
+  weather: DiaryWeather;
+};
+
+/** PUT /diaries/{id} — 일기 수정 요청 */
+export type UpdateDiaryRequest = {
+  title: string;
+  content: string;
+  weather: DiaryWeather;
+};
+
+/** 일기 수정 응답 */
+export type UpdateDiaryResponse = {
+  diary_id: string;
+  tracking_id: string;
+  writing_time: string;
+  title: string;
+  content: string;
+  weather: DiaryWeather;
+};
+
+export type UpdateDiaryParams = {
+  diaryId: string;
   title: string;
   content: string;
   weather: DiaryWeather;
@@ -76,3 +100,23 @@ export const createDiary = ({
 
   return apiPostForm<CreateDiaryResponse>("/diaries", formData);
 };
+
+/**
+ * 산책 일기 수정
+ * PUT /diaries/{id}
+ */
+export const updateDiary = (
+  diaryId: string,
+  request: UpdateDiaryRequest,
+) =>
+  apiPut<UpdateDiaryResponse>(
+    `/diaries/${encodeURIComponent(diaryId)}`,
+    request,
+  );
+
+/**
+ * 산책 일기 삭제
+ * DELETE /diaries/{id}
+ */
+export const deleteDiary = (diaryId: string) =>
+  apiDelete<void>(`/diaries/${encodeURIComponent(diaryId)}`);

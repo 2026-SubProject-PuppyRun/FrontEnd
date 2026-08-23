@@ -1,5 +1,6 @@
 import SelfieRouteCard from "@/components/swiper/SelfieRouteCard";
 import AlarmSetSwitch from "@/components/switch/AlarmSetSwitch";
+import CustomAlert from "@/components/modal/CustomAlert";
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { CheckCircleIcon, CloseIcon, EditIcon } from "@/components/ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
@@ -9,6 +10,8 @@ import { useCustomToast } from "@/hooks/use-custom-toast";
 import { FeedDetail, FeedVisibility } from "@/types/feed";
 import {
   ApiError,
+  useDeleteDiaryMutation,
+  useUpdateDiaryMutation,
   useUpdateTrackingVisibilityMutation,
 } from "@/util/api";
 import { formatTime } from "@/util/run/formatTime";
@@ -24,31 +27,82 @@ const FeedDetailBody = (props: FeedDetailBodyProps) => {
     contents: props.contents || "",
   });
   const [isPublic, setIsPublic] = useState(props.visibility === "PUBLIC");
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
   const router = useRouter();
   const { showToast } = useCustomToast();
+  const updateDiaryMutation = useUpdateDiaryMutation();
+  const deleteDiaryMutation = useDeleteDiaryMutation();
   const updateVisibilityMutation = useUpdateTrackingVisibilityMutation();
-  const isSubmitting = updateVisibilityMutation.isPending;
+  const isSubmitting =
+    updateDiaryMutation.isPending ||
+    deleteDiaryMutation.isPending ||
+    updateVisibilityMutation.isPending;
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
 
+    const trimmedTitle = editForm.title.trim();
+    const trimmedContent = editForm.contents.trim();
     const visibility: FeedVisibility = isPublic ? "PUBLIC" : "PRIVATE";
 
-    try {
-      await updateVisibilityMutation.mutateAsync({
-        trackingId: props.id,
-        visibility,
+    if (trimmedTitle.length > 100) {
+      showToast({
+        message: "제목은 100자 이하로 입력해 주세요.",
+        icon: CloseIcon,
       });
+      return;
+    }
+    if (!props.diaryId) {
+      showToast({
+        message: "수정할 일기 정보가 없습니다.",
+        icon: CloseIcon,
+      });
+      return;
+    }
+
+    try {
+      await Promise.all([
+        updateDiaryMutation.mutateAsync({
+          diaryId: props.diaryId,
+          trackingId: props.id,
+          title: trimmedTitle,
+          content: trimmedContent,
+          weather: props.weather ?? { temp: "0", sky: "1", pty: "0" },
+        }),
+        updateVisibilityMutation.mutateAsync({
+          trackingId: props.id,
+          visibility,
+        }),
+      ]);
 
       showToast({ message: "피드가 저장되었습니다!", icon: CheckCircleIcon });
       router.back();
     } catch (error) {
       const message =
+        error instanceof ApiError ? error.message : "피드 저장에 실패했습니다.";
+      showToast({ message, icon: CloseIcon });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (isSubmitting || !props.diaryId) return;
+
+    try {
+      await deleteDiaryMutation.mutateAsync({
+        diaryId: props.diaryId,
+        trackingId: props.id,
+      });
+      showToast({ message: "일기가 삭제되었습니다.", icon: CheckCircleIcon });
+      router.back();
+    } catch (error) {
+      const message =
         error instanceof ApiError
           ? error.message
-          : "공개 여부 저장에 실패했습니다.";
+          : "일기 삭제에 실패했습니다.";
       showToast({ message, icon: CloseIcon });
+    } finally {
+      setShowDeleteAlert(false);
     }
   };
 
@@ -136,11 +190,36 @@ const FeedDetailBody = (props: FeedDetailBodyProps) => {
             {isSubmitting ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text className="text-lg font-semibold text-white">저장 하기</Text>
+              <Text className="text-lg font-semibold text-white">
+                저장 하기
+              </Text>
             )}
           </Pressable>
         </RedButtonSurface>
+
+        {props.diaryId ? (
+          <Pressable
+            onPress={() => setShowDeleteAlert(true)}
+            disabled={isSubmitting}
+            className="mt-3 items-center py-2 active:opacity-70"
+          >
+            <Text className="text-sm font-medium text-[#F25857]">
+              일기 삭제
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
+
+      <CustomAlert
+        showAlertDialog={showDeleteAlert}
+        handleClose={() => setShowDeleteAlert(false)}
+        title="일기 삭제"
+        description="이 산책 일기를 삭제할까요? 첨부 이미지도 함께 삭제됩니다."
+        onConfirm={handleDelete}
+        confirmText="삭제"
+        cancelText="취소"
+        confirmDisabled={isSubmitting}
+      />
     </>
   );
 };
