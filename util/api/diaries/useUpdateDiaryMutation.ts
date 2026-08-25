@@ -14,7 +14,12 @@ export const useUpdateDiaryMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ diaryId, title, content, weather }: UpdateDiaryMutationParams) =>
+    mutationFn: ({
+      diaryId,
+      title,
+      content,
+      weather,
+    }: UpdateDiaryMutationParams) =>
       updateDiary(diaryId, { title, content, weather }),
     onSuccess: async (_data, { trackingId }) => {
       await queryClient.invalidateQueries({

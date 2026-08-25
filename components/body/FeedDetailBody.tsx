@@ -19,9 +19,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
-interface FeedDetailBodyProps extends FeedDetail {}
-
-const FeedDetailBody = (props: FeedDetailBodyProps) => {
+const FeedDetailBody = (props: FeedDetail) => {
   const [editForm, setEditForm] = useState({
     title: props.title || "",
     contents: props.contents || "",

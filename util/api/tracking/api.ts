@@ -131,8 +131,7 @@ const guessImageMeta = (uri: string, index: number) => {
  * @example
  * const { tracking_list } = await getTrackingList();
  */
-export const getTrackingList = () =>
-  apiGet<TrackingListResponse>("/tracking");
+export const getTrackingList = () => apiGet<TrackingListResponse>("/tracking");
 
 /**
  * 산책 기록 상세 조회 (피드 상세)
@@ -167,16 +166,7 @@ export const mapTrackingListToFeedCards = (
  * 산책 기록 저장
  * POST /tracking (multipart/form-data)
  */
-export const saveTracking = ({
-  request,
-  images = [],
-}: SaveTrackingParams) => {
-  console.log("[saveTracking] request:", JSON.stringify(request, null, 2));
-  console.log(
-    "[saveTracking] images:",
-    images.map((image) => image.uri),
-  );
-
+export const saveTracking = ({ request, images = [] }: SaveTrackingParams) => {
   const formData = new FormData();
   appendJsonRequestPart(formData, request, "request");
 
