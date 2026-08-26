@@ -1,7 +1,12 @@
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { Text } from "@/components/ui/text";
 import { getTargetDate } from "@/util/date";
-import { scheduleLocalNotification } from "@/util/notification";
+import {
+  getScheduledLocalAlarms,
+  LOCAL_ALARM_CHANNEL_ID,
+  scheduleLocalNotification,
+  type ScheduledLocalAlarm,
+} from "@/util/notification";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, TextInput, View } from "react-native";
@@ -20,30 +25,7 @@ const daysOfWeek = [
   { label: "토", value: "sat" },
 ];
 
-export interface AlarmItem {
-  title: string;
-  dayOfWeek: string;
-  time: Date;
-  notificationId?: string;
-}
-
-const dummyAlarmList: AlarmItem[] = [
-  {
-    title: "산책 시간이에요!",
-    dayOfWeek: "월",
-    time: new Date("2024-01-01T15:00:00"),
-  },
-  {
-    title: "밥 먹을 시간이에요!",
-    dayOfWeek: "화",
-    time: new Date("2024-01-01T18:00:00"),
-  },
-  {
-    title: "약 먹을 시간이에요!",
-    dayOfWeek: "수",
-    time: new Date("2024-01-01T09:00:00"),
-  },
-];
+export type AlarmItem = ScheduledLocalAlarm;
 
 const AlarmBody = () => {
   const [date, setDate] = useState(new Date());
@@ -52,12 +34,25 @@ const AlarmBody = () => {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [alarmBody, setAlarmBody] = useState("");
   const [alarmList, setAlarmList] = useState<AlarmItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadAlarms = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const alarms = await getScheduledLocalAlarms();
+      setAlarmList(alarms);
+    } catch (error) {
+      console.error("예약 알람 조회 실패:", error);
+      setAlarmList([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      setAlarmList(dummyAlarmList);
-      return () => {};
-    }, []),
+      void loadAlarms();
+    }, [loadAlarms]),
   );
 
   const formattedTime = date.toLocaleTimeString("ko-KR", {
@@ -136,7 +131,12 @@ const AlarmBody = () => {
       <Text className="mb-3 text-base font-semibold text-[#0D0F1B]">
         등록된 알람
       </Text>
-      <AlarmList alarmList={alarmList} setAlarmList={setAlarmList} />
+      <AlarmList
+        alarmList={alarmList}
+        setAlarmList={setAlarmList}
+        isLoading={isLoading}
+        onDeleted={loadAlarms}
+      />
 
       <CustomAlert
         showAlertDialog={showAlertDialog}
@@ -148,34 +148,18 @@ const AlarmBody = () => {
         onConfirm={async () => {
           const newAlarmDate = getTargetDate(dayOfWeek, date);
 
-          const notiId = await scheduleLocalNotification(
+          await scheduleLocalNotification(
             "알림이 도착했어요",
             newAlarmDate,
             {
-              body: alarmBody,
+              body: alarmBody.trim() || "알람",
             },
-            "puppyrun_alarm_channel",
+            LOCAL_ALARM_CHANNEL_ID,
           );
 
-          setAlarmList((prev) => {
-            const dayOrder = ["일", "월", "화", "수", "목", "금", "토"];
-            const newList = [
-              ...prev,
-              {
-                dayOfWeek,
-                time: date,
-                title: alarmBody,
-                notificationId: notiId,
-              },
-            ];
-            return newList.sort((a, b) => {
-              const dayA = dayOrder.indexOf(a.dayOfWeek);
-              const dayB = dayOrder.indexOf(b.dayOfWeek);
-              return dayA - dayB;
-            });
-          });
           setAlarmBody("");
           setShowAlertDialog(false);
+          await loadAlarms();
         }}
       />
     </ScrollView>
