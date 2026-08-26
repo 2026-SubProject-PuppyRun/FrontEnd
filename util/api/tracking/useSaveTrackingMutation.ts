@@ -22,6 +22,9 @@ export const useSaveTrackingMutation = () => {
         queryKey: queryKeys.walks.recentSummaries(),
       });
       queryClient.invalidateQueries({
+        queryKey: queryKeys.activityTracking.all,
+      });
+      queryClient.invalidateQueries({
         queryKey: queryKeys.tracking.list(),
       });
     },

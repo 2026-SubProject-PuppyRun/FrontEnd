@@ -112,7 +112,7 @@ const RunSummaryBoard = ({
         >
           <View className="min-w-0 flex-1 pr-2">
             <Text className="text-xs font-black tracking-[1.5px] text-[#0D0F1B]">
-              WALK RECORD
+              RECENT WALK RECORD
             </Text>
             <Text
               className="mt-1 text-[10px] text-gray-500"
@@ -122,7 +122,11 @@ const RunSummaryBoard = ({
               NO. {recordNo}
             </Text>
           </View>
-          <Text className="text-[11px] font-bold text-gray-400">PUPPY</Text>
+          <Text
+            className={`text-[11px] font-bold ${pet.mbti ? "text-[#D97706]" : "text-gray-400"}`}
+          >
+            {pet.mbti || "PUPPY"}
+          </Text>
         </View>
 
         <View className="flex-1 justify-center px-3 py-3">
