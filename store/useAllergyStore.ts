@@ -1,4 +1,3 @@
-import { DUMMY_ALLERGY_RECORDS } from "@/constants/dummyAllergyRecords";
 import { AllergyRecord } from "@/types/allergy";
 import { create } from "zustand";
 
@@ -11,7 +10,7 @@ interface AllergyStore {
 }
 
 export const useAllergyStore = create<AllergyStore>((set, get) => ({
-  records: DUMMY_ALLERGY_RECORDS,
+  records: [],
 
   getByPetId: (petId) =>
     get().records.filter((r) => r.petId === petId),

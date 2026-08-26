@@ -38,6 +38,13 @@ export const queryKeys = {
     list: () => [...queryKeys.tracking.all, "list"] as const,
     detail: (trackingId: string) =>
       [...queryKeys.tracking.all, "detail", trackingId] as const,
+    recommendations: (radiusMeters: number, limit: number) =>
+      [
+        ...queryKeys.tracking.all,
+        "recommendations",
+        radiusMeters,
+        limit,
+      ] as const,
   },
   activityTracking: {
     all: ["activityTracking"] as const,

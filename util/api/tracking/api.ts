@@ -1,3 +1,4 @@
+import { getPathLength } from "geolib";
 import { appendJsonRequestPart } from "../core/appendJsonRequestPart";
 import { apiGet, apiPatch, apiPostForm } from "../core/client";
 
@@ -110,6 +111,43 @@ export type UpdateTrackingVisibilityRequest = {
   visibility: TrackingVisibility;
 };
 
+/** GET /tracking/recommendations — path 좌표 (time 없음) */
+export type RecommendationPathPoint = {
+  lat: number;
+  lng: number;
+};
+
+export type RecommendedRouteDto = {
+  tracking_id: string;
+  path: RecommendationPathPoint[];
+};
+
+export type TrackingRecommendationsResponse = {
+  routes: RecommendedRouteDto[];
+};
+
+export type TrackingRecommendationsParams = {
+  latitude: number;
+  longitude: number;
+  radiusMeters?: number;
+  limit?: number;
+};
+
+/** 앱에서 쓰는 추천 루트 좌표 */
+export type RecommendedRouteCoordinate = {
+  latitude: number;
+  longitude: number;
+};
+
+export type MappedRecommendedRoute = {
+  trackingId: string;
+  path: RecommendedRouteCoordinate[];
+  distanceMeters: number;
+};
+
+const DEFAULT_RECOMMENDATION_RADIUS_METERS = 1000;
+const DEFAULT_RECOMMENDATION_LIMIT = 3;
+
 const guessImageMeta = (uri: string, index: number) => {
   const lower = uri.toLowerCase();
   if (lower.includes(".png")) {
@@ -152,6 +190,44 @@ export const updateTrackingVisibility = (
     `/tracking/${encodeURIComponent(trackingId)}/visibility`,
     request,
   );
+
+/**
+ * 주변 추천 산책 루트 조회
+ * GET /tracking/recommendations
+ */
+export const getTrackingRecommendations = ({
+  latitude,
+  longitude,
+  radiusMeters = DEFAULT_RECOMMENDATION_RADIUS_METERS,
+  limit = DEFAULT_RECOMMENDATION_LIMIT,
+}: TrackingRecommendationsParams) => {
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    radiusMeters: String(radiusMeters),
+    limit: String(limit),
+  });
+
+  return apiGet<TrackingRecommendationsResponse>(
+    `/tracking/recommendations?${params.toString()}`,
+  );
+};
+
+export const mapTrackingRecommendations = (
+  response: TrackingRecommendationsResponse,
+): MappedRecommendedRoute[] =>
+  (response.routes ?? []).map((route) => {
+    const path = (route.path ?? []).map((point) => ({
+      latitude: point.lat,
+      longitude: point.lng,
+    }));
+
+    return {
+      trackingId: route.tracking_id,
+      path,
+      distanceMeters: path.length >= 2 ? getPathLength(path) : 0,
+    };
+  });
 
 /** tracking_list → 피드 카드 목록 (path 미사용) */
 export const mapTrackingListToFeedCards = (
