@@ -19,6 +19,9 @@ export const useSaveWalkMutation = () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.walks.recentSummaries(),
       });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.activityTracking.all,
+      });
     },
   });
 };

@@ -87,6 +87,35 @@ export const getMonthlyStatistics = async (
     `/activity-tracking/statistics/monthly?date=${date}`,
   );
 
+export type PetLastTrackingActivity = {
+  tracking_id: string;
+  started_at: string;
+  ended_at: string;
+  distance_m: number;
+  duration_sec: number;
+  average_pace: string;
+};
+
+export type PetLastTrackingItem = {
+  pet_id: string;
+  pet_name: string;
+  pet_profile_url: string | null;
+  latest_activity: PetLastTrackingActivity | null;
+};
+
+export type PetLastTrackingResponse = {
+  activities: PetLastTrackingItem[];
+};
+
+/** 펫별 마지막 산책 기록 조회 (startDate/endDate: YYYY-MM-DD) */
+export const getPetLastTrackings = async (
+  startDate: string,
+  endDate: string,
+): Promise<PetLastTrackingResponse> =>
+  apiGet<PetLastTrackingResponse>(
+    `/activity-tracking/statistics/pet/last-tracking?startDate=${startDate}&endDate=${endDate}`,
+  );
+
 /** 기준일이 속한 한 달의 일별 산책 기여도 조회 (date: YYYY-MM-DD) */
 export const getMonthlyContributions = async (
   date: string,
