@@ -1,12 +1,14 @@
 import { AlarmItem } from "@/components/body/AlarmBody";
 import { Text } from "@/components/ui/text";
 import { deleteLocalNotification } from "@/util/notification";
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import AlarmListItem from "./AlarmListItem";
 
 interface AlarmListProps {
   alarmList: AlarmItem[];
   setAlarmList: React.Dispatch<React.SetStateAction<AlarmItem[]>>;
+  isLoading?: boolean;
+  onDeleted?: () => void | Promise<void>;
 }
 
 const formatTime = (time: Date) =>
@@ -16,7 +18,21 @@ const formatTime = (time: Date) =>
     hour12: false,
   });
 
-const AlarmList = ({ alarmList, setAlarmList }: AlarmListProps) => {
+const AlarmList = ({
+  alarmList,
+  setAlarmList,
+  isLoading = false,
+  onDeleted,
+}: AlarmListProps) => {
+  if (isLoading) {
+    return (
+      <View className="items-center rounded-3xl bg-white px-6 py-10 shadow-sm">
+        <ActivityIndicator color="#F25857" />
+        <Text className="mt-3 text-sm text-gray-500">알람을 불러오는 중…</Text>
+      </View>
+    );
+  }
+
   if (alarmList.length === 0) {
     return (
       <View className="items-center rounded-3xl bg-white px-6 py-10 shadow-sm">
@@ -32,17 +48,22 @@ const AlarmList = ({ alarmList, setAlarmList }: AlarmListProps) => {
 
   return (
     <View className="gap-3">
-      {alarmList.map((item, index) => (
+      {alarmList.map((item) => (
         <AlarmListItem
-          key={`${item.title}-${item.dayOfWeek}-${index}`}
+          key={item.notificationId}
           title={item.title}
           dayOfWeek={item.dayOfWeek}
           timeLabel={formatTime(item.time)}
           onDelete={() => {
-            setAlarmList((prev) => prev.filter((_, i) => i !== index));
-            if (item.notificationId) {
-              deleteLocalNotification(item.notificationId);
-            }
+            void (async () => {
+              setAlarmList((prev) =>
+                prev.filter(
+                  (alarm) => alarm.notificationId !== item.notificationId,
+                ),
+              );
+              await deleteLocalNotification(item.notificationId);
+              await onDeleted?.();
+            })();
           }}
         />
       ))}
