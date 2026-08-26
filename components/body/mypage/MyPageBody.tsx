@@ -5,6 +5,7 @@ import { Text } from "@/components/ui/text";
 import { useTrackingListQuery } from "@/util/api";
 import { FlashList } from "@shopify/flash-list";
 import { ActivityIndicator, RefreshControl, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const MyPageBody = () => {
   const {
@@ -14,7 +15,8 @@ const MyPageBody = () => {
     refetch,
     isFetching,
   } = useTrackingListQuery();
-
+  const insets = useSafeAreaInsets();
+  const bottomPadding = insets.bottom + 120;
   const ListHeader = (
     <>
       <MyPageProfileCard />
@@ -58,7 +60,10 @@ const MyPageBody = () => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <FeedBoardItem {...item} />}
         numColumns={3}
-        contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 24 }}
+        contentContainerStyle={{
+          paddingBottom: bottomPadding,
+          paddingHorizontal: 24,
+        }}
         refreshing={isFetching && !isLoading}
         onRefresh={refetch}
         refreshControl={
