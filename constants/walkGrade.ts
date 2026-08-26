@@ -1,4 +1,5 @@
 import type { TrackingProgress } from "@/util/api/pets";
+import type { ImageSourcePropType } from "react-native";
 
 export const WALK_GRADE_BY_CODE = {
   "000": { level: 1, name: "비기너", label: "BEGINNER" },
@@ -9,6 +10,34 @@ export const WALK_GRADE_BY_CODE = {
 } as const;
 
 export type WalkGradeCode = keyof typeof WALK_GRADE_BY_CODE;
+
+/** 산책 등급별 발바닥 뱃지  */
+export const WALK_GRADE_BADGE: Record<WalkGradeCode, ImageSourcePropType> = {
+  "000": require("@/assets/images/badget/badge_000.webp"),
+  "001": require("@/assets/images/badget/badge_001.webp"),
+  "002": require("@/assets/images/badget/badge_002.webp"),
+  "003": require("@/assets/images/badget/badge_003.webp"),
+  "004": require("@/assets/images/badget/badge_004.webp"),
+};
+
+export const getWalkGradeBadge = (code: string): ImageSourcePropType => {
+  const normalized = code.padStart(3, "0") as WalkGradeCode;
+  return WALK_GRADE_BADGE[normalized] ?? WALK_GRADE_BADGE["000"];
+};
+
+/** 여러 진행도 중 가장 높은 산책 등급 코드 */
+export const getHighestWalkGradeCode = (
+  progresses: { trackingProgress: TrackingProgress }[],
+): WalkGradeCode => {
+  if (!progresses.length) return "000";
+
+  return progresses.reduce<WalkGradeCode>((highest, item) => {
+    const code = item.trackingProgress.code.padStart(3, "0") as WalkGradeCode;
+    const level = WALK_GRADE_BY_CODE[code]?.level ?? 1;
+    const highestLevel = WALK_GRADE_BY_CODE[highest]?.level ?? 1;
+    return level > highestLevel ? code : highest;
+  }, "000");
+};
 
 export const WALK_GRADE_CODES = Object.keys(
   WALK_GRADE_BY_CODE,
@@ -28,9 +57,7 @@ export type WalkGradeInfo = {
 
 const getGradeFromCode = (code: string) => {
   const normalized = code.padStart(3, "0") as WalkGradeCode;
-  return (
-    WALK_GRADE_BY_CODE[normalized] ?? WALK_GRADE_BY_CODE["000"]
-  );
+  return WALK_GRADE_BY_CODE[normalized] ?? WALK_GRADE_BY_CODE["000"];
 };
 
 /** 현재 배지 구간 내 다음 배지까지 진행률 */
@@ -39,10 +66,7 @@ export const calcWalkProgressPercent = (progress: TrackingProgress) => {
 
   if (walkedDistance < requiredDistance) {
     if (requiredDistance <= 0) return 0;
-    return Math.min(
-      100,
-      Math.round((walkedDistance / requiredDistance) * 100),
-    );
+    return Math.min(100, Math.round((walkedDistance / requiredDistance) * 100));
   }
 
   const range = nextRequiredDistance - requiredDistance;
@@ -52,9 +76,7 @@ export const calcWalkProgressPercent = (progress: TrackingProgress) => {
   return Math.min(100, Math.round((walkedInTier / range) * 100));
 };
 
-export const getWalkGradeInfo = (
-  progress: TrackingProgress,
-): WalkGradeInfo => {
+export const getWalkGradeInfo = (progress: TrackingProgress): WalkGradeInfo => {
   const grade = getGradeFromCode(progress.code);
   const progressPercent = calcWalkProgressPercent(progress);
   const nextLevel = Math.min(grade.level + 1, MAX_WALK_GRADE_LEVEL);
