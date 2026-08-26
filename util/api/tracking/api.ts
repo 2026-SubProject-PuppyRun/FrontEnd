@@ -1,5 +1,7 @@
 import { appendJsonRequestPart } from "../core/appendJsonRequestPart";
-import { apiGet, apiPostForm } from "../core/client";
+import { apiGet, apiPatch, apiPostForm } from "../core/client";
+
+export type TrackingVisibility = "PRIVATE" | "PUBLIC";
 
 export type TrackingPathPoint = {
   lat: number;
@@ -20,7 +22,7 @@ export type TrackingRestPeriod = {
 export type SaveTrackingRequest = {
   started_at: string;
   ended_at: string;
-  visibility: "PRIVATE" | "PUBLIC";
+  visibility: TrackingVisibility;
   distance: number;
   path: TrackingPathPoint[];
   average_pace: string;
@@ -95,13 +97,17 @@ export type TrackingDetailResponse = {
   started_at: string;
   ended_at: string;
   duration: number;
-  visibility: "PRIVATE" | "PUBLIC";
+  visibility: TrackingVisibility;
   distance: number;
   tracking_images: TrackingDetailImage[];
   average_pace: string;
   path: TrackingPathPoint[];
   diary_info?: TrackingDetailDiaryInfo | null;
   pet_list: TrackingDetailPet[];
+};
+
+export type UpdateTrackingVisibilityRequest = {
+  visibility: TrackingVisibility;
 };
 
 const guessImageMeta = (uri: string, index: number) => {
@@ -125,8 +131,7 @@ const guessImageMeta = (uri: string, index: number) => {
  * @example
  * const { tracking_list } = await getTrackingList();
  */
-export const getTrackingList = () =>
-  apiGet<TrackingListResponse>("/tracking");
+export const getTrackingList = () => apiGet<TrackingListResponse>("/tracking");
 
 /**
  * 산책 기록 상세 조회 (피드 상세)
@@ -134,6 +139,19 @@ export const getTrackingList = () =>
  */
 export const getTrackingById = (trackingId: string) =>
   apiGet<TrackingDetailResponse>(`/tracking/${trackingId}`);
+
+/**
+ * 산책 공개 여부 변경
+ * PATCH /tracking/{id}/visibility
+ */
+export const updateTrackingVisibility = (
+  trackingId: string,
+  request: UpdateTrackingVisibilityRequest,
+) =>
+  apiPatch<void>(
+    `/tracking/${encodeURIComponent(trackingId)}/visibility`,
+    request,
+  );
 
 /** tracking_list → 피드 카드 목록 (path 미사용) */
 export const mapTrackingListToFeedCards = (
@@ -148,16 +166,7 @@ export const mapTrackingListToFeedCards = (
  * 산책 기록 저장
  * POST /tracking (multipart/form-data)
  */
-export const saveTracking = ({
-  request,
-  images = [],
-}: SaveTrackingParams) => {
-  console.log("[saveTracking] request:", JSON.stringify(request, null, 2));
-  console.log(
-    "[saveTracking] images:",
-    images.map((image) => image.uri),
-  );
-
+export const saveTracking = ({ request, images = [] }: SaveTrackingParams) => {
   const formData = new FormData();
   appendJsonRequestPart(formData, request, "request");
 

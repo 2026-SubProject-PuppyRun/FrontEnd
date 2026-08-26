@@ -33,6 +33,7 @@ export const mapTrackingDetailToFeedDetail = (
     distance: tracking.distance ?? 0,
     duration: tracking.duration ?? 0,
     date: dateSource ? new Date(dateSource) : new Date(),
+    visibility: tracking.visibility ?? "PRIVATE",
     diaryId: diary?.diary_id,
     weather: diary?.weather
       ? {

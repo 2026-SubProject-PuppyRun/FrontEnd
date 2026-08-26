@@ -11,6 +11,8 @@ export interface FeedDetailWeather {
   pty: string;
 }
 
+export type FeedVisibility = "PRIVATE" | "PUBLIC";
+
 export interface FeedDetail {
   id: string;
   contents?: string;
@@ -22,6 +24,7 @@ export interface FeedDetail {
   distance: number;
   duration: number;
   date: Date;
+  visibility: FeedVisibility;
   diaryId?: string;
   weather?: FeedDetailWeather;
   pets?: FeedDetailPet[];

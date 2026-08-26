@@ -61,7 +61,6 @@ export const submitWalkTracking = async (
   const selfie = selfieUri ?? runData.selfie;
 
   // 실제 HTTP: POST {BASE_URL}/tracking (multipart)
-  console.log("[submitWalkTracking] 서버로 산책 기록 전송 시작");
   const response = await saveTracking({
     request: {
       started_at: formatLocalDateTime(startedAt),
@@ -75,7 +74,6 @@ export const submitWalkTracking = async (
     },
     images: selfie ? [{ uri: selfie }] : [],
   });
-  console.log("[submitWalkTracking] 서버 응답:", response);
 
   const trackingId = getTrackingId(response);
   if (trackingId) {

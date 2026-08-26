@@ -8,14 +8,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 export const formatLocalDateTime = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 
-const toImageParts = (...uris: (string | null | undefined)[]) =>
-  uris
-    .filter((uri): uri is string => Boolean(uri))
-    .map((uri) => ({ uri }));
-
 /**
  * 러닝 세션 → 산책 일기 등록
- * POST /diaries (multipart) — request JSON + images
+ * POST /diaries (application/json)
  */
 export const submitWalkDiary = async (
   title: string,
@@ -24,14 +19,8 @@ export const submitWalkDiary = async (
   const trimmedTitle = title.trim();
   const trimmedContent = content.trim();
 
-  if (!trimmedTitle) {
-    throw new Error("제목을 입력해 주세요.");
-  }
   if (trimmedTitle.length > 100) {
     throw new Error("제목은 100자 이하로 입력해 주세요.");
-  }
-  if (!trimmedContent) {
-    throw new Error("일기 내용을 입력해 주세요.");
   }
 
   const runData = useRunStore.getState().runData;
@@ -43,17 +32,14 @@ export const submitWalkDiary = async (
   const weather = useWeatherStore.getState().current;
 
   return createDiary({
-    request: {
-      tracking_id: trackingId,
-      writing_time: formatLocalDateTime(new Date()),
-      title: trimmedTitle,
-      content: trimmedContent,
-      weather: {
-        temp: weather.temp != null ? String(Math.round(weather.temp)) : "0",
-        sky: weather.sky != null ? String(weather.sky) : "1",
-        pty: weather.pty != null ? String(weather.pty) : "0",
-      },
+    tracking_id: trackingId,
+    writing_time: formatLocalDateTime(new Date()),
+    title: trimmedTitle,
+    content: trimmedContent,
+    weather: {
+      temp: weather.temp != null ? String(Math.round(weather.temp)) : "0",
+      sky: weather.sky != null ? String(weather.sky) : "1",
+      pty: weather.pty != null ? String(weather.pty) : "0",
     },
-    images: toImageParts(runData.selfie, runData.routeImg),
   });
 };
