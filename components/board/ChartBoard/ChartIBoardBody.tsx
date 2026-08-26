@@ -16,7 +16,6 @@ import CompareChart from "./BoardItem/CompareChart";
 import GrassChart from "./BoardItem/GrassChart";
 import MonthlyChart from "./BoardItem/MonthlyChart";
 import StarChart from "./BoardItem/StarChart";
-import UserInsight from "./BoardItem/UserInsight";
 import WeeklyChart from "./BoardItem/WeeklyChart";
 
 const CHART_TABS = [
@@ -46,7 +45,9 @@ const ChartBoardBody = () => {
   const handleSelectChart = (value: string) => {
     const next = value as ChartTab;
     const nextIndex = CHART_TABS.findIndex((tab) => tab.value === next);
-    const prevIndex = CHART_TABS.findIndex((tab) => tab.value === selectedChart);
+    const prevIndex = CHART_TABS.findIndex(
+      (tab) => tab.value === selectedChart,
+    );
     if (nextIndex < 0 || nextIndex === prevIndex) return;
 
     setDirection(nextIndex > prevIndex ? 1 : -1);
@@ -86,7 +87,7 @@ const ChartBoardBody = () => {
       contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 32 }}
       showsVerticalScrollIndicator={false}
     >
-      <UserInsight />
+      {/* <UserInsight /> */}
 
       <View className="mb-4 rounded-3xl bg-white p-5 shadow-sm">
         <Text className="mb-4 text-sm font-semibold text-gray-500">
