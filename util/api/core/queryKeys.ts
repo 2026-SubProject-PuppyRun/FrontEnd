@@ -3,6 +3,10 @@
  * invalidateQueries({ queryKey: queryKeys.pets.all }) 형태로 사용.
  */
 export const queryKeys = {
+  account: {
+    all: ["account"] as const,
+    me: () => [...queryKeys.account.all, "me"] as const,
+  },
   pets: {
     all: ["pets"] as const,
     list: () => [...queryKeys.pets.all, "list"] as const,

@@ -1,4 +1,7 @@
 import { useCustomToast } from "@/hooks/use-custom-toast";
+import { useUserStore } from "@/store/useUserStore";
+import { ApiError, useChangeNicknameMutation } from "@/util/api";
+import { useEffect, useState } from "react";
 import {
   Actionsheet,
   ActionsheetBackdrop,
@@ -6,7 +9,7 @@ import {
   ActionsheetDragIndicator,
   ActionsheetDragIndicatorWrapper,
 } from "../ui/actionsheet";
-import { Button, ButtonText } from "../ui/button";
+import { Button, ButtonSpinner, ButtonText } from "../ui/button";
 import {
   FormControl,
   FormControlLabel,
@@ -15,8 +18,6 @@ import {
 import { AddIcon, CloseIcon } from "../ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "../ui/input";
 import { Text } from "../ui/text";
-
-import { useState } from "react";
 import { VStack } from "../ui/vstack";
 
 interface ChangeNameSheetProps {
@@ -24,20 +25,45 @@ interface ChangeNameSheetProps {
   setShowActionsheet: (value: boolean) => void;
 }
 
+const NICKNAME_MIN = 2;
+const NICKNAME_MAX = 20;
+
 const ChangeNameSheet = ({
   showActionsheet,
   setShowActionsheet,
 }: ChangeNameSheetProps) => {
   const toast = useCustomToast();
-  // TODO: 기존 닉네임은 스토어에서 가져오고 폼 예외처리 필요 (동일한 닉네임인지)
-  const userName = "이채주";
+  const userName = useUserStore((state) => state.nickName) ?? "";
   const [newNickname, setNewNickname] = useState(userName);
-  const handleNicknameChange = async (newNickname: string) => {
-    const trimmedNickname = newNickname.trim();
+  const changeNicknameMutation = useChangeNicknameMutation();
+  const isSubmitting = changeNicknameMutation.isPending;
+
+  useEffect(() => {
+    if (showActionsheet) {
+      setNewNickname(userName);
+    }
+  }, [showActionsheet, userName]);
+
+  const handleNicknameChange = async (nickname: string) => {
+    if (isSubmitting) return;
+
+    const trimmedNickname = nickname.trim();
 
     if (!trimmedNickname) {
       toast.showToast({
         message: "닉네임을 입력해주세요.",
+        icon: CloseIcon,
+        iconColor: "red",
+      });
+      return;
+    }
+
+    if (
+      trimmedNickname.length < NICKNAME_MIN ||
+      trimmedNickname.length > NICKNAME_MAX
+    ) {
+      toast.showToast({
+        message: `닉네임은 ${NICKNAME_MIN}~${NICKNAME_MAX}자로 입력해주세요.`,
         icon: CloseIcon,
         iconColor: "red",
       });
@@ -54,14 +80,18 @@ const ChangeNameSheet = ({
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500)); // ToDO: 서버에 닉네임 변경 요청 보내기
+      await changeNicknameMutation.mutateAsync(trimmedNickname);
       toast.showToast({
         message: "닉네임이 변경되었습니다.",
       });
       setShowActionsheet(false);
     } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : "닉네임 변경에 실패했습니다. 다시 시도해주세요.";
       toast.showToast({
-        message: "닉네임 변경에 실패했습니다. 다시 시도해주세요.",
+        message,
         icon: CloseIcon,
       });
     }
@@ -71,7 +101,10 @@ const ChangeNameSheet = ({
     <>
       <Actionsheet
         isOpen={showActionsheet}
-        onClose={() => setShowActionsheet(false)}
+        onClose={() => {
+          if (isSubmitting) return;
+          setShowActionsheet(false);
+        }}
         snapPoints={[36]}
       >
         <ActionsheetBackdrop />
@@ -92,16 +125,20 @@ const ChangeNameSheet = ({
                   placeholder="새 닉네임 입력"
                   value={newNickname}
                   onChangeText={setNewNickname}
+                  maxLength={NICKNAME_MAX}
+                  editable={!isSubmitting}
                 />
               </Input>
             </FormControl>
             <Text className="text-gray-500" size="sm">
-              기존과 동일한 닉네임은 사용할 수 없습니다.
+              2~20자, 기존과 다른 닉네임으로 변경할 수 있어요.
             </Text>
             <Button
               onPress={() => handleNicknameChange(newNickname)}
+              disabled={isSubmitting}
               className="mb-2 mt-auto w-full rounded-2xl bg-primary-500"
             >
+              {isSubmitting ? <ButtonSpinner color="#FFFFFF" /> : null}
               <ButtonText>닉네임 변경</ButtonText>
             </Button>
           </VStack>
