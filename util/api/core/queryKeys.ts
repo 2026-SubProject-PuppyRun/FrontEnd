@@ -54,6 +54,8 @@ export const queryKeys = {
     all: ["activityTracking"] as const,
     monthlyContributions: (date: string) =>
       [...queryKeys.activityTracking.all, "monthlyContributions", date] as const,
+    monthlyStatistics: (year: string) =>
+      [...queryKeys.activityTracking.all, "monthlyStatistics", year] as const,
     grassChart: (endDate: string) =>
       [...queryKeys.activityTracking.all, "grassChart", endDate] as const,
     weeklyChart: (weekStart: string) =>

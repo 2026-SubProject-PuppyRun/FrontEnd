@@ -56,6 +56,37 @@ export type DailyStatisticsResponse = {
   tracking: DailyTrackingItem[];
 };
 
+export type MonthlySummaryItem = {
+  label: string;
+  total_distance_m: number;
+  total_duration_sec: number;
+  total_count: number;
+};
+
+export type MonthlyContributionDay = {
+  label: string;
+  distance_m: number;
+  duration_sec: number;
+  tracking_count: number;
+};
+
+export type MonthlyStatisticsResponse = {
+  period: {
+    type: "monthly";
+    year: string;
+  };
+  monthly_summary: MonthlySummaryItem[];
+  contribution_chart: MonthlyContributionDay[];
+};
+
+/** 기준 연도의 월별 통계와 최근 15주 일별 기여도 조회 (date: YYYY-MM-DD) */
+export const getMonthlyStatistics = async (
+  date: string,
+): Promise<MonthlyStatisticsResponse> =>
+  apiGet<MonthlyStatisticsResponse>(
+    `/activity-tracking/statistics/monthly?date=${date}`,
+  );
+
 /** 기준일이 속한 한 달의 일별 산책 기여도 조회 (date: YYYY-MM-DD) */
 export const getMonthlyContributions = async (
   date: string,
