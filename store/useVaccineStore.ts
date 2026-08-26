@@ -1,4 +1,3 @@
-import { DUMMY_VACCINE_RECORDS } from "@/constants/dummyVaccineRecords";
 import { VaccineRecord } from "@/types/vaccine";
 import { create } from "zustand";
 
@@ -10,7 +9,7 @@ interface VaccineStore {
 }
 
 export const useVaccineStore = create<VaccineStore>((set) => ({
-  records: DUMMY_VACCINE_RECORDS,
+  records: [],
 
   addRecord: (record) =>
     set((state) => ({
