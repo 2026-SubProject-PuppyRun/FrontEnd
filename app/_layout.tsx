@@ -1,5 +1,6 @@
 import "@/tasks/backgroundLocationTask";
 import { Stack } from "expo-router";
+import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -11,6 +12,7 @@ import "@/global.css";
 import { openPermissionModal } from "@/store/usePermissionModalStore";
 import { useSyncAccountFromQuery } from "@/util/api/account";
 import { useSyncPetListFromQuery } from "@/util/api/pets";
+import { spoqaFontMap } from "@/util/fonts/spoqa";
 import {
   getFirebaseMessaging,
   initFCM,
@@ -37,7 +39,9 @@ const AppDataBootstrap = () => {
 
 export default function RootLayout() {
   const queryClient = new QueryClient();
+  const [fontsLoaded, fontError] = useFonts(spoqaFontMap);
   const [showAnimatedSplash, setShowAnimatedSplash] = useState(true);
+  const fontsReady = fontsLoaded || Boolean(fontError);
 
   const onAnimatedSplashReady = useCallback(() => {
     SplashScreen.hideAsync().catch(() => undefined);
@@ -48,10 +52,10 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (showAnimatedSplash) {
+    if (showAnimatedSplash && fontsReady) {
       onAnimatedSplashReady();
     }
-  }, [showAnimatedSplash, onAnimatedSplashReady]);
+  }, [showAnimatedSplash, fontsReady, onAnimatedSplashReady]);
 
   useEffect(() => {
     let unsubscribeForeground: (() => void) | undefined;
@@ -147,6 +151,10 @@ export default function RootLayout() {
       appStateSub.remove();
     };
   }, [showAnimatedSplash]);
+
+  if (!fontsReady) {
+    return null;
+  }
 
   return (
     <SafeAreaProvider>
