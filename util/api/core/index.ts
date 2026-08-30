@@ -1,8 +1,12 @@
 export {
   clearAccessToken,
+  clearTokens,
   getAccessToken,
+  getRefreshToken,
+  isAuthenticated,
   isUsingTempAdminToken,
   setAccessToken,
+  setTokens,
 } from "./authToken";
 export { appendJsonRequestPart } from "./appendJsonRequestPart";
 export {

@@ -1,9 +1,12 @@
 import { delay } from "@/util/location/delay";
-import { getAccessToken } from "./authToken";
+import { refreshAccessToken } from "../auth/refreshAccessToken";
+import { clearTokens, getAccessToken } from "./authToken";
 import { ApiError, ApiErrorBody, getApiErrorMessage } from "./errors";
 import type { ApiRequestOptions } from "./types";
 
 const DEFAULT_BASE_URL = process.env.EXPO_PUBLIC_BASE_URL ?? "";
+
+const isRefreshEndpoint = (path: string) => path.includes("/auth/refresh");
 
 const buildUrl = (path: string) => {
   if (path.startsWith("http://") || path.startsWith("https://")) {
@@ -72,6 +75,7 @@ const fetchWithNetworkRetry = async (
 export async function apiClient<T>(
   path: string,
   options: ApiRequestOptions = {},
+  authRetried = false,
 ): Promise<T> {
   const { json, formData, skipAuth = false, retry = 1, ...init } = options;
 
@@ -106,6 +110,23 @@ export async function apiClient<T>(
   const data = isJson ? await response.json() : await response.text();
 
   if (!response.ok) {
+    if (
+      response.status === 401 &&
+      !skipAuth &&
+      !authRetried &&
+      !isRefreshEndpoint(path)
+    ) {
+      try {
+        await refreshAccessToken();
+        return apiClient<T>(path, options, true);
+      } catch (refreshError) {
+        clearTokens();
+        if (refreshError instanceof ApiError) {
+          throw refreshError;
+        }
+      }
+    }
+
     const errorBody = isJson ? (data as ApiErrorBody) : null;
     const fallback =
       typeof data === "string" && data.length > 0

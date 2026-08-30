@@ -1,27 +1,48 @@
-/**
- * API 인증 토큰
- *
- * - 로그인/토큰 저장: 다른 팀원 작업 중 → `setAccessToken`은 추후 연동
- * - 당분간 `.env`의 `EXPO_PUBLIC_TEM_ADMIN_KEY`를 Bearer 토큰으로 사용
- */
-let accessToken: string | null = null;
+import { useAuthTokenStore } from "@/store/useAuthTokenStore";
 
 const getTempAdminToken = () =>
   process.env.EXPO_PUBLIC_TEM_ADMIN_KEY?.trim() || null;
 
-/** 런타임 토큰 우선, 없으면 env 임시 토큰 */
-export const getAccessToken = () => accessToken ?? getTempAdminToken();
+/** 저장된 access token 우선, 없으면 env 임시 토큰 */
+export const getAccessToken = () =>
+  useAuthTokenStore.getState().accessToken ?? getTempAdminToken();
 
-/** 로그인 연동 후 발급받은 토큰 저장 (임시 env 토큰보다 우선) */
+export const getRefreshToken = () =>
+  useAuthTokenStore.getState().refreshToken;
+
+export const setTokens = (accessToken: string, refreshToken: string) => {
+  useAuthTokenStore.getState().setTokens({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+};
+
+/** access token만 갱신 (refresh token 유지) */
 export const setAccessToken = (token: string | null) => {
-  accessToken = token;
+  if (token === null) {
+    clearTokens();
+    return;
+  }
+
+  const refreshToken = getRefreshToken();
+  if (refreshToken) {
+    setTokens(token, refreshToken);
+    return;
+  }
+
+  useAuthTokenStore.setState({ accessToken: token });
 };
 
-/** 런타임 토큰만 제거 — env 임시 토큰은 그대로 사용됨 */
-export const clearAccessToken = () => {
-  accessToken = null;
+export const clearTokens = () => {
+  useAuthTokenStore.getState().clearTokens();
 };
+
+/** @deprecated clearTokens 사용 */
+export const clearAccessToken = clearTokens;
+
+export const isAuthenticated = () => Boolean(useAuthTokenStore.getState().accessToken);
 
 /** env 임시 토큰으로 요청 중인지 (디버깅용) */
 export const isUsingTempAdminToken = () =>
-  accessToken === null && getTempAdminToken() !== null;
+  useAuthTokenStore.getState().accessToken === null &&
+  getTempAdminToken() !== null;
