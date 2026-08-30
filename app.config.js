@@ -25,22 +25,29 @@ module.exports = {
       },
       googleServicesFile: "./google-services.json",
     },
-    web: {
+    /*  web: {
       output: "static",
       favicon: "./assets/images/favicon.png",
-    },
+    },*/
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.puppyrun",
       config: {
         googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
       },
-      // googleServicesFile: "./GoogleService-Info.plist",
     },
-
     plugins: [
       "expo-router",
       "@react-native-firebase/app",
+      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-seoul/kakao-login",
+        {
+          kakaoAppKey: process.env.EXPO_PUBLIC_KAKAO_APP_KEY,
+          overrideKakaoSDKVersion: "2.20.1",
+          kotlinVersion: "2.1.20",
+        },
+      ],
       [
         "./withNotificationIcon.js",
         {
@@ -72,18 +79,14 @@ module.exports = {
           isAndroidForegroundServiceEnabled: true,
         },
       ],
-      // [
-      //   "react-native-maps",
-      //   {
-      //     iosGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-      //     androidGoogleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-      //   },
-      // ],
       [
         "expo-build-properties",
         {
           android: {
             useFirebaseAndroidCore: true,
+            extraMavenRepos: [
+              "https://devrepo.kakao.com/nexus/content/groups/public/",
+            ],
           },
         },
       ],
