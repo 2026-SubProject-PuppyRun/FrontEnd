@@ -13,27 +13,42 @@ import { CloseIcon } from "@/components/ui/icon";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { useCustomToast } from "@/hooks/use-custom-toast";
+import { logout } from "@/util/auth/logout";
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
 const SettingBody = () => {
   const toast = useCustomToast();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [showActionsheet, setShowActionsheet] = useState(false);
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
   const [showWithdrawalAlert, setShowWithdrawalAlert] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await logout();
+      queryClient.clear();
+      setShowLogoutAlert(false);
       toast.showToast({
         message: "로그아웃 되었습니다.",
       });
+      router.replace("/(auth)/auth");
     } catch (error) {
+      console.error("로그아웃 실패:", error);
       toast.showToast({
         message: "로그아웃에 실패했습니다. 다시 시도해주세요.",
         icon: CloseIcon,
       });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
