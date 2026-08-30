@@ -25,10 +25,10 @@ module.exports = {
       },
       googleServicesFile: "./google-services.json",
     },
-    web: {
+    /*  web: {
       output: "static",
       favicon: "./assets/images/favicon.png",
-    },
+    },*/
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.puppyrun",
@@ -45,7 +45,7 @@ module.exports = {
         {
           kakaoAppKey: process.env.EXPO_PUBLIC_KAKAO_APP_KEY,
           overrideKakaoSDKVersion: "2.20.1",
-          kotlinVersion: "1.9.0",
+          kotlinVersion: "2.1.20",
         },
       ],
       [
@@ -84,6 +84,9 @@ module.exports = {
         {
           android: {
             useFirebaseAndroidCore: true,
+            extraMavenRepos: [
+              "https://devrepo.kakao.com/nexus/content/groups/public/",
+            ],
           },
         },
       ],
