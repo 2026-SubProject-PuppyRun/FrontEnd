@@ -1,6 +1,7 @@
 import { ApiError } from "@/util/api";
 import {
   configureGoogleSignIn,
+  resolvePostLoginRoute,
   signInWithOAuth,
   type OAuthProvider,
 } from "@/util/auth";
@@ -44,7 +45,10 @@ export const useSocialAuth = () => {
     async (provider: OAuthProvider) => {
       try {
         await signInWithOAuth(provider);
-        router.replace("/(tabs)/home");
+        const route = await resolvePostLoginRoute();
+        router.replace(
+          route === "home" ? "/(tabs)/home" : "/(onboarding)/welcome",
+        );
       } catch (error) {
         console.error(`${PROVIDER_LABELS[provider]} 로그인 실패:`, error);
         Alert.alert("로그인 실패", getSocialAuthErrorMessage(provider, error));
