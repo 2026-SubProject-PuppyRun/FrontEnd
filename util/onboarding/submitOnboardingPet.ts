@@ -51,7 +51,7 @@ export const submitOnboardingPet = async (
 
   const created = await createPet({
     name: payload.name.trim(),
-    birth_year: payload.birthDate || null,
+    birth_year: payload.birthDate?.trim() ? payload.birthDate : null,
     breed_code: payload.breedCode,
     is_neutered: payload.isNeutered,
     gender: payload.gender,

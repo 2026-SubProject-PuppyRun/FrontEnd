@@ -56,16 +56,15 @@ const Basics = () => {
   const birthDate = useOnboardingStore((s) => s.birthDate);
   const setField = useOnboardingStore((s) => s.setField);
 
-  const birthLabel =
-    birthDate === null
-      ? ""
-      : birthDate
-        ? new Date(birthDate).toLocaleDateString("ko-KR", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-          })
-        : "날짜를 선택하세요";
+  const birthLabel = birthDate?.trim()
+    ? new Date(birthDate).toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+    : "날짜를 선택하세요";
+
+  const isBirthUnknown = !birthDate?.trim();
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -124,10 +123,6 @@ const Basics = () => {
 
     if (!name.trim() || !gender) {
       return;
-    }
-
-    if (birthDate === "") {
-      setField("birthDate", null);
     }
 
     router.push("/(onboarding)/profile");
@@ -232,19 +227,16 @@ const Basics = () => {
               <Pressable
                 className="flex-1"
                 onPress={() => setDateModalOpen(true)}
-                disabled={birthDate === null}
+                disabled={isBirthUnknown}
               >
                 <View className="border-b border-outline-200 pb-2 pt-2">
                   <Text
                     style={{
-                      color:
-                        birthDate === null || !birthDate
-                          ? "#9CA3AF"
-                          : "#0D0F1B",
+                      color: isBirthUnknown ? "#9CA3AF" : "#0D0F1B",
                     }}
                     className="text-base"
                   >
-                    {birthDate === null ? "모름" : birthLabel}
+                    {isBirthUnknown ? "모름" : birthLabel}
                   </Text>
                 </View>
               </Pressable>
@@ -252,7 +244,7 @@ const Basics = () => {
               <DatePicker
                 modal
                 open={dateModalOpen}
-                date={birthDate ? new Date(birthDate) : new Date()}
+                date={birthDate?.trim() ? new Date(birthDate) : new Date()}
                 mode="date"
                 locale="ko"
                 title="생년월일 선택"
@@ -269,7 +261,7 @@ const Basics = () => {
               <Checkbox
                 size="md"
                 value="unknown"
-                isChecked={birthDate === null}
+                isChecked={isBirthUnknown}
                 onChange={(isChecked) => {
                   setField("birthDate", isChecked ? null : "");
                 }}

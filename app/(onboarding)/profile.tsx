@@ -24,9 +24,9 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { BREED_DATA } from "@/constants/breedData";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
-import { getBreedDefaultColor } from "@/util/pet";
+import { getBreedDefaultColor, getBreedName } from "@/util/pet";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { runOnJS } from "react-native-reanimated";
 import ColorPicker, {
@@ -49,6 +49,11 @@ const Profile = () => {
   const setField = useOnboardingStore((s) => s.setField);
 
   const updateColor = (hex: string) => setField("color", hex);
+
+  const breedLabel = useMemo(
+    () => (breedCode ? getBreedName(breedCode) : ""),
+    [breedCode],
+  );
 
   useEffect(() => {
     if (!breedCode) return;
@@ -103,6 +108,7 @@ const Profile = () => {
                   placeholder="종을 선택하세요"
                   placeholderTextColor="#9CA3AF"
                   style={INPUT_TEXT_COLOR}
+                  value={breedLabel}
                 />
                 <SelectIcon className="mr-3" as={ChevronDownIcon} />
               </SelectTrigger>
