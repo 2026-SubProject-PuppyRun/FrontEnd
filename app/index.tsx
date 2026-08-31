@@ -1,21 +1,27 @@
-import { restoreAuthSession } from "@/util/auth/restoreSession";
-import { Redirect } from "expo-router";
+import { resolveAppRoute, type AppRoute } from "@/util/auth/resolveAuthRoute";
+import { Redirect, type Href } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, LogBox, View } from "react-native";
 
 LogBox.ignoreLogs(["Open debugger"]);
 
-type AuthRoute = "loading" | "home" | "auth";
+type RouteState = "loading" | AppRoute;
+
+const ROUTE_HREF = {
+  home: "/(tabs)/home",
+  auth: "/(auth)/auth",
+  onboarding: "/(onboarding)/welcome",
+} as const satisfies Record<Exclude<RouteState, "loading">, Href>;
 
 const Index = () => {
-  const [route, setRoute] = useState<AuthRoute>("loading");
+  const [route, setRoute] = useState<RouteState>("loading");
 
   useEffect(() => {
     let cancelled = false;
 
-    restoreAuthSession().then((isLoggedIn) => {
+    resolveAppRoute().then((nextRoute) => {
       if (cancelled) return;
-      setRoute(isLoggedIn ? "home" : "auth");
+      setRoute(nextRoute);
     });
 
     return () => {
@@ -31,9 +37,7 @@ const Index = () => {
     );
   }
 
-  return (
-    <Redirect href={route === "home" ? "/(tabs)/home" : "/(auth)/auth"} />
-  );
+  return <Redirect href={ROUTE_HREF[route]} />;
 };
 
 export default Index;

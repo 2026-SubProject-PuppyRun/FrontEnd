@@ -1,16 +1,19 @@
 import OnboardingScreen from "@/components/onboarding/OnboardingScreen";
 import AllergyForm from "@/components/form/AllergyForm";
 import VaccineForm from "@/components/form/VaccineForm";
+import { AlertCircleIcon, CheckCircleIcon } from "@/components/ui/icon";
 import { useCustomToast } from "@/hooks/use-custom-toast";
-import { useAllergyStore } from "@/store/useAllergyStore";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
 import { usePetStore } from "@/store/usePetStore";
-import { useVaccineStore } from "@/store/useVaccineStore";
 import { AllergyFormValues } from "@/types/allergy";
 import { VaccineFormValues } from "@/types/vaccine";
+import { ApiError } from "@/util/api";
+import { queryKeys } from "@/util/api/core/queryKeys";
 import { getSeverityLabel } from "@/util/allergy";
-import { CheckCircleIcon } from "@/components/ui/icon";
+import { setOnboardingComplete } from "@/util/onboarding/onboardingFlag";
+import { submitOnboardingPet } from "@/util/onboarding/submitOnboardingPet";
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -23,9 +26,11 @@ import {
 
 const Health = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { showToast } = useCustomToast();
   const [allergyModalOpen, setAllergyModalOpen] = useState(false);
   const [vaccineModalOpen, setVaccineModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const name = useOnboardingStore((s) => s.name);
   const profileImage = useOnboardingStore((s) => s.profileImage);
@@ -44,9 +49,6 @@ const Health = () => {
   const reset = useOnboardingStore((s) => s.reset);
 
   const setPetList = usePetStore((s) => s.setPetList);
-  const petList = usePetStore((s) => s.petList);
-  const addAllergyRecord = useAllergyStore((s) => s.addRecord);
-  const addVaccineRecord = useVaccineStore((s) => s.addRecord);
 
   const handleAddAllergy = (values: AllergyFormValues) => {
     addAllergy({
@@ -66,50 +68,57 @@ const Health = () => {
     setVaccineModalOpen(false);
   };
 
-  const finishOnboarding = () => {
-    const petId = `onboarding-${Date.now().toString(36)}`;
-    const weightNum = Number(weight);
+  const finishOnboarding = async () => {
+    if (isSubmitting) return;
 
-    const nextPet = {
-      petId,
-      name: name.trim(),
-      profileImageUrl: profileImage || null,
-      gender,
-      birthYear: birthDate,
-      breedCode,
-      color,
-      isNeutered,
-      weight: weightNum,
-      badgeCode: "",
-    };
-
-    setPetList([...(petList ?? []), nextPet]);
-
-    allergies.forEach((item) => {
-      addAllergyRecord({
-        petId,
-        allergen: item.allergen,
-        severity: item.severity,
-        isActive: true,
+    if (!gender) {
+      showToast({
+        message: "기본 정보가 누락되었습니다. 이전 단계를 확인해주세요.",
+        icon: AlertCircleIcon,
       });
-    });
+      return;
+    }
 
-    vaccines.forEach((item) => {
-      addVaccineRecord({
-        petId,
-        name: item.name,
-        vaccinatedAt: item.vaccinatedAt,
-        nextVaccinationAt: item.nextVaccinationAt,
-        memo: item.memo,
+    setIsSubmitting(true);
+    try {
+      const { list } = await submitOnboardingPet({
+        name,
+        profileImage,
+        gender,
+        birthDate,
+        breedCode,
+        color,
+        isNeutered,
+        weight,
+        allergies,
+        vaccines,
       });
-    });
 
-    reset();
-    showToast({
-      message: `${name.trim()} 등록이 완료됐어요!`,
-      icon: CheckCircleIcon,
-    });
-    router.replace("/(tabs)/home");
+      setPetList(list.items, list.totalCount);
+      queryClient.setQueryData(queryKeys.pets.list(), list);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.pets.list() });
+
+      reset();
+      await setOnboardingComplete();
+      showToast({
+        message: `${name.trim()} 등록이 완료됐어요!`,
+        icon: CheckCircleIcon,
+      });
+      router.replace("/(tabs)/home");
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message || "반려견 등록에 실패했어요."
+          : error instanceof Error
+            ? error.message
+            : "반려견 등록에 실패했어요. 잠시 후 다시 시도해 주세요.";
+      showToast({
+        message,
+        icon: AlertCircleIcon,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -119,6 +128,7 @@ const Health = () => {
         title={"건강 정보도\n남길까요?"}
         subtitle="알러지와 접종 기록은 나중에 추가해도 괜찮아요"
         ctaLabel="완료하기"
+        ctaLoading={isSubmitting}
         onCtaPress={finishOnboarding}
         secondaryLabel="나중에 입력하기"
         onSecondaryPress={finishOnboarding}

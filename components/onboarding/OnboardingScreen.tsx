@@ -20,6 +20,7 @@ type OnboardingScreenProps = {
   children: ReactNode;
   ctaLabel: string;
   onCtaPress: () => void;
+  ctaLoading?: boolean;
   secondaryLabel?: string;
   onSecondaryPress?: () => void;
   showBack?: boolean;
@@ -32,6 +33,7 @@ const OnboardingScreen = ({
   children,
   ctaLabel,
   onCtaPress,
+  ctaLoading = false,
   secondaryLabel,
   onSecondaryPress,
   showBack = true,
@@ -89,6 +91,7 @@ const OnboardingScreen = ({
           {secondaryLabel && onSecondaryPress ? (
             <Pressable
               onPress={onSecondaryPress}
+              disabled={ctaLoading}
               className="mb-3 items-center py-2 active:opacity-70"
             >
               <Text className="text-sm font-medium text-gray-400">
@@ -106,11 +109,14 @@ const OnboardingScreen = ({
           >
             <Pressable
               onPress={onCtaPress}
+              disabled={ctaLoading}
               className="h-full w-full items-center justify-center"
-              style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
+              style={({ pressed }) =>
+                pressed && !ctaLoading ? { opacity: 0.85 } : undefined
+              }
             >
               <Text className="text-base font-semibold text-white">
-                {ctaLabel}
+                {ctaLoading ? "등록 중..." : ctaLabel}
               </Text>
             </Pressable>
           </RedButtonSurface>
