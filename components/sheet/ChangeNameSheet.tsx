@@ -1,7 +1,7 @@
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useUserStore } from "@/store/useUserStore";
 import { ApiError, useChangeNicknameMutation } from "@/util/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Actionsheet,
   ActionsheetBackdrop,
@@ -34,13 +34,15 @@ const ChangeNameSheet = ({
 }: ChangeNameSheetProps) => {
   const toast = useCustomToast();
   const userName = useUserStore((state) => state.nickName) ?? "";
-  const [newNickname, setNewNickname] = useState(userName);
+  const nicknameRef = useRef(userName);
+  const [inputKey, setInputKey] = useState(0);
   const changeNicknameMutation = useChangeNicknameMutation();
   const isSubmitting = changeNicknameMutation.isPending;
 
   useEffect(() => {
     if (showActionsheet) {
-      setNewNickname(userName);
+      nicknameRef.current = userName;
+      setInputKey((key) => key + 1);
     }
   }, [showActionsheet, userName]);
 
@@ -108,24 +110,29 @@ const ChangeNameSheet = ({
         snapPoints={[36]}
       >
         <ActionsheetBackdrop />
-        <ActionsheetContent className="">
+        <ActionsheetContent className="bg-background-light">
           <ActionsheetDragIndicatorWrapper>
             <ActionsheetDragIndicator />
           </ActionsheetDragIndicatorWrapper>
           <VStack className="w-full flex-1 gap-2 pt-5">
             <FormControl className="mt-9 gap-2">
               <FormControlLabel>
-                <FormControlLabelText>새 닉네임 입력</FormControlLabelText>
+                <FormControlLabelText className="text-gray-900">
+                  새 닉네임 입력
+                </FormControlLabelText>
               </FormControlLabel>
               <Input className="w-full rounded-2xl">
                 <InputSlot>
                   <InputIcon as={AddIcon} className="ml-2 " />
                 </InputSlot>
                 <InputField
+                  className="text-gray-900"
+                  key={inputKey}
                   placeholder="새 닉네임 입력"
-                  value={newNickname}
-                  onChangeText={setNewNickname}
-                  maxLength={NICKNAME_MAX}
+                  defaultValue={userName}
+                  onChangeText={(text) => {
+                    nicknameRef.current = text;
+                  }}
                   editable={!isSubmitting}
                 />
               </Input>
@@ -134,7 +141,7 @@ const ChangeNameSheet = ({
               2~20자, 기존과 다른 닉네임으로 변경할 수 있어요.
             </Text>
             <Button
-              onPress={() => handleNicknameChange(newNickname)}
+              onPress={() => handleNicknameChange(nicknameRef.current)}
               disabled={isSubmitting}
               className="mb-2 mt-auto w-full rounded-2xl bg-primary-500"
             >
