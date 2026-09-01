@@ -68,7 +68,7 @@ const fetchWithNetworkRetry = async (
 /**
  * 모든 API 요청의 진입점.
  * - base URL: EXPO_PUBLIC_BASE_URL
- * - Authorization: setAccessToken() 또는 EXPO_PUBLIC_TEM_ADMIN_KEY (임시)
+ * - Authorization: 저장된 access token (Bearer)
  * - JSON 직렬화 또는 multipart FormData
  * - 4xx/5xx → ApiError throw
  */

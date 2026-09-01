@@ -113,7 +113,6 @@ const guessImageMeta = (uri: string) => {
 /**
  * 반려견 등록
  * POST /pets
- * - birth_year가 없으면(모름) 필드 자체를 보내지 않음
  */
 export const createPet = (payload: CreatePetRequest) => {
   const body: Record<string, unknown> = {
@@ -123,11 +122,8 @@ export const createPet = (payload: CreatePetRequest) => {
     gender: payload.gender,
     color: payload.color,
     weight: payload.weight,
+    birth_year: payload.birth_year ?? null,
   };
-
-  if (payload.birth_year) {
-    body.birth_year = payload.birth_year;
-  }
 
   return apiPost<CreatePetResponse>("/pets", body);
 };
@@ -165,13 +161,8 @@ export const updatePet = (petId: string, payload: UpdatePetRequest) => {
     is_neutered: payload.is_neutered,
     gender: payload.gender,
     color: payload.color,
+    birth_year: payload.birth_year?.trim() ? payload.birth_year : null,
   };
-
-  if (payload.birth_year) {
-    body.birth_year = payload.birth_year;
-  } else {
-    body.birth_year = null;
-  }
 
   return apiPut<UpdatePetResponse>(`/pets/${petId}`, body);
 };

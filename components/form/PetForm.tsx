@@ -2,7 +2,7 @@ import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { BREED_DATA } from "@/constants/breedData";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
-import { getBreedDefaultColor } from "@/util/pet";
+import { getBreedDefaultColor, getBreedName } from "@/util/pet";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -98,7 +98,7 @@ const PetForm = ({
 }: PetFormProps) => {
   const [name, setName] = useState(initialData?.name || "");
   const [birthYear, setBirthYear] = useState<string | null>(
-    initialData?.birthYear ?? "",
+    initialData?.birthYear || null,
   );
   const [weight, setWeight] = useState<string>(
     initialData?.weight?.toString() || "",
@@ -175,8 +175,7 @@ const PetForm = ({
       isNaN(weightNum) ||
       weightNum <= 0 ||
       !breedCode ||
-      !color ||
-      isNeutered === undefined
+      !color
     ) {
       return;
     }
@@ -192,7 +191,7 @@ const PetForm = ({
     void onSubmit({
       ...initialData,
       name: name.trim(),
-      birthYear: birthYear || null,
+      birthYear: birthYear?.trim() ? birthYear : null,
       weight: weightNum,
       color,
       breedCode,
@@ -203,15 +202,20 @@ const PetForm = ({
   };
 
   const birthLabel =
-    birthYear === null
-      ? ""
-      : birthYear
-        ? new Date(birthYear).toLocaleDateString("ko-KR", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-          })
-        : "날짜를 선택하세요";
+    birthYear?.trim()
+      ? new Date(birthYear).toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })
+      : "날짜를 선택하세요";
+
+  const isBirthUnknown = !birthYear?.trim();
+
+  const breedLabel = useMemo(
+    () => (breedCode ? getBreedName(breedCode) : ""),
+    [breedCode],
+  );
 
   useMemo(() => {
     if (breedCode) {
@@ -326,19 +330,16 @@ const PetForm = ({
               <Pressable
                 className="flex-1"
                 onPress={() => setDateModalOpen(true)}
-                disabled={birthYear === null}
+                disabled={isBirthUnknown}
               >
                 <View className="border-b border-outline-200 pb-2 pt-2">
                   <Text
                     style={{
-                      color:
-                        birthYear === null || !birthYear
-                          ? "#9CA3AF"
-                          : "#0D0F1B",
+                      color: isBirthUnknown ? "#9CA3AF" : "#0D0F1B",
                     }}
                     className="text-base"
                   >
-                    {birthYear === null ? "모름" : birthLabel}
+                    {isBirthUnknown ? "모름" : birthLabel}
                   </Text>
                 </View>
               </Pressable>
@@ -346,7 +347,7 @@ const PetForm = ({
               <DatePicker
                 modal
                 open={dateModalOpen}
-                date={birthYear ? new Date(birthYear) : new Date()}
+                date={birthYear?.trim() ? new Date(birthYear) : new Date()}
                 mode="date"
                 locale="ko"
                 title="생년월일 선택"
@@ -364,13 +365,9 @@ const PetForm = ({
               <Checkbox
                 size="md"
                 value="unknown"
-                isChecked={birthYear === null}
+                isChecked={isBirthUnknown}
                 onChange={(isChecked) => {
-                  if (isChecked) {
-                    setBirthYear(null);
-                  } else {
-                    setBirthYear("");
-                  }
+                  setBirthYear(isChecked ? null : "");
                 }}
               >
                 <CheckboxIndicator>
@@ -424,6 +421,7 @@ const PetForm = ({
                   placeholder="종을 선택하세요"
                   placeholderTextColor="#9CA3AF"
                   style={INPUT_TEXT_COLOR}
+                  value={breedLabel}
                 />
                 <SelectIcon className="mr-3" as={ChevronDownIcon} />
               </SelectTrigger>
@@ -483,7 +481,7 @@ const PetForm = ({
             </FormControlError>
           </FormControl>
 
-          <FormControl isInvalid={hasSubmitted && isNeutered === undefined}>
+          <FormControl>
             <HStack className="items-center justify-between">
               <FormControlLabelText className="text-sm font-semibold text-gray-500">
                 중성화 여부
@@ -496,12 +494,6 @@ const PetForm = ({
                 value={isNeutered}
               />
             </HStack>
-            <FormControlError>
-              <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText>
-                중성화 여부를 선택해주세요.
-              </FormControlErrorText>
-            </FormControlError>
           </FormControl>
         </FormSection>
 

@@ -34,22 +34,14 @@ const Edit = () => {
   ) as Pet | undefined;
 
   const handleSubmit = async (data: Partial<Pet>) => {
-    if (
-      !petId ||
-      !data.name ||
-      !data.gender ||
-      data.weight == null ||
-      !data.color
-    ) {
-      return;
-    }
+    if (!petId) return;
 
     try {
       await updatePet({
         petId,
         request: {
           name: data.name,
-          birth_year: data.birthYear ? data.birthYear : null,
+          birth_year: data.birthYear?.trim() ? data.birthYear : null,
           weight: data.weight,
           is_neutered: data.isNeutered ?? false,
           gender: data.gender,

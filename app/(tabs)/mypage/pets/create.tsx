@@ -13,15 +13,11 @@ const Create = () => {
   const { mutateAsync, isPending } = useCreatePetMutation();
 
   const handleSubmit = async (data: Partial<Pet>) => {
-    if (!data.name || !data.gender || !data.breedCode || data.weight == null) {
-      return;
-    }
-
     try {
       await mutateAsync({
         request: {
           name: data.name,
-          birth_year: data.birthYear ? data.birthYear : null,
+          birth_year: data.birthYear?.trim() ? data.birthYear : null,
           breed_code: data.breedCode,
           is_neutered: data.isNeutered ?? false,
           gender: data.gender,

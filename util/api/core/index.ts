@@ -4,7 +4,6 @@ export {
   getAccessToken,
   getRefreshToken,
   isAuthenticated,
-  isUsingTempAdminToken,
   setAccessToken,
   setTokens,
 } from "./authToken";

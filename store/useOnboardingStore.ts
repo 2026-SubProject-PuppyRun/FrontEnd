@@ -43,7 +43,7 @@ const INITIAL_DRAFT: OnboardingDraft = {
   name: "",
   profileImage: "",
   gender: undefined,
-  birthDate: "",
+  birthDate: null,
   breedCode: "",
   color: "#F2F2F2",
   isNeutered: false,
