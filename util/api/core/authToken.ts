@@ -1,14 +1,8 @@
 import { useAuthTokenStore } from "@/store/useAuthTokenStore";
 
-const getTempAdminToken = () =>
-  process.env.EXPO_PUBLIC_TEM_ADMIN_KEY?.trim() || null;
+export const getAccessToken = () => useAuthTokenStore.getState().accessToken;
 
-/** 저장된 access token 우선, 없으면 env 임시 토큰 */
-export const getAccessToken = () =>
-  useAuthTokenStore.getState().accessToken ?? getTempAdminToken();
-
-export const getRefreshToken = () =>
-  useAuthTokenStore.getState().refreshToken;
+export const getRefreshToken = () => useAuthTokenStore.getState().refreshToken;
 
 export const setTokens = (accessToken: string, refreshToken: string) => {
   useAuthTokenStore.getState().setTokens({
@@ -40,9 +34,5 @@ export const clearTokens = () => {
 /** @deprecated clearTokens 사용 */
 export const clearAccessToken = clearTokens;
 
-export const isAuthenticated = () => Boolean(useAuthTokenStore.getState().accessToken);
-
-/** env 임시 토큰으로 요청 중인지 (디버깅용) */
-export const isUsingTempAdminToken = () =>
-  useAuthTokenStore.getState().accessToken === null &&
-  getTempAdminToken() !== null;
+export const isAuthenticated = () =>
+  Boolean(useAuthTokenStore.getState().accessToken);
