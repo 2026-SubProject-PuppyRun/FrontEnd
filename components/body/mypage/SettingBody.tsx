@@ -13,6 +13,7 @@ import { CloseIcon } from "@/components/ui/icon";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { useCustomToast } from "@/hooks/use-custom-toast";
+import { ApiError, useDeleteAccountMutation } from "@/util/api";
 import { logout } from "@/util/auth/logout";
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,6 +29,8 @@ const SettingBody = () => {
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
   const [showWithdrawalAlert, setShowWithdrawalAlert] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { mutateAsync: withdrawAccount, isPending: isWithdrawing } =
+    useDeleteAccountMutation();
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -40,7 +43,7 @@ const SettingBody = () => {
       toast.showToast({
         message: "로그아웃 되었습니다.",
       });
-      router.replace("/(auth)/auth");
+      router.replace("/");
     } catch (error) {
       console.error("로그아웃 실패:", error);
       toast.showToast({
@@ -53,14 +56,22 @@ const SettingBody = () => {
   };
 
   const handleWithdrawal = async () => {
+    if (isWithdrawing) return;
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await withdrawAccount();
+      setShowWithdrawalAlert(false);
       toast.showToast({
         message: "회원 탈퇴 되었습니다.",
       });
+      router.replace("/");
     } catch (error) {
+      console.error("회원 탈퇴 실패:", error);
       toast.showToast({
-        message: "회원 탈퇴에 실패했습니다. 다시 시도해주세요.",
+        message:
+          error instanceof ApiError
+            ? error.message || "회원 탈퇴에 실패했습니다. 다시 시도해주세요."
+            : "회원 탈퇴에 실패했습니다. 다시 시도해주세요.",
         icon: CloseIcon,
       });
     }
@@ -173,6 +184,7 @@ const SettingBody = () => {
 
                 <Pressable
                   onPress={() => setShowWithdrawalAlert(true)}
+                  disabled={isWithdrawing}
                   className="flex-row items-center justify-between rounded-2xl bg-[#FFF0F0] px-4 py-3.5"
                   style={({ pressed }) =>
                     pressed ? { opacity: 0.85 } : undefined
@@ -203,7 +215,10 @@ const SettingBody = () => {
       />
       <WarningAlert
         showAlertDialog={showWithdrawalAlert}
-        handleClose={() => setShowWithdrawalAlert(false)}
+        handleClose={() => {
+          if (isWithdrawing) return;
+          setShowWithdrawalAlert(false);
+        }}
         title="회원 탈퇴"
         description="정말 회원 탈퇴 하시겠습니까?"
         confirmText="회원 탈퇴"

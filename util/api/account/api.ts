@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "../core/client";
+import { apiDelete, apiGet, apiPost } from "../core/client";
 
 export type AccountDto = {
   nick_name: string;
@@ -39,4 +39,12 @@ export const changeNickname = async (nickName: string): Promise<string> => {
     nick_name: trimmed,
   } satisfies ChangeNicknameRequest);
   return trimmed;
+};
+
+/**
+ * 회원 탈퇴
+ * DELETE /account
+ */
+export const deleteAccount = async (): Promise<void> => {
+  await apiDelete("/account");
 };
