@@ -10,6 +10,7 @@ import AnimatedSplashScreen from "@/components/splash/AnimatedSplashScreen";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import "@/global.css";
 import { openPermissionModal } from "@/store/usePermissionModalStore";
+import { useAuthTokenStore } from "@/store/useAuthTokenStore";
 import { useSyncAccountFromQuery } from "@/util/api/account";
 import { useSyncPetListFromQuery } from "@/util/api/pets";
 import { spoqaFontMap } from "@/util/fonts/spoqa";
@@ -30,10 +31,13 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-/** QueryClient 안에서 계정/펫 정보를 스토어에 동기화 */
+/** 로그인 상태일 때만 계정/펫 정보를 스토어에 동기화 */
 const AppDataBootstrap = () => {
-  useSyncAccountFromQuery(true);
-  useSyncPetListFromQuery(true);
+  const accessToken = useAuthTokenStore((state) => state.accessToken);
+  const isLoggedIn = Boolean(accessToken);
+
+  useSyncAccountFromQuery(isLoggedIn);
+  useSyncPetListFromQuery(isLoggedIn);
   return null;
 };
 
