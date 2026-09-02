@@ -2,7 +2,7 @@ import RedButtonSurface from "@/components/ui/RedButtonSurface";
 import { BREED_DATA } from "@/constants/breedData";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
-import { getBreedDefaultColor, getBreedName } from "@/util/pet";
+import { getBreedDefaultColor, getBreedName, toLocalYmd } from "@/util/pet";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -100,6 +100,9 @@ const PetForm = ({
   const [birthYear, setBirthYear] = useState<string | null>(
     initialData?.birthYear || null,
   );
+  const [isBirthUnknown, setIsBirthUnknown] = useState(
+    !initialData?.birthYear?.trim(),
+  );
   const [weight, setWeight] = useState<string>(
     initialData?.weight?.toString() || "",
   );
@@ -191,7 +194,7 @@ const PetForm = ({
     void onSubmit({
       ...initialData,
       name: name.trim(),
-      birthYear: birthYear?.trim() ? birthYear : null,
+      birthYear: isBirthUnknown || !birthYear?.trim() ? null : birthYear,
       weight: weightNum,
       color,
       breedCode,
@@ -209,8 +212,6 @@ const PetForm = ({
           day: "2-digit",
         })
       : "날짜를 선택하세요";
-
-  const isBirthUnknown = !birthYear?.trim();
 
   const breedLabel = useMemo(
     () => (breedCode ? getBreedName(breedCode) : ""),
@@ -329,13 +330,18 @@ const PetForm = ({
             <HStack className="items-center gap-3">
               <Pressable
                 className="flex-1"
-                onPress={() => setDateModalOpen(true)}
-                disabled={isBirthUnknown}
+                onPress={() => {
+                  setIsBirthUnknown(false);
+                  setDateModalOpen(true);
+                }}
               >
                 <View className="border-b border-outline-200 pb-2 pt-2">
                   <Text
                     style={{
-                      color: isBirthUnknown ? "#9CA3AF" : "#0D0F1B",
+                      color:
+                        isBirthUnknown || !birthYear?.trim()
+                          ? "#9CA3AF"
+                          : "#0D0F1B",
                     }}
                     className="text-base"
                   >
@@ -353,9 +359,11 @@ const PetForm = ({
                 title="생년월일 선택"
                 confirmText="확인"
                 cancelText="취소"
+                maximumDate={new Date()}
                 onConfirm={(date) => {
                   setDateModalOpen(false);
-                  setBirthYear(date.toISOString().split("T")[0]);
+                  setIsBirthUnknown(false);
+                  setBirthYear(toLocalYmd(date));
                 }}
                 onCancel={() => {
                   setDateModalOpen(false);
@@ -367,7 +375,12 @@ const PetForm = ({
                 value="unknown"
                 isChecked={isBirthUnknown}
                 onChange={(isChecked) => {
-                  setBirthYear(isChecked ? null : "");
+                  setIsBirthUnknown(isChecked);
+                  if (isChecked) {
+                    setBirthYear(null);
+                    return;
+                  }
+                  setDateModalOpen(true);
                 }}
               >
                 <CheckboxIndicator>

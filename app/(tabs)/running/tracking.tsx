@@ -10,10 +10,8 @@ import { useNavigation } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { BackHandler, View } from "react-native";
 import { Polyline } from "react-native-maps";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tracking = () => {
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const selectedRoute = useRunStore((state) => state.selectedRoute);
   const actualRoute = useRunStore((state) => state.actualRoute);

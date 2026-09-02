@@ -2,12 +2,13 @@ import CustomAlert from "@/components/modal/CustomAlert";
 import ConvexShadowSurface from "@/components/ui/ConvexShadowSurface";
 import { Text } from "@/components/ui/text";
 import { RED_BUTTON_EFFECT } from "@/constants/redButtonEffect";
+import { ensureBackgroundPermission } from "@/hooks/use-run-tracking";
 import { usePetStore } from "@/store/usePetStore";
 import { useRunStore } from "@/store/useRunStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 interface RunStartButtonProps {
@@ -21,10 +22,24 @@ const RunStartButton = ({ disabled }: RunStartButtonProps) => {
   const setSelectedPetIds = useRunStore((state) => state.setSelectedPetIds);
   const petList = usePetStore((state) => state.petList) ?? [];
   const router = useRouter();
+  const isCheckingPermission = useRef(false);
 
-  const openStartDialog = () => {
-    setPickedPetIds(petList.map((pet) => pet.petId));
-    setShowAlertDialog(true);
+  const requireAlwaysLocation = async () =>
+    ensureBackgroundPermission({ forcePrompt: true });
+
+  const openStartDialog = async () => {
+    if (isCheckingPermission.current) return;
+    isCheckingPermission.current = true;
+
+    try {
+      const granted = await requireAlwaysLocation();
+      if (!granted) return;
+
+      setPickedPetIds(petList.map((pet) => pet.petId));
+      setShowAlertDialog(true);
+    } finally {
+      isCheckingPermission.current = false;
+    }
   };
 
   const togglePet = (petId: string) => {
@@ -67,8 +82,13 @@ const RunStartButton = ({ disabled }: RunStartButtonProps) => {
         title="산책을 시작해볼까요?"
         confirmDisabled={!canStart}
         onConfirm={() => {
-          setSelectedPetIds(pickedPetIds);
-          router.replace("/running/tracking");
+          void (async () => {
+            const granted = await requireAlwaysLocation();
+            if (!granted) return;
+
+            setSelectedPetIds(pickedPetIds);
+            router.replace("/running/tracking");
+          })();
         }}
         confirmText="시작하기"
         cancelText="그만두기"
