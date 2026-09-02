@@ -22,6 +22,14 @@ const formatBirth = (birthYear: string | null): string => {
   return `${y}.${m}.${d}`;
 };
 
+/** 로컬 날짜를 YYYY-MM-DD로 저장 (toISOString은 UTC라 하루 밀릴 수 있음) */
+export const toLocalYmd = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
 const formatGender = (gender?: Pet["gender"]): string => {
   if (gender === "M") return "남아";
   if (gender === "F") return "여아";

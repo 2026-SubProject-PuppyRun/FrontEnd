@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/radio";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
+import { toLocalYmd } from "@/util/pet";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -55,6 +56,7 @@ const Basics = () => {
   const gender = useOnboardingStore((s) => s.gender);
   const birthDate = useOnboardingStore((s) => s.birthDate);
   const setField = useOnboardingStore((s) => s.setField);
+  const [isBirthUnknown, setIsBirthUnknown] = useState(!birthDate?.trim());
 
   const birthLabel = birthDate?.trim()
     ? new Date(birthDate).toLocaleDateString("ko-KR", {
@@ -63,8 +65,6 @@ const Basics = () => {
         day: "2-digit",
       })
     : "날짜를 선택하세요";
-
-  const isBirthUnknown = !birthDate?.trim();
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -226,13 +226,18 @@ const Basics = () => {
             <HStack className="items-center gap-3">
               <Pressable
                 className="flex-1"
-                onPress={() => setDateModalOpen(true)}
-                disabled={isBirthUnknown}
+                onPress={() => {
+                  setIsBirthUnknown(false);
+                  setDateModalOpen(true);
+                }}
               >
                 <View className="border-b border-outline-200 pb-2 pt-2">
                   <Text
                     style={{
-                      color: isBirthUnknown ? "#9CA3AF" : "#0D0F1B",
+                      color:
+                        isBirthUnknown || !birthDate?.trim()
+                          ? "#9CA3AF"
+                          : "#0D0F1B",
                     }}
                     className="text-base"
                   >
@@ -253,7 +258,8 @@ const Basics = () => {
                 maximumDate={new Date()}
                 onConfirm={(date) => {
                   setDateModalOpen(false);
-                  setField("birthDate", date.toISOString().split("T")[0]);
+                  setIsBirthUnknown(false);
+                  setField("birthDate", toLocalYmd(date));
                 }}
                 onCancel={() => setDateModalOpen(false)}
               />
@@ -263,7 +269,12 @@ const Basics = () => {
                 value="unknown"
                 isChecked={isBirthUnknown}
                 onChange={(isChecked) => {
-                  setField("birthDate", isChecked ? null : "");
+                  setIsBirthUnknown(isChecked);
+                  if (isChecked) {
+                    setField("birthDate", null);
+                    return;
+                  }
+                  setDateModalOpen(true);
                 }}
               >
                 <CheckboxIndicator>
