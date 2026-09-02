@@ -7,9 +7,10 @@ import {
   bridgeLocationOnTransition,
   getTaskStopDelayMs,
 } from "@/util/run/recordRunLocation";
+import { useFocusEffect } from "expo-router";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, AppState, Linking } from "react-native";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -22,35 +23,62 @@ const stopBackgroundTask = async () => {
   }
 };
 
+let didPromptBackgroundThisSession = false;
+
 const ensureForegroundPermission = async () => {
   const granted = await requestLocationPermission();
   return granted === true;
 };
 
-const ensureBackgroundPermission = async () => {
+const promptBackgroundSettings = () => {
+  openPermissionModal({
+    kind: "backgroundLocation",
+    onConfirm: () => Linking.openSettings(),
+    onCancel: () => {
+      didPromptBackgroundThisSession = false;
+    },
+  });
+};
+
+export const ensureBackgroundPermission = async (
+  options: { forcePrompt?: boolean } = {},
+) => {
   const background = await Location.getBackgroundPermissionsAsync();
-  if (background.status === "granted") return true;
+  if (background.status === "granted") {
+    didPromptBackgroundThisSession = false;
+    return true;
+  }
 
   // 포그라운드가 먼저 있어야 Android/iOS 모두 백그라운드 요청 가능
   const hasForeground = await ensureForegroundPermission();
   if (!hasForeground) return false;
 
+  if (!options.forcePrompt && didPromptBackgroundThisSession) return false;
+
+  didPromptBackgroundThisSession = true;
+
   if (!background.canAskAgain) {
-    openPermissionModal({
-      kind: "backgroundLocation",
-      onConfirm: () => Linking.openSettings(),
-    });
+    promptBackgroundSettings();
     return false;
   }
 
   const { status } = await Location.requestBackgroundPermissionsAsync();
-  if (status === "granted") return true;
+  if (status === "granted") {
+    didPromptBackgroundThisSession = false;
+    return true;
+  }
 
-  openPermissionModal({
-    kind: "backgroundLocation",
-    onConfirm: () => Linking.openSettings(),
-  });
+  promptBackgroundSettings();
   return false;
+};
+
+/** 러닝 탭 진입 시 백그라운드(항상 허용) 위치 권한을 요청합니다. */
+export const usePromptBackgroundLocationOnFocus = () => {
+  useFocusEffect(
+    useCallback(() => {
+      void ensureBackgroundPermission();
+    }, []),
+  );
 };
 
 export const useRunTracking = () => {
@@ -66,17 +94,6 @@ export const useRunTracking = () => {
     });
     return () => subscription.remove();
   }, []);
-
-  useEffect(() => {
-    if (!isRunning) return;
-
-    const preparePermissions = async () => {
-      await ensureForegroundPermission();
-      await ensureBackgroundPermission();
-    };
-
-    void preparePermissions();
-  }, [isRunning]);
 
   useEffect(() => {
     const syncBackgroundTask = async () => {

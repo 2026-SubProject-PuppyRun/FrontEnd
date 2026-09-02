@@ -1,6 +1,7 @@
 import RunStartButton from "@/components/button/RunStartButton";
 import GoogleMap from "@/components/map/GoogleMap";
 import RecRouteSwiper from "@/components/swiper/RecRouteSwiper";
+import { usePromptBackgroundLocationOnFocus } from "@/hooks/use-run-tracking";
 import { useRunStore } from "@/store/useRunStore";
 import React, { useState } from "react";
 import { View } from "react-native";
@@ -9,6 +10,8 @@ import { Polyline } from "react-native-maps";
 const Index = () => {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
+
+  usePromptBackgroundLocationOnFocus();
 
   return (
     <View className="flex-1 bg-transparent ">

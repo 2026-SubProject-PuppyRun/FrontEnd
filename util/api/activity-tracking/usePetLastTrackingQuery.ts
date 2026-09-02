@@ -10,7 +10,7 @@ import {
 
 export const PET_LAST_TRACKING_RANGE_DAYS = 89;
 
-export type WalkSummaryStats = {
+type WalkSummaryStats = {
   time: string;
   distance: string;
   pace: string;

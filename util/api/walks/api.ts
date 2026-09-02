@@ -2,7 +2,7 @@ import type { Pet } from "@/store/usePetStore";
 import { apiGet, apiPost } from "../core/client";
 
 /** 홈 '최근 산책 요약' 카드용 */
-export type WalkSummaryStats = {
+type WalkSummaryStats = {
   time: string;
   distance: string;
   pace: string;
