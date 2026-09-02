@@ -6,15 +6,21 @@ import { useCompassHeading } from "@/hooks/use-compass-heading";
 import { useLocationPermission } from "@/hooks/use-location-permission";
 import { useRunStore } from "@/store/useRunStore";
 import { getCurrentPositionWithRetry } from "@/util/location";
+import { applyHeadingDeadzone, smoothHeading } from "@/util/map/headingFilter";
 import {
-  applyHeadingDeadzone,
-  smoothHeading,
-} from "@/util/map/headingFilter";
-import { getSmoothedDisplayCoords, seedDisplayCoords } from "@/util/run/gpsFilter";
+  getSmoothedDisplayCoords,
+  seedDisplayCoords,
+} from "@/util/run/gpsFilter";
 import { recordRunLocation } from "@/util/run/recordRunLocation";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Spinner } from "../ui/spinner";
@@ -45,9 +51,7 @@ const GPS_HEADING_MIN_SPEED_MPS = 1.4;
 const GPS_HEADING_SMOOTH_ALPHA = 0.4;
 const GPS_HEADING_DEADZONE_DEG = 3;
 
-const getRouteCenter = (
-  route: { latitude: number; longitude: number }[],
-) => {
+const getRouteCenter = (route: { latitude: number; longitude: number }[]) => {
   const mid = route[Math.floor(route.length / 2)] ?? route[0];
   return {
     latitude: mid.latitude,
@@ -90,10 +94,11 @@ const GoogleMap = ({
   const [useGpsHeading, setUseGpsHeading] = useState(false);
   const gpsHeadingFilteredRef = useRef<number | null>(null);
 
-  const heading = useGpsHeading && gpsHeading != null ? gpsHeading : compassHeading;
+  const heading =
+    useGpsHeading && gpsHeading != null ? gpsHeading : compassHeading;
 
   const summaryRoute = useMemo(
-    () => (isSummary ? finalRoute ?? [] : []),
+    () => (isSummary ? (finalRoute ?? []) : []),
     [isSummary, finalRoute],
   );
 
@@ -358,6 +363,12 @@ const GoogleMap = ({
         rotateEnabled={!isSummary}
         showsMyLocationButton={false}
         pointerEvents={isSummary ? "none" : "auto"}
+        mapPadding={{
+          top: 0,
+          right: 0,
+          bottom: 120,
+          left: 16,
+        }}
       >
         {children}
         {!isSummary && (
