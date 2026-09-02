@@ -1,8 +1,11 @@
 import HomeDashBoard from "@/components/board/HomeDashBoard/HomeDashBoard";
 import Header from "@/components/header/Header";
+import { useNotificationConsentPrompt } from "@/hooks/use-notification-consent-prompt";
 import { Text, View } from "react-native";
 
 const Index = () => {
+  useNotificationConsentPrompt();
+
   return (
     <View className="flex-1 bg-[#F7F7F7]">
       <Header showLogo disableBack />

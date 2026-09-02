@@ -3,7 +3,7 @@ import {
   usePermissionModalStore,
 } from "@/store/usePermissionModalStore";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { Platform, Pressable, View } from "react-native";
 
 import {
@@ -44,13 +44,13 @@ const COPY: Record<PermissionKind, PermissionCopy> = {
   },
   notification: {
     icon: "notifications",
-    title: "알림 권한이 필요해요",
+    title: "푸시 알림을 받아볼까요?",
     description:
       "산책 리마인드와 중요한 소식을 제때 받으려면 알림 허용이 필요해요.",
     benefits: ["산책·일정 알림", "놓치기 쉬운 업데이트 안내"],
-    hint: "설정에서 알림을 허용하면 바로 받아볼 수 있어요.",
-    confirmText: "설정으로 이동",
-    cancelText: "나중에",
+    hint: "나중에 마이페이지에서 언제든 바꿀 수 있어요.",
+    confirmText: "허용",
+    cancelText: "허용 안 함",
   },
   backgroundLocation: {
     icon: "navigate",
@@ -76,6 +76,9 @@ const PermissionAlert = () => {
   const close = usePermissionModalStore((s) => s.close);
 
   const copy = useMemo(() => (kind ? COPY[kind] : null), [kind]);
+  const lastCopyRef = useRef(copy);
+  if (copy) lastCopyRef.current = copy;
+  const displayCopy = copy ?? lastCopyRef.current;
 
   const handleClose = () => {
     onCancel?.();
@@ -87,10 +90,10 @@ const PermissionAlert = () => {
     close();
   };
 
-  if (!copy) return null;
-
   return (
     <AlertDialog isOpen={visible} onClose={handleClose}>
+      {displayCopy ? (
+        <>
       <AlertDialogBackdrop className="bg-[#0D0F1B]/45" />
       <AlertDialogContent
         className="mx-6 w-full max-w-[380px] rounded-3xl border-0 px-5 pb-5 pt-5 shadow-sm"
@@ -110,20 +113,20 @@ const PermissionAlert = () => {
 
         <View className="mb-4 items-center">
           <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-[#FFF0F0]">
-            <Ionicons name={copy.icon} size={30} color="#F25857" />
+            <Ionicons name={displayCopy.icon} size={30} color="#F25857" />
           </View>
           <Text className="text-center text-xl font-bold text-[#0D0F1B]">
-            {copy.title}
+            {displayCopy.title}
           </Text>
         </View>
 
         <AlertDialogBody className="mb-5 px-0">
           <Text className="mb-4 text-center text-sm leading-5 text-gray-500">
-            {copy.description}
+            {displayCopy.description}
           </Text>
 
           <View className="mb-3 gap-2">
-            {copy.benefits.map((benefit) => (
+            {displayCopy.benefits.map((benefit) => (
               <View
                 key={benefit}
                 className="flex-row items-center gap-3 rounded-2xl bg-[#F7F7F7] px-3.5 py-3"
@@ -139,7 +142,7 @@ const PermissionAlert = () => {
           </View>
 
           <Text className="px-1 text-center text-xs leading-4 text-gray-400">
-            {copy.hint}
+            {displayCopy.hint}
           </Text>
         </AlertDialogBody>
 
@@ -150,7 +153,7 @@ const PermissionAlert = () => {
             style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
           >
             <Text className="text-sm font-semibold text-[#0D0F1B]">
-              {copy.cancelText}
+              {displayCopy.cancelText}
             </Text>
           </Pressable>
           <Pressable
@@ -159,11 +162,13 @@ const PermissionAlert = () => {
             style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
           >
             <Text className="text-sm font-semibold text-white">
-              {copy.confirmText}
+              {displayCopy.confirmText}
             </Text>
           </Pressable>
         </AlertDialogFooter>
       </AlertDialogContent>
+        </>
+      ) : null}
     </AlertDialog>
   );
 };

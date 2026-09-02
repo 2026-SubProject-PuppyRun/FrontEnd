@@ -3,6 +3,7 @@ import { ApiError } from "@/util/api/core/errors";
 import {
   registerFcmToken,
   registerNotificationConsent,
+  updatePushAgreement,
 } from "@/util/api/notifications";
 import { getApp } from "@react-native-firebase/app";
 import {
@@ -13,6 +14,11 @@ import {
   requestPermission,
   setBackgroundMessageHandler,
 } from "@react-native-firebase/messaging";
+import {
+  clearPendingPushConsent,
+  getPendingPushConsent,
+  setPendingPushConsent,
+} from "./notificationPromptFlag";
 
 let messagingInstance: ReturnType<typeof getMessaging> | null = null;
 let backgroundHandlerRegistered = false;
@@ -61,30 +67,51 @@ export const submitFcmTokenToBackend = async (token: string) => {
 };
 
 /**
- * 푸시 허용 시 최초 동의 등록
- * - 성공: /notifications/agree
- * - 이미 등록됨(409): /notifications/fcm-token 으로 토큰 교체
+ * 푸시 허용/거절을 서버에 반영합니다.
+ * 로그인 전이면 선택을 저장해 두고, 로그인 후 flush합니다.
  */
-export const registerPushConsentOnAllow = async () => {
-  if (!ensureAccessToken()) return;
+export const registerPushConsent = async (isPushAgreed: boolean) => {
+  if (!getAccessToken()) {
+    await setPendingPushConsent(isPushAgreed);
+    return;
+  }
 
   const token = await getFCMToken();
   if (!token?.trim()) {
-    console.warn("FCM 토큰이 없어 알림 동의 등록을 건너뜁니다.");
+    await setPendingPushConsent(isPushAgreed);
+    console.warn("FCM 토큰이 없어 알림 동의 등록을 보류합니다.");
     return;
   }
 
   try {
-    await registerNotificationConsent(true, token);
-    console.log("알림 동의 및 FCM 토큰 최초 등록 완료");
+    await registerNotificationConsent(isPushAgreed, token);
+    await clearPendingPushConsent();
+    console.log(
+      isPushAgreed
+        ? "알림 동의 및 FCM 토큰 최초 등록 완료"
+        : "알림 거절을 서버에 등록했습니다.",
+    );
   } catch (error) {
     if (error instanceof ApiError && error.status === 409) {
-      await registerFcmToken(token);
-      console.log("알림 설정이 이미 있어 FCM 토큰을 갱신했습니다.");
+      if (isPushAgreed) {
+        await registerFcmToken(token);
+      } else {
+        await updatePushAgreement(false);
+      }
+      await clearPendingPushConsent();
       return;
     }
+    await setPendingPushConsent(isPushAgreed);
     throw error;
   }
+};
+
+export const registerPushConsentOnAllow = () => registerPushConsent(true);
+
+export const flushPendingPushConsent = async () => {
+  const pending = await getPendingPushConsent();
+  if (pending == null) return;
+  await registerPushConsent(pending);
 };
 
 // FCM 토큰 가져오기

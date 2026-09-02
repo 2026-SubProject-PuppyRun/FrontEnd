@@ -1,5 +1,5 @@
-import { apiGet, apiPatch, apiPost } from "../core/client";
 import type { NotificationOptionCode } from "@/constants/notificationOptions";
+import { apiGet, apiPatch, apiPost } from "../core/client";
 
 export type RegisterNotificationConsentRequest = {
   is_push_agreed: boolean;
@@ -71,10 +71,12 @@ export const registerFcmToken = (fcmToken: string) =>
  * 알림 설정 조회
  * GET /notifications
  */
-export const getNotificationSettings = async (): Promise<NotificationSettings> => {
-  const response = await apiGet<NotificationSettingsDto>("/notifications");
-  return mapNotificationSettings(response);
-};
+export const getNotificationSettings =
+  async (): Promise<NotificationSettings> => {
+    const response = await apiGet<NotificationSettingsDto>("/notifications");
+    console.log("response", response);
+    return mapNotificationSettings(response);
+  };
 
 /**
  * 전체 푸시 수신 동의 변경
