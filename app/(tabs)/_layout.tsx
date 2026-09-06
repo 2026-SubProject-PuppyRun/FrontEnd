@@ -1,0 +1,44 @@
+import CustomTabBar, {
+  TAB_BAR_FAB_OVERHANG,
+  TAB_BAR_PILL_HEIGHT,
+} from "@/components/navigation/CustomTabBar";
+import { Tabs } from "expo-router";
+import React from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+  const tabBarHeight =
+    TAB_BAR_PILL_HEIGHT +
+    TAB_BAR_FAB_OVERHANG +
+    Math.max(insets.bottom, 10) +
+    8;
+
+  return (
+    <Tabs
+      backBehavior="history"
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
+        sceneStyle: { backgroundColor: "transparent" },
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: tabBarHeight,
+          backgroundColor: "transparent",
+          borderTopWidth: 0,
+          elevation: 0,
+        },
+      }}
+    >
+      <Tabs.Screen name="care" options={{ href: "/(tabs)/care/pets" }} />
+      <Tabs.Screen name="mypage" options={{ href: "/(tabs)/mypage" }} />
+      <Tabs.Screen name="home" options={{ href: "/(tabs)/home" }} />
+      <Tabs.Screen name="running" options={{ href: "/(tabs)/running" }} />
+      <Tabs.Screen name="guide" options={{ href: "/(tabs)/guide" }} />
+    </Tabs>
+  );
+}

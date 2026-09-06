@@ -1,0 +1,108 @@
+module.exports = {
+  expo: {
+    name: "퍼피런",
+    slug: "PuppyRun_FE",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/images/icon.png",
+    scheme: "puppyrunfe",
+    userInterfaceStyle: "automatic",
+    newArchEnabled: true,
+    android: {
+      adaptiveIcon: {
+        backgroundColor: "#E6F4FE",
+        foregroundImage: "./assets/images/android-icon-foreground.png",
+        backgroundImage: "./assets/images/android-icon-background.png",
+        monochromeImage: "./assets/images/android-icon-monochrome.png",
+      },
+      edgeToEdgeEnabled: true,
+      predictiveBackGestureEnabled: false,
+      package: "com.puppyrun",
+      config: {
+        googleMaps: {
+          apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+        },
+      },
+      googleServicesFile: "./google-services.json",
+    },
+    /*  web: {
+      output: "static",
+      favicon: "./assets/images/favicon.png",
+    },*/
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: "com.puppyrun",
+      config: {
+        googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+      },
+    },
+    plugins: [
+      "expo-router",
+      "@react-native-firebase/app",
+      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-seoul/kakao-login",
+        {
+          kakaoAppKey: process.env.EXPO_PUBLIC_KAKAO_APP_KEY,
+          overrideKakaoSDKVersion: "2.20.1",
+          kotlinVersion: "2.1.20",
+        },
+      ],
+      [
+        "./withNotificationIcon.js",
+        {
+          // 앱 아이콘과 동일 소스 → status bar / FCM 기본 아이콘
+          icon: "./assets/images/icon.png",
+        },
+      ],
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/images/splash-icon.png",
+          imageWidth: 400,
+          resizeMode: "contain",
+          backgroundColor: "#F25857",
+          dark: {
+            image: "./assets/images/splash-icon.png",
+            backgroundColor: "#F25857",
+          },
+        },
+      ],
+      [
+        "expo-location",
+        {
+          locationWhenInUsePermission:
+            "앱 사용 중 위치 접근을 허용하시겠습니까?",
+          locationAlwaysAndWhenInUsePermission:
+            "앱이 백그라운드에서도 위치를 사용할 수 있도록 허용하시겠습니까?",
+          isAndroidBackgroundLocationEnabled: true,
+          isAndroidForegroundServiceEnabled: true,
+        },
+      ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            useFirebaseAndroidCore: true,
+            extraMavenRepos: [
+              "https://devrepo.kakao.com/nexus/content/groups/public/",
+            ],
+          },
+        },
+      ],
+      "./withNotifeeBuildGradle.js",
+    ],
+    ignoreWarnings: [
+      "SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context",
+    ],
+    experiments: {
+      typedRoutes: true,
+      reactCompiler: true,
+    },
+    extra: {
+      eas: {
+        projectId: "348e8009-69db-4728-9bcd-70956396ead3",
+      },
+    },
+  },
+};
