@@ -15,6 +15,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="basics" />
       <Stack.Screen name="profile" />
       <Stack.Screen name="health" />
+      <Stack.Screen name="terms" />
     </Stack>
   );
 }

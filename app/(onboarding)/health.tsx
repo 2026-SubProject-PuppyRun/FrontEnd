@@ -1,19 +1,11 @@
 import OnboardingScreen from "@/components/onboarding/OnboardingScreen";
 import AllergyForm from "@/components/form/AllergyForm";
 import VaccineForm from "@/components/form/VaccineForm";
-import { AlertCircleIcon, CheckCircleIcon } from "@/components/ui/icon";
-import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
-import { usePetStore } from "@/store/usePetStore";
 import { AllergyFormValues } from "@/types/allergy";
 import { VaccineFormValues } from "@/types/vaccine";
-import { ApiError } from "@/util/api";
-import { queryKeys } from "@/util/api/core/queryKeys";
 import { getSeverityLabel } from "@/util/allergy";
-import { setOnboardingComplete } from "@/util/onboarding/onboardingFlag";
-import { submitOnboardingPet } from "@/util/onboarding/submitOnboardingPet";
 import { Ionicons } from "@expo/vector-icons";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -26,29 +18,15 @@ import {
 
 const Health = () => {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const { showToast } = useCustomToast();
   const [allergyModalOpen, setAllergyModalOpen] = useState(false);
   const [vaccineModalOpen, setVaccineModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const name = useOnboardingStore((s) => s.name);
-  const profileImage = useOnboardingStore((s) => s.profileImage);
-  const gender = useOnboardingStore((s) => s.gender);
-  const birthDate = useOnboardingStore((s) => s.birthDate);
-  const breedCode = useOnboardingStore((s) => s.breedCode);
-  const color = useOnboardingStore((s) => s.color);
-  const isNeutered = useOnboardingStore((s) => s.isNeutered);
-  const weight = useOnboardingStore((s) => s.weight);
   const allergies = useOnboardingStore((s) => s.allergies);
   const vaccines = useOnboardingStore((s) => s.vaccines);
   const addAllergy = useOnboardingStore((s) => s.addAllergy);
   const addVaccine = useOnboardingStore((s) => s.addVaccine);
   const removeAllergy = useOnboardingStore((s) => s.removeAllergy);
   const removeVaccine = useOnboardingStore((s) => s.removeVaccine);
-  const reset = useOnboardingStore((s) => s.reset);
-
-  const setPetList = usePetStore((s) => s.setPetList);
 
   const handleAddAllergy = (values: AllergyFormValues) => {
     addAllergy({
@@ -68,57 +46,8 @@ const Health = () => {
     setVaccineModalOpen(false);
   };
 
-  const finishOnboarding = async () => {
-    if (isSubmitting) return;
-
-    if (!gender) {
-      showToast({
-        message: "기본 정보가 누락되었습니다. 이전 단계를 확인해주세요.",
-        icon: AlertCircleIcon,
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const { list } = await submitOnboardingPet({
-        name,
-        profileImage,
-        gender,
-        birthDate,
-        breedCode,
-        color,
-        isNeutered,
-        weight,
-        allergies,
-        vaccines,
-      });
-
-      setPetList(list.items, list.totalCount);
-      queryClient.setQueryData(queryKeys.pets.list(), list);
-      await queryClient.invalidateQueries({ queryKey: queryKeys.pets.list() });
-
-      reset();
-      await setOnboardingComplete();
-      showToast({
-        message: `${name.trim()} 등록이 완료됐어요!`,
-        icon: CheckCircleIcon,
-      });
-      router.replace("/(tabs)/home");
-    } catch (error) {
-      const message =
-        error instanceof ApiError
-          ? error.message || "반려견 등록에 실패했어요."
-          : error instanceof Error
-            ? error.message
-            : "반려견 등록에 실패했어요. 잠시 후 다시 시도해 주세요.";
-      showToast({
-        message,
-        icon: AlertCircleIcon,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const goToTerms = () => {
+    router.push("/(onboarding)/terms");
   };
 
   return (
@@ -127,11 +56,10 @@ const Health = () => {
         step={3}
         title={"건강 정보도\n남길까요?"}
         subtitle="알러지와 접종 기록은 나중에 추가해도 괜찮아요"
-        ctaLabel="완료하기"
-        ctaLoading={isSubmitting}
-        onCtaPress={finishOnboarding}
+        ctaLabel="다음"
+        onCtaPress={goToTerms}
         secondaryLabel="나중에 입력하기"
-        onSecondaryPress={finishOnboarding}
+        onSecondaryPress={goToTerms}
       >
         <View className="mb-4 rounded-3xl bg-white px-5 py-4">
           <View className="mb-3 flex-row items-center justify-between">
@@ -152,29 +80,29 @@ const Health = () => {
           ) : (
             <View className="gap-2">
               {allergies.map((item) => (
-                  <View
-                    key={item.id}
-                    className="flex-row items-center gap-3 rounded-2xl bg-[#F7F7F7] px-3 py-3"
-                  >
-                    <View className="flex-1">
-                      <Text className="text-sm font-semibold text-[#0D0F1B]">
-                        {item.allergen}
+                <View
+                  key={item.id}
+                  className="flex-row items-center gap-3 rounded-2xl bg-[#F7F7F7] px-3 py-3"
+                >
+                  <View className="flex-1">
+                    <Text className="text-sm font-semibold text-[#0D0F1B]">
+                      {item.allergen}
+                    </Text>
+                    {item.severity ? (
+                      <Text className="mt-0.5 text-xs text-gray-500">
+                        {getSeverityLabel(item.severity)}
                       </Text>
-                      {item.severity ? (
-                        <Text className="mt-0.5 text-xs text-gray-500">
-                          {getSeverityLabel(item.severity)}
-                        </Text>
-                      ) : null}
-                    </View>
-                    <Pressable
-                      onPress={() => removeAllergy(item.id)}
-                      hitSlop={8}
-                      className="active:opacity-70"
-                    >
-                      <Ionicons name="close" size={18} color="#9CA3AF" />
-                    </Pressable>
+                    ) : null}
                   </View>
-                ))}
+                  <Pressable
+                    onPress={() => removeAllergy(item.id)}
+                    hitSlop={8}
+                    className="active:opacity-70"
+                  >
+                    <Ionicons name="close" size={18} color="#9CA3AF" />
+                  </Pressable>
+                </View>
+              ))}
             </View>
           )}
         </View>

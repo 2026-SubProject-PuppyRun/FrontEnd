@@ -11,6 +11,7 @@ const ROUTE_HREF = {
   home: "/(tabs)/home",
   auth: "/(auth)/auth",
   onboarding: "/(onboarding)/welcome",
+  terms: "/(onboarding)/terms",
 } as const satisfies Record<Exclude<RouteState, "loading">, Href>;
 
 const Index = () => {
