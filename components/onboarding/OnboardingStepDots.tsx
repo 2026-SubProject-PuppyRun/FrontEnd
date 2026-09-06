@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 type OnboardingStepDotsProps = {
   current: number;

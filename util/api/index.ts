@@ -10,6 +10,7 @@ export * from "./diaries";
 export * from "./medications";
 export * from "./notifications";
 export * from "./pets";
+export * from "./terms";
 export * from "./tracking";
 export * from "./vaccines";
 export * from "./walks";

@@ -40,7 +40,6 @@ export const resolveDogColor = (themeColor: string | null, index: number) => {
 export const mapWeeklyBarItems = (
   response: WeeklyStatisticsResponse,
 ): WeeklyBarItem[] => {
-  // console.log("response", response);
   const { period, activity_chart } = response;
   const start = dayjs(period.start_date);
   const distanceByDate = Object.fromEntries(

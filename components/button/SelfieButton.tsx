@@ -40,9 +40,7 @@ const SelfieButton = ({ size = 100 }: { size?: number }) => {
 
     try {
       setIsSaving(true);
-      console.log("[SelfieButton] submitWalkTracking 호출");
       await submitWalkTracking(selfieUri);
-      console.log("[SelfieButton] submitWalkTracking 완료");
       showToast({
         message: "산책 기록이 저장되었습니다!",
         icon: CheckCircleIcon,

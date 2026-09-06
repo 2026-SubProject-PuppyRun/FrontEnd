@@ -21,6 +21,7 @@ type OnboardingScreenProps = {
   ctaLabel: string;
   onCtaPress: () => void;
   ctaLoading?: boolean;
+  ctaDisabled?: boolean;
   secondaryLabel?: string;
   onSecondaryPress?: () => void;
   showBack?: boolean;
@@ -34,6 +35,7 @@ const OnboardingScreen = ({
   ctaLabel,
   onCtaPress,
   ctaLoading = false,
+  ctaDisabled = false,
   secondaryLabel,
   onSecondaryPress,
   showBack = true,
@@ -109,10 +111,14 @@ const OnboardingScreen = ({
           >
             <Pressable
               onPress={onCtaPress}
-              disabled={ctaLoading}
+              disabled={ctaLoading || ctaDisabled}
               className="h-full w-full items-center justify-center"
               style={({ pressed }) =>
-                pressed && !ctaLoading ? { opacity: 0.85 } : undefined
+                pressed && !ctaLoading && !ctaDisabled
+                  ? { opacity: 0.85 }
+                  : ctaDisabled
+                    ? { opacity: 0.45 }
+                    : undefined
               }
             >
               <Text className="text-base font-semibold text-white">

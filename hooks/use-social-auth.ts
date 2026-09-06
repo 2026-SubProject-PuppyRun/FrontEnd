@@ -47,7 +47,11 @@ export const useSocialAuth = () => {
         await signInWithOAuth(provider);
         const route = await resolvePostLoginRoute();
         router.replace(
-          route === "home" ? "/(tabs)/home" : "/(onboarding)/welcome",
+          route === "home"
+            ? "/(tabs)/home"
+            : route === "terms"
+              ? "/(onboarding)/terms"
+              : "/(onboarding)/welcome",
         );
       } catch (error) {
         console.error(`${PROVIDER_LABELS[provider]} 로그인 실패:`, error);
