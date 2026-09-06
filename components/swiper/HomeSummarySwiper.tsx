@@ -66,17 +66,8 @@ const EmptyWalkCard = ({ hasPets }: { hasPets: boolean }) => {
 const HomeSummarySwiper = () => {
   const petList = usePetStore((state) => state.petList);
   const hasPets = (petList?.length ?? 0) > 0;
-  const { data, isPending, isError, error, refetch } =
+  const { data, isPending, isError, refetch } =
     usePetLastTrackingQuery(hasPets);
-
-  React.useEffect(() => {
-    if (isError) {
-      console.log("[HomeSummarySwiper] petLastTracking error", error);
-    }
-    if (data) {
-      console.log("[HomeSummarySwiper] petLastTracking data", data);
-    }
-  }, [data, error, isError]);
 
   const summaries = React.useMemo(
     () => mapPetLastTrackingsToSummaries(data?.activities ?? [], petList),

@@ -110,20 +110,7 @@ export const usePetLastTrackingQuery = (enabled = true) => {
 
   return useQuery({
     queryKey: queryKeys.activityTracking.petLastTracking(startDate, endDate),
-    queryFn: async () => {
-      console.log("[petLastTracking] request", { startDate, endDate });
-      try {
-        const response = await getPetLastTrackings(startDate, endDate);
-        console.log(
-          "[petLastTracking] response",
-          JSON.stringify(response, null, 2),
-        );
-        return response;
-      } catch (error) {
-        console.log("[petLastTracking] error", error);
-        throw error;
-      }
-    },
+    queryFn: () => getPetLastTrackings(startDate, endDate),
     enabled,
     staleTime: 1000 * 60 * 2,
   });

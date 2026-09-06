@@ -74,7 +74,6 @@ export const registerFcmToken = (fcmToken: string) =>
 export const getNotificationSettings =
   async (): Promise<NotificationSettings> => {
     const response = await apiGet<NotificationSettingsDto>("/notifications");
-    console.log("response", response);
     return mapNotificationSettings(response);
   };
 

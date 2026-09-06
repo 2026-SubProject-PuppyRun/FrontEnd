@@ -78,8 +78,6 @@ export default function RootLayout() {
         unsubscribeForeground = onMessage(
           getFirebaseMessaging(),
           async (remoteMessage) => {
-            console.log("💌 [포그라운드] 수신됨:", remoteMessage);
-
             const channelId = await notifee.createChannel({
               id: "default",
               name: "Default Channel",

@@ -36,9 +36,7 @@ const registerBackgroundHandler = () => {
   try {
     setBackgroundMessageHandler(
       getFirebaseMessaging(),
-      async (remoteMessage) => {
-        console.log("💌 Message handled in the background!", remoteMessage);
-      },
+      async () => {},
     );
     backgroundHandlerRegistered = true;
   } catch (error) {
@@ -86,11 +84,6 @@ export const registerPushConsent = async (isPushAgreed: boolean) => {
   try {
     await registerNotificationConsent(isPushAgreed, token);
     await clearPendingPushConsent();
-    console.log(
-      isPushAgreed
-        ? "알림 동의 및 FCM 토큰 최초 등록 완료"
-        : "알림 거절을 서버에 등록했습니다.",
-    );
   } catch (error) {
     if (error instanceof ApiError && error.status === 409) {
       if (isPushAgreed) {
@@ -119,7 +112,6 @@ export const getFCMToken = async () => {
   try {
     registerBackgroundHandler();
     const token = await getToken(getFirebaseMessaging());
-    console.log("FCM Token:", token);
     return token;
   } catch (error) {
     console.error("FCM Token 가져오기 실패:", error);
@@ -134,9 +126,6 @@ export const requestUserPermission = async () => {
       authStatus === AuthorizationStatus.AUTHORIZED ||
       authStatus === AuthorizationStatus.PROVISIONAL;
 
-    if (enabled) {
-      console.log("푸시 알림 권한 승인됨");
-    }
     return enabled;
   } catch (error) {
     console.warn("FCM 권한 요청 실패:", error);
