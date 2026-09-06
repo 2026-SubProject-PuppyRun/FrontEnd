@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "223574755020-iimfmtieu8knnfrddmcfdm7fq0pbff69.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.puppyrun",
+            "certificate_hash": "6f6e605da42cac0700d331f5290161b5e9449ad0"
+          }
+        },
+        {
           "client_id": "223574755020-lbmruo76frmabvu6qqaqknerup69pgtb.apps.googleusercontent.com",
           "client_type": 3
         }
