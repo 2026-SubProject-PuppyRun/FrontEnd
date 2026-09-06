@@ -3,6 +3,7 @@ import { BREED_DATA } from "@/constants/breedData";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { Pet } from "@/store/usePetStore";
 import { getBreedDefaultColor, getBreedName, toLocalYmd } from "@/util/pet";
+import { compressProfileImage } from "@/util/image/compressProfileImage";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -139,11 +140,12 @@ const PetForm = ({
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-      setProfileImageUrl(result.assets[0].uri);
+      const compressedUri = await compressProfileImage(result.assets[0].uri);
+      setProfileImageUrl(compressedUri);
     }
   };
 
@@ -158,11 +160,12 @@ const PetForm = ({
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-      setProfileImageUrl(result.assets[0].uri);
+      const compressedUri = await compressProfileImage(result.assets[0].uri);
+      setProfileImageUrl(compressedUri);
     }
   };
 
@@ -218,14 +221,10 @@ const PetForm = ({
     [breedCode],
   );
 
-  useMemo(() => {
-    if (breedCode) {
-      const breed = BREED_DATA.find((b) => b.code === breedCode);
-      if (breed) {
-        setColor(getBreedDefaultColor(breedCode));
-      }
-    }
-  }, [breedCode]);
+  const handleBreedChange = (code: string) => {
+    setBreedCode(code);
+    setColor(getBreedDefaultColor(code));
+  };
 
   return (
     <>
@@ -420,11 +419,15 @@ const PetForm = ({
         </FormSection>
 
         <FormSection title="상세 정보">
-          <FormControl isInvalid={hasSubmitted && !breedCode}>
+          <FormControl isInvalid={hasSubmitted && !breedCode} isDisabled={Boolean(initialData)}>
             <FormControlLabelText className="mb-1 text-sm font-semibold text-gray-500">
               견종
             </FormControlLabelText>
-            <Select selectedValue={breedCode} onValueChange={setBreedCode}>
+            <Select
+              selectedValue={breedCode}
+              onValueChange={handleBreedChange}
+              isDisabled={Boolean(initialData)}
+            >
               <SelectTrigger
                 variant="underlined"
                 size="md"
@@ -436,27 +439,31 @@ const PetForm = ({
                   style={INPUT_TEXT_COLOR}
                   value={breedLabel}
                 />
-                <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                {!initialData ? (
+                  <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                ) : null}
               </SelectTrigger>
 
-              <SelectPortal>
-                <SelectBackdrop />
-                <SelectContent className="max-h-[60vh]">
-                  <SelectDragIndicatorWrapper>
-                    <SelectDragIndicator />
-                  </SelectDragIndicatorWrapper>
+              {!initialData ? (
+                <SelectPortal>
+                  <SelectBackdrop />
+                  <SelectContent className="max-h-[60vh]">
+                    <SelectDragIndicatorWrapper>
+                      <SelectDragIndicator />
+                    </SelectDragIndicatorWrapper>
 
-                  <ScrollView className="w-full">
-                    {BREED_DATA.map((breed) => (
-                      <SelectItem
-                        key={breed.code}
-                        label={breed.name}
-                        value={breed.code}
-                      />
-                    ))}
-                  </ScrollView>
-                </SelectContent>
-              </SelectPortal>
+                    <ScrollView className="w-full">
+                      {BREED_DATA.map((breed) => (
+                        <SelectItem
+                          key={breed.code}
+                          label={breed.name}
+                          value={breed.code}
+                        />
+                      ))}
+                    </ScrollView>
+                  </SelectContent>
+                </SelectPortal>
+              ) : null}
             </Select>
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />

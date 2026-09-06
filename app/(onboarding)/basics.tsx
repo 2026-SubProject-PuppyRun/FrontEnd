@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/radio";
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useOnboardingStore } from "@/store/useOnboardingStore";
+import { compressProfileImage } from "@/util/image/compressProfileImage";
 import { toLocalYmd } from "@/util/pet";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -80,11 +81,12 @@ const Basics = () => {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-      setField("profileImage", result.assets[0].uri);
+      const compressedUri = await compressProfileImage(result.assets[0].uri);
+      setField("profileImage", compressedUri);
     }
   };
 
@@ -102,11 +104,12 @@ const Basics = () => {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-      setField("profileImage", result.assets[0].uri);
+      const compressedUri = await compressProfileImage(result.assets[0].uri);
+      setField("profileImage", compressedUri);
     }
   };
 
