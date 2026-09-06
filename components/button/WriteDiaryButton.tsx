@@ -1,7 +1,10 @@
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useRunStore } from "@/store/useRunStore";
 import { ApiError } from "@/util/api";
-import { submitWalkDiary } from "@/util/run/submitWalkDiary";
+import {
+  buildDeferredDiaryDraft,
+  submitWalkDiary,
+} from "@/util/run/submitWalkDiary";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, Pressable } from "react-native";
@@ -19,7 +22,8 @@ const WriteDiaryButton = () => {
 
     try {
       setIsSubmitting(true);
-      await submitWalkDiary("", "");
+      const { title, content } = buildDeferredDiaryDraft();
+      await submitWalkDiary(title, content);
       useRunStore.getState().resetRunSession();
       router.replace("/");
     } catch (error) {
