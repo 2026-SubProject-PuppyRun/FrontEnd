@@ -39,12 +39,12 @@ const Edit = () => {
       await updatePet({
         petId,
         request: {
-          name: data.name,
+          name: data.name!,
           birth_year: data.birthYear?.trim() ? data.birthYear : null,
-          weight: data.weight,
+          weight: data.weight!,
           is_neutered: data.isNeutered ?? false,
-          gender: data.gender,
-          color: data.color,
+          gender: data.gender!,
+          color: data.color!,
         },
         profileImageUri: data.profileImageUrl,
       });
