@@ -88,6 +88,7 @@ const GoogleMap = ({
   const locationSubscription =
     React.useRef<Location.LocationSubscription | null>(null);
   const selectedRoute = useRunStore((state) => state.selectedRoute);
+  const isRunning = useRunStore((state) => state.isRunning);
   const finalRoute = useRunStore((state) => state.runData?.route);
   const compassHeading = useCompassHeading(permission === true && !isSummary);
   const [gpsHeading, setGpsHeading] = useState<number | null>(null);
@@ -122,35 +123,47 @@ const GoogleMap = ({
     });
   }, [isSummary, summaryRoute, edgePadding]);
 
+  const followUserOnMap = useCallback(
+    (latitude: number, longitude: number, duration = 280) => {
+      if (!mapRef.current) return;
+      mapRef.current.animateCamera(
+        {
+          center: { latitude, longitude },
+        },
+        { duration },
+      );
+    },
+    [],
+  );
+
   const handleMapReady = () => {
     isMapReady.current = true;
     fitSummaryRoute();
     onMapLoad();
   };
 
-  const moveToMyLocation = async () => {
-    try {
-      const location = await getCurrentPositionWithRetry({
-        initialDelayMs: 0,
-        maxAttempts: 2,
-      });
-      const next = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      };
-      seedDisplayCoords(next);
-      setCoordinates(next);
-      mapRef.current?.animateToRegion(
-        {
-          ...next,
-          latitudeDelta: DEFAULT_REGION.latitudeDelta,
-          longitudeDelta: DEFAULT_REGION.longitudeDelta,
-        },
-        500,
-      );
-    } catch (error) {
-      console.error("위치 이동 실패:", error);
-    }
+  const moveToMyLocation = () => {
+    // watch로 이미 갱신 중인 표시 좌표로 즉시 이동 (GPS 재조회는 체감 지연의 주원인)
+    seedDisplayCoords(coordinates);
+    followUserOnMap(coordinates.latitude, coordinates.longitude, 350);
+
+    // 최신 GPS는 백그라운드로 한 번 더 맞춰 줌
+    void (async () => {
+      try {
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        const next = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+        seedDisplayCoords(next);
+        setCoordinates(next);
+        followUserOnMap(next.latitude, next.longitude, 280);
+      } catch (error) {
+        console.error("위치 이동 실패:", error);
+      }
+    })();
   };
 
   // 요약 화면: GPS 없이 루트 기준으로 바로 표시
@@ -253,17 +266,8 @@ const GoogleMap = ({
 
           setCoordinates(display);
 
-          const running = useRunStore.getState().isRunning;
-          if (running && mapRef.current) {
-            mapRef.current.animateToRegion(
-              {
-                latitude: display.latitude,
-                longitude: display.longitude,
-                latitudeDelta: DEFAULT_REGION.latitudeDelta,
-                longitudeDelta: DEFAULT_REGION.longitudeDelta,
-              },
-              500,
-            );
+          if (useRunStore.getState().isRunning) {
+            followUserOnMap(display.latitude, display.longitude);
           }
         },
       );
@@ -275,11 +279,19 @@ const GoogleMap = ({
       locationSubscription.current?.remove();
       locationSubscription.current = null;
     };
-  }, [isSummary, permission]);
+  }, [isSummary, permission, followUserOnMap]);
 
-  // 추천 경로 선택 시 fit (요약 화면에서는 건너뜀)
+  // 산책 시작 시 현재 위치로 즉시 포커스 (이후 위치 watch가 계속 추종)
   useEffect(() => {
-    if (isSummary) return;
+    if (isSummary || !isRunning) return;
+    followUserOnMap(coordinates.latitude, coordinates.longitude, 400);
+    // 시작 순간에만 한 번 — coordinates 변경마다 재실행하지 않음
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSummary, isRunning, followUserOnMap]);
+
+  // 추천 경로 선택 시 fit (산책 중·요약 화면에서는 건너뜀)
+  useEffect(() => {
+    if (isSummary || isRunning) return;
 
     if (selectedRoute && selectedRoute.length > 0 && mapRef.current) {
       setTimeout(() => {
@@ -304,7 +316,7 @@ const GoogleMap = ({
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSummary, selectedRoute]);
+  }, [isSummary, isRunning, selectedRoute]);
 
   // 요약: 맵 준비 후 / 루트 변경 시 전체 경로로 고정
   useEffect(() => {

@@ -10,6 +10,10 @@ import { useCustomToast } from "@/hooks/use-custom-toast";
 import useNonNavbar from "@/hooks/use-non-navbar";
 import { useRunStore } from "@/store/useRunStore";
 import { ApiError } from "@/util/api";
+import {
+  buildDeferredDiaryDraft,
+  submitWalkDiary,
+} from "@/util/run/submitWalkDiary";
 import { getRunResultStats } from "@/util/run/getRunResultStats";
 import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -56,7 +60,6 @@ const Diary = () => {
       showToast({ message: "산책 일기가 저장되었습니다!" });
       router.replace("/");
     } catch (error) {
-      console.error("데이터 제출 실패:", error);
       isSubmitRef.current = false;
       const message =
         error instanceof ApiError
@@ -64,6 +67,31 @@ const Diary = () => {
           : error instanceof Error
             ? error.message
             : "일기 저장에 실패했습니다. 다시 시도해 주세요.";
+      showToast({ message });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleExitWithoutSaving = async () => {
+    if (isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      isSubmitRef.current = true;
+      setShowAlert(false);
+      const draft = buildDeferredDiaryDraft();
+      await submitWalkDiary(draft.title, draft.content);
+      useRunStore.getState().resetRunSession();
+      router.replace("/");
+    } catch (error) {
+      isSubmitRef.current = false;
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "일기 등록에 실패했습니다. 다시 시도해 주세요.";
       showToast({ message });
     } finally {
       setIsSubmitting(false);
@@ -171,11 +199,9 @@ const Diary = () => {
         showAlertDialog={showAlert}
         handleClose={() => setShowAlert(false)}
         title="일기 작성종료"
-        description="일기 작성을 정말 종료하시겠습니까? 작성 중인 내용은 저장되지 않습니다."
+        description="작성 중인 내용은 저장되지 않고, 임시 일기로 등록됩니다."
         onConfirm={() => {
-          isSubmitRef.current = true;
-          useRunStore.getState().resetRunSession();
-          router.replace("/");
+          void handleExitWithoutSaving();
         }}
         confirmText="종료"
         cancelText="취소"
