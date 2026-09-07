@@ -1,6 +1,7 @@
 import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useRunStore } from "@/store/useRunStore";
 import { ApiError } from "@/util/api";
+import { compressProfileImage } from "@/util/image/compressProfileImage";
 import { submitWalkTracking } from "@/util/run/submitWalkTracking";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -30,12 +31,12 @@ const SelfieButton = ({ size = 100 }: { size?: number }) => {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 5],
-      quality: 1,
+      quality: 0.8,
     });
 
     if (result.canceled) return;
 
-    const selfieUri = result.assets[0].uri;
+    const selfieUri = await compressProfileImage(result.assets[0].uri);
     useRunStore.getState().addRunData({ selfie: selfieUri });
 
     try {
