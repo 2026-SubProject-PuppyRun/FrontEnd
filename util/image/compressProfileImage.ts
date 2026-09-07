@@ -1,11 +1,11 @@
 import * as ImageManipulator from "expo-image-manipulator";
 
-const PROFILE_MAX_WIDTH = 1080;
-const PROFILE_COMPRESS = 0.7;
+const PROFILE_MAX_WIDTH = 720;
+const PROFILE_COMPRESS = 0.5;
 
 /**
- * 프로필 업로드용 이미지 리사이즈·압축 (JPEG).
- * 서버 "사진 사이즈가 큽니다" 반려를 줄이기 위함.
+ * 업로드용 이미지 리사이즈·압축 (JPEG).
+ * 프로필·셀피 등 서버 용량 제한 회피용.
  */
 export const compressProfileImage = async (uri: string): Promise<string> => {
   const result = await ImageManipulator.manipulateAsync(
