@@ -69,20 +69,35 @@ const RunLocationMarker = ({
           markerStyle,
         ]}
       >
+        {/*
+         * 회전축은 컨테이너 중심(20,20).
+         * 화살표를 흐름에 두면 원 중심이 축에서 3.5 밀려 heading이 바뀔 때마다
+         * 원이 축 주위를 궤도처럼 돌며 흔들린다. 화살표만 absolute로 띄워
+         * 원 중심 = 회전축이 되게 맞춘다.
+         */}
         <View
           style={{
-            width: 0,
-            height: 0,
-            borderLeftWidth: 4,
-            borderRightWidth: 4,
-            borderBottomWidth: 5,
-            borderLeftColor: "transparent",
-            borderRightColor: "transparent",
-            borderBottomColor: "#F25857",
-            marginBottom: 2,
-            borderRadius: 2,
+            position: "absolute",
+            top: 1,
+            left: 0,
+            right: 0,
+            alignItems: "center",
           }}
-        />
+        >
+          <View
+            style={{
+              width: 0,
+              height: 0,
+              borderLeftWidth: 4,
+              borderRightWidth: 4,
+              borderBottomWidth: 5,
+              borderLeftColor: "transparent",
+              borderRightColor: "transparent",
+              borderBottomColor: "#F25857",
+              borderRadius: 2,
+            }}
+          />
+        </View>
         <View
           style={{
             width: 24,

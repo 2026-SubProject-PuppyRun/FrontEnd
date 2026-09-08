@@ -1,49 +1,66 @@
 import { applyHeadingDeadzone, smoothHeading } from "@/util/map/headingFilter";
-import * as Location from "expo-location";
+import {
+  computeTiltCompensatedHeading,
+  type Vec3,
+} from "@/util/map/orientationHeading";
+import { Accelerometer, Magnetometer } from "expo-sensors";
 import { useEffect, useRef, useState } from "react";
 
-/** EMA — 융합 센서라 원시 자력계보다 낮게 잡아도 반응성이 유지됨 */
+const UPDATE_INTERVAL_MS = 100;
+
+/** 중력 추출용 저역통과 — 걸을 때 발걸음 가속을 걸러낸다 */
+const GRAVITY_ALPHA = 0.15;
+
+/** 자력계 저역통과 */
+const MAGNETIC_ALPHA = 0.25;
+
+/** heading EMA */
 const SMOOTH_ALPHA = 0.2;
 
 /** UI 반영 최소 각도 */
 const PUBLISH_DEADZONE_DEG = 4;
 
-/** 이 값 미만이면 나침반 미보정 (3=높음, 0=오차 50°↑) */
-const LOW_ACCURACY_THRESHOLD = 2;
+const lowPass = (previous: Vec3 | null, next: Vec3, alpha: number): Vec3 =>
+  previous
+    ? {
+        x: previous.x + alpha * (next.x - previous.x),
+        y: previous.y + alpha * (next.y - previous.y),
+        z: previous.z + alpha * (next.z - previous.z),
+      }
+    : next;
 
 /**
  * 지도 마커용 방위각.
  *
- * 자력계 원시값 대신 OS 융합 나침반을 사용한다.
- * - 기울기 보정: 손에 들고 걸을 때 pitch/roll로 각도가 튀지 않음
- * - trueHeading: 자편각까지 보정된 진북 기준 (위치 권한 필요, 없으면 -1)
+ * expo-location의 watchHeadingAsync는 SensorManager.getOrientation의 azimuth를
+ * remapCoordinateSystem 없이 그대로 쓴다. azimuth는 기기 +Y축의 수평 투영
+ * 방향이라, 화면을 보려고 폰을 세워 들면 +Y가 하늘을 향해 투영이 0에 수렴하고
+ * 손목을 10°만 기울여도 100° 이상 튄다(gimbal lock).
+ *
+ * 그래서 가속도계·자력계를 직접 받아 기울기에 따라 기준축을 바꿔 계산한다.
  */
 export const useCompassHeading = (enabled: boolean) => {
   const [heading, setHeading] = useState(0);
+  const gravityRef = useRef<Vec3 | null>(null);
+  const magneticRef = useRef<Vec3 | null>(null);
   const filteredRef = useRef(0);
   const publishedRef = useRef(0);
   const initializedRef = useRef(false);
-  const warnedRef = useRef(false);
 
   useEffect(() => {
     if (!enabled) return;
 
-    let subscription: Location.LocationSubscription | null = null;
-    let mounted = true;
+    gravityRef.current = null;
+    magneticRef.current = null;
     initializedRef.current = false;
-    warnedRef.current = false;
 
-    const handleSample = (sample: Location.LocationHeadingObject) => {
-      const raw =
-        sample.trueHeading >= 0 ? sample.trueHeading : sample.magHeading;
-      if (raw < 0) return;
+    const publish = () => {
+      const gravity = gravityRef.current;
+      const magnetic = magneticRef.current;
+      if (!gravity || !magnetic) return;
 
-      if (sample.accuracy < LOW_ACCURACY_THRESHOLD && !warnedRef.current) {
-        warnedRef.current = true;
-        console.warn(
-          `나침반 정확도 낮음 (accuracy=${sample.accuracy}) — 기기 보정 또는 자기 간섭 확인 필요`,
-        );
-      }
+      const raw = computeTiltCompensatedHeading(gravity, magnetic);
+      if (raw === null) return;
 
       if (!initializedRef.current) {
         initializedRef.current = true;
@@ -56,35 +73,37 @@ export const useCompassHeading = (enabled: boolean) => {
       const smoothed = smoothHeading(filteredRef.current, raw, SMOOTH_ALPHA);
       filteredRef.current = smoothed;
 
-      const publishCandidate = applyHeadingDeadzone(
+      const candidate = applyHeadingDeadzone(
         publishedRef.current,
         smoothed,
         PUBLISH_DEADZONE_DEG,
       );
-      if (publishCandidate === publishedRef.current) return;
+      if (candidate === publishedRef.current) return;
 
-      publishedRef.current = publishCandidate;
-      setHeading(publishCandidate);
+      publishedRef.current = candidate;
+      setHeading(candidate);
     };
 
-    const start = async () => {
-      try {
-        const next = await Location.watchHeadingAsync(handleSample);
-        if (!mounted) {
-          next.remove();
-          return;
-        }
-        subscription = next;
-      } catch (error) {
-        console.error("나침반 구독 실패:", error);
-      }
-    };
+    Accelerometer.setUpdateInterval(UPDATE_INTERVAL_MS);
+    Magnetometer.setUpdateInterval(UPDATE_INTERVAL_MS);
 
-    void start();
+    const accelerometer = Accelerometer.addListener((sample) => {
+      gravityRef.current = lowPass(gravityRef.current, sample, GRAVITY_ALPHA);
+    });
+
+    // 자력계 쪽에서만 발행 — 두 센서 모두에서 계산하면 불필요하게 두 배로 돈다
+    const magnetometer = Magnetometer.addListener((sample) => {
+      magneticRef.current = lowPass(
+        magneticRef.current,
+        sample,
+        MAGNETIC_ALPHA,
+      );
+      publish();
+    });
 
     return () => {
-      mounted = false;
-      subscription?.remove();
+      accelerometer.remove();
+      magnetometer.remove();
     };
   }, [enabled]);
 
