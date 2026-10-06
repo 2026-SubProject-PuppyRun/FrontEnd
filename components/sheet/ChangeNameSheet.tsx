@@ -2,6 +2,7 @@ import { useCustomToast } from "@/hooks/use-custom-toast";
 import { useUserStore } from "@/store/useUserStore";
 import { ApiError, useChangeNicknameMutation } from "@/util/api";
 import { useEffect, useRef, useState } from "react";
+import { Keyboard, Platform, View } from "react-native";
 import {
   Actionsheet,
   ActionsheetBackdrop,
@@ -36,6 +37,7 @@ const ChangeNameSheet = ({
   const userName = useUserStore((state) => state.nickName) ?? "";
   const nicknameRef = useRef(userName);
   const [inputKey, setInputKey] = useState(0);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const changeNicknameMutation = useChangeNicknameMutation();
   const isSubmitting = changeNicknameMutation.isPending;
 
@@ -43,8 +45,31 @@ const ChangeNameSheet = ({
     if (showActionsheet) {
       nicknameRef.current = userName;
       setInputKey((key) => key + 1);
+    } else {
+      setKeyboardHeight(0);
     }
   }, [showActionsheet, userName]);
+
+  useEffect(() => {
+    if (!showActionsheet) return;
+
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [showActionsheet]);
 
   const handleNicknameChange = async (nickname: string) => {
     if (isSubmitting) return;
@@ -107,15 +132,14 @@ const ChangeNameSheet = ({
           if (isSubmitting) return;
           setShowActionsheet(false);
         }}
-        snapPoints={[36]}
       >
         <ActionsheetBackdrop />
         <ActionsheetContent className="bg-background-light">
           <ActionsheetDragIndicatorWrapper>
             <ActionsheetDragIndicator />
           </ActionsheetDragIndicatorWrapper>
-          <VStack className="w-full flex-1 gap-2 pt-5">
-            <FormControl className="mt-9 gap-2">
+          <VStack className="w-full gap-2 pt-5">
+            <FormControl className="mt-4 gap-2">
               <FormControlLabel>
                 <FormControlLabelText className="text-gray-900">
                   새 닉네임 입력
@@ -143,12 +167,13 @@ const ChangeNameSheet = ({
             <Button
               onPress={() => handleNicknameChange(nicknameRef.current)}
               disabled={isSubmitting}
-              className="mb-2 mt-auto w-full rounded-2xl bg-primary-500"
+              className="mb-2 mt-4 w-full rounded-2xl bg-primary-500"
             >
               {isSubmitting ? <ButtonSpinner color="#FFFFFF" /> : null}
               <ButtonText>닉네임 변경</ButtonText>
             </Button>
           </VStack>
+          <View style={{ height: keyboardHeight }} />
         </ActionsheetContent>
       </Actionsheet>
     </>
