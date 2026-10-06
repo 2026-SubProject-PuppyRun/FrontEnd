@@ -17,29 +17,29 @@ GPS로 산책 경로·거리·페이스를 추적하고, 접종·알러지·투�
 - **가이드** — 견종 정보와 반려동물 관련 법·규정을 검색해 참고할 수 있습니다.
 - **온보딩** — 카카오 / Google 소셜 로그인 후 기본 정보·건강 정보·약관 동의로 바로 시작할 수 있습니다.
 
-| 탭 | 역할 |
-|----|------|
-| 홈 | 오늘의 산책 요약, 날씨, 산책 점수, 주간·월간 통계, 알람 |
-| 산책 | 지도·추천 경로·실시간 트래킹 → 요약 · 셀카 · 일기 |
-| 케어 | 반려견 프로필, 투약 · 체중 · 접종 · 알러지 |
-| 마이 | 프로필, 산책 피드, 펫 관리, 멍BTI, 설정 |
-| 가이드 | 견종 검색, 관련 법·규정 |
+| 탭     | 역할                                                    |
+| ------ | ------------------------------------------------------- |
+| 홈     | 오늘의 산책 요약, 날씨, 산책 점수, 주간·월간 통계, 알람 |
+| 산책   | 지도·추천 경로·실시간 트래킹 → 요약 · 셀카 · 일기       |
+| 케어   | 반려견 프로필, 투약 · 체중 · 접종 · 알러지              |
+| 마이   | 프로필, 산책 피드, 펫 관리, 멍BTI, 설정                 |
+| 가이드 | 견종 검색, 관련 법·규정                                 |
 
 ---
 
 ## 기술 스택
 
-| 구분 | 기술 |
-|------|------|
-| 프레임워크 | Expo ~54, React Native 0.81, Expo Router |
-| 언어 | TypeScript |
-| UI | Gluestack UI, NativeWind (Tailwind), Reanimated |
-| 상태 · 데이터 | Zustand, TanStack Query |
-| 지도 | react-native-maps (Google Maps) |
-| 위치 | expo-location, expo-task-manager (백그라운드 트래킹) |
-| 인증 | 카카오 로그인, Google Sign-In |
-| 푸시 · 알림 | Firebase Cloud Messaging, Notifee |
-| 빌드 · 배포 | EAS Build (development / preview / production) |
+| 구분          | 기술                                                 |
+| ------------- | ---------------------------------------------------- |
+| 프레임워크    | Expo ~54, React Native 0.81, Expo Router             |
+| 언어          | TypeScript                                           |
+| UI            | Gluestack UI, NativeWind (Tailwind), Reanimated      |
+| 상태 · 데이터 | Zustand, TanStack Query                              |
+| 지도          | react-native-maps (Google Maps)                      |
+| 위치          | expo-location, expo-task-manager (백그라운드 트래킹) |
+| 인증          | 카카오 로그인, Google Sign-In                        |
+| 푸시 · 알림   | Firebase Cloud Messaging, Notifee                    |
+| 빌드 · 배포   | EAS Build (development / preview / production)       |
 
 ---
 
