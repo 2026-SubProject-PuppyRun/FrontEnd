@@ -12,6 +12,20 @@ import Animated, {
 
 const HEADING_ANIMATION_MS = 140;
 
+/**
+ * 기존 디자인: 빨간 화살표 + 투명 갭 + (빨간 원 / 크림 / 발바닥)
+ * MapView 비트맵 제한 때문에 전체를 빨간 원으로 감싸지 않고,
+ * 투명 캔버스 위에 실루엣만 그려 맵이 비치게 한다.
+ */
+const MARKER_SIZE = 40;
+const CIRCLE_SIZE = 24;
+const ARROW_HEIGHT = 5;
+const ARROW_HALF_WIDTH = 4;
+const GAP = 2;
+
+const STACK_HEIGHT = ARROW_HEIGHT + GAP + CIRCLE_SIZE;
+const CIRCLE_CENTER_Y = ARROW_HEIGHT + GAP + CIRCLE_SIZE / 2;
+
 type RunLocationMarkerProps = {
   latitude: number;
   longitude: number;
@@ -48,6 +62,8 @@ const RunLocationMarker = ({
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
+  const stackTop = MARKER_SIZE / 2 - CIRCLE_CENTER_Y;
+
   return (
     <Marker
       coordinate={{ latitude, longitude }}
@@ -56,72 +72,71 @@ const RunLocationMarker = ({
       zIndex={999}
       flat
     >
-      <Animated.View
+      {/* 투명 캡처 영역 — 빨간 배경으로 채우지 않음 */}
+      <View
         collapsable={false}
-        style={[
-          {
-            width: 40,
-            height: 40,
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "visible",
-          },
-          markerStyle,
-        ]}
+        style={{
+          width: MARKER_SIZE,
+          height: MARKER_SIZE,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "transparent",
+        }}
       >
-        {/*
-         * 회전축은 컨테이너 중심(20,20).
-         * 화살표를 흐름에 두면 원 중심이 축에서 3.5 밀려 heading이 바뀔 때마다
-         * 원이 축 주위를 궤도처럼 돌며 흔들린다. 화살표만 absolute로 띄워
-         * 원 중심 = 회전축이 되게 맞춘다.
-         */}
-        <View
-          style={{
-            position: "absolute",
-            top: 1,
-            left: 0,
-            right: 0,
-            alignItems: "center",
-          }}
+        <Animated.View
+          collapsable={false}
+          style={[
+            {
+              position: "absolute",
+              top: stackTop,
+              width: CIRCLE_SIZE,
+              height: STACK_HEIGHT,
+              alignItems: "center",
+              transformOrigin: `${CIRCLE_SIZE / 2}px ${CIRCLE_CENTER_Y}px`,
+            },
+            markerStyle,
+          ]}
         >
+          {/* 진행 방향 화살표 (기존과 동일하게 빨강) */}
           <View
             style={{
               width: 0,
               height: 0,
-              borderLeftWidth: 4,
-              borderRightWidth: 4,
-              borderBottomWidth: 5,
+              borderLeftWidth: ARROW_HALF_WIDTH,
+              borderRightWidth: ARROW_HALF_WIDTH,
+              borderBottomWidth: ARROW_HEIGHT,
               borderLeftColor: "transparent",
               borderRightColor: "transparent",
               borderBottomColor: "#F25857",
-              borderRadius: 2,
             }}
           />
-        </View>
-        <View
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: 12,
-            backgroundColor: "#F25857",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+          {/* 투명 라인 — 맵이 비쳐 화살표·원이 분리돼 보임 */}
+          <View style={{ height: GAP, width: ARROW_HALF_WIDTH * 2 }} />
           <View
             style={{
-              width: 18,
-              height: 18,
-              borderRadius: 9,
-              backgroundColor: "#FDECEA",
+              width: CIRCLE_SIZE,
+              height: CIRCLE_SIZE,
+              borderRadius: CIRCLE_SIZE / 2,
+              backgroundColor: "#F25857",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Ionicons name="paw" size={12} color="#F25857" />
+            <View
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: 9,
+                backgroundColor: "#FDECEA",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="paw" size={12} color="#F25857" />
+            </View>
           </View>
-        </View>
-      </Animated.View>
+        </Animated.View>
+      </View>
     </Marker>
   );
 };

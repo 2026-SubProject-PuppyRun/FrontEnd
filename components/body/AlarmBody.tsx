@@ -74,7 +74,18 @@ const AlarmBody = () => {
         </Text>
 
         <Text className="mb-3 text-xs font-medium text-gray-500">요일</Text>
-        <View className="mb-5 flex-row justify-between">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          nestedScrollEnabled
+          className="mb-5"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingVertical: 2,
+          }}
+        >
           {daysOfWeek.map((day) => (
             <DayOfWeekChoiceButton
               key={day.value}
@@ -83,7 +94,7 @@ const AlarmBody = () => {
               handleSelectDayOfWeek={setDayOfWeek}
             />
           ))}
-        </View>
+        </ScrollView>
 
         <Text className="mb-2 text-xs font-medium text-gray-500">시간</Text>
         <View className="items-center rounded-2xl bg-[#F7F7F7] py-2">

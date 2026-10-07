@@ -1,3 +1,4 @@
+import { getChartLayout } from "@/components/board/ChartBoard/getChartLayout";
 import ChartSkeleton from "@/components/skeleton/ChartSkeleton";
 import { Text } from "@/components/ui/text";
 import { usePetStore } from "@/store/usePetStore";
@@ -7,7 +8,7 @@ import {
 } from "@/util/api/activity-tracking";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useMemo, useState } from "react";
-import { View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
 type CompareChartProps = {
@@ -15,6 +16,8 @@ type CompareChartProps = {
 };
 
 const CompareChart = ({ referenceDate }: CompareChartProps) => {
+  const { width: windowWidth } = useWindowDimensions();
+  const { isCompact, pieRadius, pieInnerRadius } = getChartLayout(windowWidth);
   const knownPetCount = usePetStore(
     (state) => state.totalPetCount ?? state.petList?.length,
   );
@@ -74,58 +77,76 @@ const CompareChart = ({ referenceDate }: CompareChartProps) => {
     ? `${dayjs(data.period.start_date).format("M/D")} ~ ${dayjs(data.period.end_date).format("M/D")}`
     : "";
 
+  const legend = (
+    <View
+      className={isCompact ? "mt-4 flex-row flex-wrap justify-center gap-x-4 gap-y-2" : "ml-4 gap-3"}
+    >
+      {chartData.map((item, index) => (
+        <View key={item.label} className="max-w-[120px] flex-row items-center">
+          <View
+            style={{ backgroundColor: item.color }}
+            className="mr-2.5 h-3.5 w-3.5 shrink-0 rounded-full"
+          />
+          <Text
+            className={`min-w-0 flex-1 text-sm ${
+              selectedIndex === index
+                ? "font-bold text-[#0D0F1B]"
+                : "text-gray-500"
+            }`}
+            numberOfLines={1}
+          >
+            {item.label}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+
   return (
     <>
       <Text className="mb-3 text-base font-semibold text-[#0D0F1B]">
         반려견별 산책 비율
       </Text>
       <View className="rounded-3xl bg-white p-5 shadow-sm">
-      {periodLabel ? (
-        <Text className="mb-3 text-xs text-gray-500">{periodLabel}</Text>
-      ) : null}
+        {periodLabel ? (
+          <Text className="mb-3 text-xs text-gray-500">{periodLabel}</Text>
+        ) : null}
 
-      <View className="flex-row items-center justify-center">
-        <PieChart
-          data={chartData}
-          donut
-          sectionAutoFocus
-          radius={88}
-          innerRadius={58}
-          innerCircleColor="#FFFFFF"
-          focusOnPress
-          toggleFocusOnPress={false}
-          onPress={(_item, index) => setSelectedIndex(index)}
-          selectedIndex={selectedIndex}
-          centerLabelComponent={() => (
-            <View className="items-center justify-center">
-              <Text className="text-xl font-bold text-[#0D0F1B]">
-                {Math.round(selectedItem.value)}%
-              </Text>
-              <Text className="text-sm text-gray-500">{selectedItem.label}</Text>
-            </View>
-          )}
-        />
-        <View className="ml-4 gap-3">
-          {chartData.map((item, index) => (
-            <View key={item.label} className="flex-row items-center">
-              <View
-                style={{ backgroundColor: item.color }}
-                className="mr-2.5 h-3.5 w-3.5 rounded-full"
-              />
-              <Text
-                className={`text-sm ${
-                  selectedIndex === index
-                    ? "font-bold text-[#0D0F1B]"
-                    : "text-gray-500"
-                }`}
-              >
-                {item.label}
-              </Text>
-            </View>
-          ))}
+        <View
+          className={
+            isCompact
+              ? "items-center"
+              : "flex-row items-center justify-center"
+          }
+        >
+          <PieChart
+            data={chartData}
+            donut
+            sectionAutoFocus
+            radius={pieRadius}
+            innerRadius={pieInnerRadius}
+            innerCircleColor="#FFFFFF"
+            focusOnPress
+            toggleFocusOnPress={false}
+            onPress={(_item, index) => setSelectedIndex(index)}
+            selectedIndex={selectedIndex}
+            centerLabelComponent={() => (
+              <View className="items-center justify-center px-1">
+                <Text className="text-xl font-bold text-[#0D0F1B]">
+                  {Math.round(selectedItem.value)}%
+                </Text>
+                <Text
+                  className="max-w-[96px] text-center text-sm text-gray-500"
+                  numberOfLines={1}
+                >
+                  {selectedItem.label}
+                </Text>
+              </View>
+            )}
+          />
+          {legend}
         </View>
       </View>
-    </View>
     </>
   );
 };

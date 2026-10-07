@@ -1,5 +1,6 @@
 import RunSummaryBoard, {
-  RUN_SUMMARY_CARD_HEIGHT,
+  getRunSummaryLayout,
+  RUN_SUMMARY_HORIZONTAL_INSET,
 } from "@/components/board/HomeDashBoard/RunSummaryBoard";
 import RunSummarySkeleton from "@/components/skeleton/RunSummarySkeleton";
 import RedButtonSurface from "@/components/ui/RedButtonSurface";
@@ -12,14 +13,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as React from "react";
-import { Dimensions, Pressable, View } from "react-native";
+import { Pressable, useWindowDimensions, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import Carousel, {
   ICarouselInstance,
   Pagination,
 } from "react-native-reanimated-carousel";
-
-const CARD_HEIGHT = RUN_SUMMARY_CARD_HEIGHT;
 
 const EmptyWalkCard = ({ hasPets }: { hasPets: boolean }) => {
   const router = useRouter();
@@ -76,8 +75,9 @@ const HomeSummarySwiper = () => {
 
   const progress = useSharedValue<number>(0);
   const ref = React.useRef<ICarouselInstance>(null);
-  const windowWidth = Dimensions.get("window").width;
-  const PAGE_WIDTH = windowWidth - 48;
+  const { width: windowWidth } = useWindowDimensions();
+  const PAGE_WIDTH = windowWidth - RUN_SUMMARY_HORIZONTAL_INSET;
+  const cardHeight = getRunSummaryLayout(windowWidth).cardHeight;
   const hasSummaries = summaries.length > 0;
 
   const onPressPagination = (index: number) => {
@@ -89,7 +89,7 @@ const HomeSummarySwiper = () => {
 
   if (hasPets && isPending) {
     return (
-      <View className="mb-4 px-6" style={{ height: CARD_HEIGHT }}>
+      <View className="mb-4 px-6" style={{ height: cardHeight }}>
         <RunSummarySkeleton />
       </View>
     );
@@ -100,7 +100,7 @@ const HomeSummarySwiper = () => {
       <View className="mb-4 px-6">
         <View
           className="items-center justify-center rounded-3xl bg-white px-5 py-8 shadow-sm"
-          style={{ minHeight: CARD_HEIGHT }}
+          style={{ minHeight: cardHeight }}
         >
           <Text
             className="text-center text-sm text-gray-500"
@@ -120,14 +120,14 @@ const HomeSummarySwiper = () => {
           <Carousel
             ref={ref}
             width={PAGE_WIDTH}
-            height={CARD_HEIGHT}
+            height={cardHeight}
             loop={summaries.length > 1}
             onProgressChange={(_offsetProgress, absoluteProgress) => {
               progress.value = absoluteProgress;
             }}
             data={summaries}
             renderItem={({ item }) => (
-              <View style={{ width: PAGE_WIDTH, height: CARD_HEIGHT }}>
+              <View style={{ width: PAGE_WIDTH, height: cardHeight }}>
                 <RunSummaryBoard
                   pet={item.pet}
                   time={item.stats.time}
@@ -158,7 +158,7 @@ const HomeSummarySwiper = () => {
           ) : null}
         </>
       ) : (
-        <View style={{ width: PAGE_WIDTH, height: CARD_HEIGHT }}>
+        <View style={{ width: PAGE_WIDTH, height: cardHeight }}>
           <EmptyWalkCard hasPets={hasPets} />
         </View>
       )}

@@ -15,8 +15,45 @@ export const ROUTE_SIDE_CARD_VISIBLE_RATIO = 2 / 3;
 
 export const ROUTE_CARD_GAP = 34;
 
+export type RouteCardLayout = {
+  cardSize: { width: number; height: number };
+  myRouteSize: { width: number; height: number };
+  shadowPad: number;
+  titleSize: number;
+  distanceSize: number;
+  slideHeight: number;
+  parallaxOffset: number;
+  cardGap: number;
+};
+
+/** 화면 너비에 맞춘 루트 카드/MY ROUTE 크기 */
+export const getRouteCardLayout = (screenWidth: number): RouteCardLayout => {
+  const isCompact = screenWidth < 375;
+  const cardWidth = isCompact
+    ? Math.min(168, Math.max(148, screenWidth - 140))
+    : ROUTE_CARD_SIZE.width;
+  const cardHeight = isCompact ? 96 : ROUTE_CARD_SIZE.height;
+  const shadowPad = isCompact ? 12 : ROUTE_CARD_SHADOW_PAD;
+  const cardGap = isCompact ? 24 : ROUTE_CARD_GAP;
+  const myRouteWidth = Math.min(288, Math.max(220, screenWidth - 48));
+
+  return {
+    cardSize: { width: cardWidth, height: cardHeight },
+    myRouteSize: {
+      width: myRouteWidth,
+      height: isCompact ? 64 : 73,
+    },
+    shadowPad,
+    titleSize: isCompact ? 26 : 32,
+    distanceSize: isCompact ? 18 : 22,
+    slideHeight: cardHeight + shadowPad * 2,
+    parallaxOffset: Math.round(screenWidth - cardWidth - cardGap + 30),
+    cardGap,
+  };
+};
+
 export const getRouteParallaxOffset = (screenWidth: number) =>
-  Math.round(screenWidth - ROUTE_CARD_SIZE.width - ROUTE_CARD_GAP + 30);
+  getRouteCardLayout(screenWidth).parallaxOffset;
 
 const blendOverMap = (
   fg: { r: number; g: number; b: number },

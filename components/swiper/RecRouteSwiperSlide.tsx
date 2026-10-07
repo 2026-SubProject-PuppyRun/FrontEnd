@@ -1,12 +1,11 @@
 import RecRouteSwiperItem from "@/components/swiper/RecRouteSwiperItem";
 import ConvexShadowSurface from "@/components/ui/ConvexShadowSurface";
 import {
+  getRouteCardLayout,
   RED_BUTTON_EFFECT,
-  ROUTE_CARD_SHADOW_PAD,
-  ROUTE_CARD_SIZE,
   ROUTE_SWIPER_INACTIVE,
 } from "@/constants/redButtonEffect";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   Extrapolation,
   interpolate,
@@ -26,6 +25,9 @@ const RecRouteSwiperSlide = ({
   routeNumber,
   distanceKm,
 }: RecRouteSwiperSlideProps) => {
+  const { width: windowWidth } = useWindowDimensions();
+  const layout = getRouteCardLayout(windowWidth);
+
   const fillStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(
       animationValue.value,
@@ -50,14 +52,16 @@ const RecRouteSwiperSlide = ({
   return (
     <View style={styles.slot}>
       <ConvexShadowSurface
-        shadowPadding={ROUTE_CARD_SHADOW_PAD}
-        style={ROUTE_CARD_SIZE}
+        shadowPadding={layout.shadowPad}
+        style={layout.cardSize}
         fillStyle={fillStyle}
         bevelStyle={bevelStyle}
       >
         <RecRouteSwiperItem
           routeNumber={routeNumber}
           distanceKm={distanceKm}
+          titleSize={layout.titleSize}
+          distanceSize={layout.distanceSize}
         />
       </ConvexShadowSurface>
     </View>

@@ -23,6 +23,7 @@ import React, {
 } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Spinner } from "../ui/spinner";
 
 interface Region {
@@ -45,6 +46,11 @@ const DEFAULT_SUMMARY_PADDING = {
   bottom: 48,
   left: 48,
 };
+
+/** 상단 통계 보드만 살짝 비움 (과한 패딩은 Google 로고를 밀어 올림) */
+const RUN_MAP_TOP_CHROME = 100;
+/** 하단 컨트롤 여유 — 기존 120 수준 유지 */
+const RUN_MAP_BOTTOM_CHROME = 120;
 
 /** GPS course를 신뢰할 최소 속도 (m/s) — 너무 낮으면 해딩이 늦게 바뀜 */
 const GPS_HEADING_MIN_SPEED_MPS = 1.4;
@@ -79,6 +85,7 @@ const GoogleMap = ({
   style,
   fitEdgePadding,
 }: GoogleMapProps) => {
+  const insets = useSafeAreaInsets();
   const permission = useLocationPermission();
   const mapRef = React.useRef<MapView>(null);
   const isMapReady = React.useRef(false);
@@ -97,6 +104,17 @@ const GoogleMap = ({
 
   const heading =
     useGpsHeading && gpsHeading != null ? gpsHeading : compassHeading;
+
+  const runMapPadding = useMemo(
+    () => ({
+      top: Math.round(insets.top + RUN_MAP_TOP_CHROME),
+      right: 16,
+      // bottom에 safe inset을 또 더하면 Google 로고가 과도하게 위로 올라감
+      bottom: RUN_MAP_BOTTOM_CHROME,
+      left: 16,
+    }),
+    [insets.top],
+  );
 
   const summaryRoute = useMemo(
     () => (isSummary ? (finalRoute ?? []) : []),
@@ -375,12 +393,11 @@ const GoogleMap = ({
         rotateEnabled={!isSummary}
         showsMyLocationButton={false}
         pointerEvents={isSummary ? "none" : "auto"}
-        mapPadding={{
-          top: 0,
-          right: 0,
-          bottom: 120,
-          left: 16,
-        }}
+        mapPadding={
+          isSummary
+            ? DEFAULT_SUMMARY_PADDING
+            : runMapPadding
+        }
       >
         {children}
         {!isSummary && (

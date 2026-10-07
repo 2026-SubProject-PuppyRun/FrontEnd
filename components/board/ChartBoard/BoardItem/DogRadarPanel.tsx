@@ -1,6 +1,7 @@
+import { getChartLayout } from "@/components/board/ChartBoard/getChartLayout";
 import type { WeeklyDogRadar } from "@/util/api/activity-tracking";
 import React, { useMemo } from "react";
-import { View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import { RadarChart } from "react-native-gifted-charts";
 
 const getRadarLabels = (points: WeeklyDogRadar["data_points"]) =>
@@ -32,6 +33,9 @@ type DogRadarPanelProps = {
 
 /** 기존 StarChart 레이더 디자인 (지난 주 + 이번 주 오버레이) */
 const DogRadarPanel = ({ dog }: DogRadarPanelProps) => {
+  const { width: windowWidth } = useWindowDimensions();
+  const { radarSize } = getChartLayout(windowWidth);
+
   const labels = useMemo(
     () => getRadarLabels(dog.data_points),
     [dog.data_points],
@@ -56,13 +60,13 @@ const DogRadarPanel = ({ dog }: DogRadarPanelProps) => {
   } as const;
 
   return (
-    <View className="relative items-center justify-center">
+    <View className="relative items-center justify-center overflow-hidden">
       <RadarChart
         {...axisConfig}
         data={lastWeekData}
         labels={labels}
         maxValue={100}
-        chartSize={280}
+        chartSize={radarSize}
         noOfSections={5}
         polygonConfig={{
           stroke: "#FFB3B2",
@@ -79,7 +83,7 @@ const DogRadarPanel = ({ dog }: DogRadarPanelProps) => {
           data={thisWeekData}
           labels={hasLastWeek ? labels.map(() => "") : labels}
           maxValue={100}
-          chartSize={280}
+          chartSize={radarSize}
           hideLabels={hasLastWeek}
           noOfSections={5}
           polygonConfig={{
