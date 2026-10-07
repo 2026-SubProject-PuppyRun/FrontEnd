@@ -1,3 +1,4 @@
+import { getChartLayout } from "@/components/board/ChartBoard/getChartLayout";
 import ChartDateNavigator from "@/components/navigator/ChartDateNavigator";
 import ChartSkeleton from "@/components/skeleton/ChartSkeleton";
 import {
@@ -6,11 +7,13 @@ import {
 } from "@/util/api/activity-tracking";
 import dayjs from "dayjs";
 import React, { useMemo, useRef, useState } from "react";
-import { View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 
 const MonthlyChart = () => {
   const ref = useRef(null);
+  const { width: windowWidth } = useWindowDimensions();
+  const { contentWidth, monthlySpacing } = getChartLayout(windowWidth);
   const [currentDate, setCurrentDate] = useState(dayjs());
   const year = currentDate.year();
 
@@ -42,6 +45,7 @@ const MonthlyChart = () => {
           key={year}
           scrollRef={ref}
           data={chartData}
+          width={contentWidth}
           color="#F25857"
           thickness={3}
           dataPointsColor="#F25857"
@@ -56,7 +60,8 @@ const MonthlyChart = () => {
           xAxisLabelsHeight={20}
           initialSpacing={12}
           endSpacing={12}
-          spacing={36}
+          spacing={monthlySpacing}
+          yAxisLabelWidth={36}
         />
       )}
     </View>

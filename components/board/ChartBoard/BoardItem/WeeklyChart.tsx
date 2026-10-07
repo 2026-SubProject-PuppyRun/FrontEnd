@@ -1,3 +1,4 @@
+import { getChartLayout } from "@/components/board/ChartBoard/getChartLayout";
 import ChartDateNavigator from "@/components/navigator/ChartDateNavigator";
 import ChartSkeleton from "@/components/skeleton/ChartSkeleton";
 import {
@@ -9,7 +10,7 @@ import {
 import { getWeekName } from "@/util/date";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useMemo, useState } from "react";
-import { View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 import WeeklyDaySummary from "./WeeklyDaySummary";
 
@@ -27,6 +28,8 @@ const WeeklyChart = ({
   onPrevWeek,
   onNextWeek,
 }: WeeklyChartProps) => {
+  const { width: windowWidth } = useWindowDimensions();
+  const { contentWidth, barWidth, barSpacing } = getChartLayout(windowWidth);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const weekEndKey = referenceDate.format("YYYY-MM-DD");
 
@@ -102,8 +105,12 @@ const WeeklyChart = ({
           key={chartKey}
           data={chartData}
           onPress={handleBarPress}
+          width={contentWidth}
           barBorderRadius={6}
-          barWidth={22}
+          barWidth={barWidth}
+          spacing={barSpacing}
+          initialSpacing={8}
+          endSpacing={8}
           frontColor={ACTIVE_BAR_COLOR}
           hideRules
           isAnimated={false}
@@ -112,6 +119,7 @@ const WeeklyChart = ({
           noOfSections={4}
           xAxisThickness={0}
           yAxisThickness={0}
+          yAxisLabelWidth={36}
         />
       )}
 

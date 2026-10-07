@@ -28,22 +28,29 @@ const ChartDateNavigator: React.FC<ChartDateNavigatorProps> = ({
     <View className="mb-4 flex-row items-center justify-between rounded-2xl bg-[#F7F7F7] px-3 py-2">
       <Pressable
         onPress={onPrev}
-        className="h-9 w-9 items-center justify-center rounded-full bg-white"
+        className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white"
         style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
       >
         <Ionicons name="chevron-back" size={20} color="#0D0F1B" />
       </Pressable>
 
-      <Text className="text-sm font-semibold text-[#0D0F1B]">{dateText}</Text>
+      <Text
+        className="mx-2 min-w-0 flex-1 text-center text-sm font-semibold text-[#0D0F1B]"
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.85}
+      >
+        {dateText}
+      </Text>
 
       {isCurrentPeriod ? (
-        <View className="h-9 w-9 items-center justify-center opacity-30">
+        <View className="h-9 w-9 shrink-0 items-center justify-center opacity-30">
           <Ionicons name="chevron-forward" size={20} color="#0D0F1B" />
         </View>
       ) : (
         <Pressable
           onPress={onNext}
-          className="h-9 w-9 items-center justify-center rounded-full bg-white"
+          className="h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white"
           style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
         >
           <Ionicons name="chevron-forward" size={20} color="#0D0F1B" />

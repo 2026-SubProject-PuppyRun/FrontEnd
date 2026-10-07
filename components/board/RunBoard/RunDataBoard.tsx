@@ -3,6 +3,7 @@ import { formatTime } from "@/util/run";
 import { getRouteDistanceMeters } from "@/util/run/getRouteDistance";
 import { updateRunPaceMetrics } from "@/util/run/recordRunLocation";
 import React, { useEffect, useState } from "react";
+import { useWindowDimensions } from "react-native";
 import { Box } from "../../ui/box";
 import { HStack } from "../../ui/hstack";
 import { Text } from "../../ui/text";
@@ -13,6 +14,8 @@ interface RunDataBoardProps {
 }
 
 const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
+  const { width: windowWidth } = useWindowDimensions();
+  const isCompact = windowWidth < 375;
   const currentPace = useRunStore((state) => state.runData?.pace ?? "0'00''");
   const actualRoute = useRunStore((state) => state.actualRoute);
   const startTime = useRunStore((state) => state.runData?.startTime);
@@ -50,31 +53,69 @@ const RunDataBoard = ({ isMapLoaded }: RunDataBoardProps) => {
   if (!isMapLoaded) return null;
 
   const totalDistance = getRouteDistanceMeters(actualRoute);
+  const valueSize = isCompact ? "2xl" : "4xl";
+  const labelSize = isCompact ? "sm" : "xl";
 
   return (
-    <View className="top-safe-offset-20 absolute z-10 w-full items-center">
-      <HStack space="4xl">
-        <Box className="items-center gap-2">
-          <Text size="4xl" bold className="font-bold italic text-primary-500">
+    <View className="top-safe-offset-20 absolute z-10 w-full items-center px-3">
+      <HStack space={isCompact ? "md" : "4xl"} className="w-full max-w-full">
+        <Box className="min-w-0 flex-1 items-center gap-1">
+          <Text
+            size={valueSize}
+            bold
+            className="font-bold italic text-primary-500"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
             {currentPace}
           </Text>
-          <Text size="xl" bold className="font-semibold text-primary-500">
-            Current Pace
+          <Text
+            size={labelSize}
+            bold
+            className="font-semibold text-primary-500"
+            numberOfLines={1}
+          >
+            Pace
           </Text>
         </Box>
-        <Box className="items-center gap-2">
-          <Text size="4xl" bold className="font-bold italic text-primary-500">
+        <Box className="min-w-0 flex-1 items-center gap-1">
+          <Text
+            size={valueSize}
+            bold
+            className="font-bold italic text-primary-500"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
             {(totalDistance / 1000).toFixed(2)}km
           </Text>
-          <Text size="xl" bold className="font-semibold text-primary-500">
+          <Text
+            size={labelSize}
+            bold
+            className="font-semibold text-primary-500"
+            numberOfLines={1}
+          >
             Distance
           </Text>
         </Box>
-        <Box className="items-center gap-2">
-          <Text size="4xl" bold className="font-bold italic text-primary-500">
+        <Box className="min-w-0 flex-1 items-center gap-1">
+          <Text
+            size={valueSize}
+            bold
+            className="font-bold italic text-primary-500"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
             {formatTime(elapsedTime)}
           </Text>
-          <Text size="xl" bold className="font-semibold text-primary-500">
+          <Text
+            size={labelSize}
+            bold
+            className="font-semibold text-primary-500"
+            numberOfLines={1}
+          >
             Time
           </Text>
         </Box>

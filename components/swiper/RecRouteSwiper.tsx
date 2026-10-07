@@ -3,15 +3,14 @@ import RecRouteSwiperSlide from "@/components/swiper/RecRouteSwiperSlide";
 import RouteGuidanceToggle from "@/components/swiper/RouteGuidanceToggle";
 import { RECOMMENDED_ROUTES_ENABLED } from "@/constants/featureFlags";
 import {
-  getRouteParallaxOffset,
-  ROUTE_SLIDE_SIZE,
+  getRouteCardLayout,
   ROUTE_SWIPER_INACTIVE,
 } from "@/constants/redButtonEffect";
 import { useRunStore } from "@/store/useRunStore";
 import { useRecommendedRoutesQuery } from "@/util/api/tracking";
 import * as React from "react";
 import { useEffect, useMemo, useRef } from "react";
-import { Dimensions, View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import Carousel, { ICarouselInstance } from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -22,8 +21,9 @@ interface RecRouteSwiperProps {
 const formatDistanceKm = (meters: number) => `${(meters / 1000).toFixed(2)}km`;
 
 function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
-  const screenWidth = Dimensions.get("window").width;
-  const parallaxOffset = getRouteParallaxOffset(screenWidth);
+  const { width: screenWidth } = useWindowDimensions();
+  const routeLayout = getRouteCardLayout(screenWidth);
+  const parallaxOffset = routeLayout.parallaxOffset;
   const ref = React.useRef<ICarouselInstance>(null);
   const lastRouteIndexRef = useRef(0);
   const setSelectedRoute = useRunStore((state) => state.setSelectedRoute);
@@ -110,7 +110,7 @@ function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
             ref={ref}
             loop
             width={screenWidth}
-            height={ROUTE_SLIDE_SIZE.height}
+            height={routeLayout.slideHeight}
             style={{ overflow: "visible" }}
             containerStyle={{ overflow: "visible" }}
             pagingEnabled
@@ -135,7 +135,7 @@ function RecRouteSwiper({ disabled }: RecRouteSwiperProps) {
                   className="items-center justify-center"
                   style={{
                     width: screenWidth,
-                    height: ROUTE_SLIDE_SIZE.height,
+                    height: routeLayout.slideHeight,
                     overflow: "visible",
                   }}
                 >
