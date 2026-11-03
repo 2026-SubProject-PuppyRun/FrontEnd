@@ -1,10 +1,12 @@
 import HomeDashBoard from "@/components/board/HomeDashBoard/HomeDashBoard";
 import Header from "@/components/header/Header";
+import { useDoubleBackToExit } from "@/hooks/use-double-back-to-exit";
 import { useNotificationConsentPrompt } from "@/hooks/use-notification-consent-prompt";
 import { Text, View } from "react-native";
 
 const Index = () => {
   useNotificationConsentPrompt();
+  useDoubleBackToExit();
 
   return (
     <View className="flex-1 bg-[#F7F7F7]">
