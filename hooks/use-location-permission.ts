@@ -16,12 +16,23 @@ const notify = (value: PermissionState) => {
   listeners.forEach((listener) => listener(value));
 };
 
+const promptForegroundDisclosure = () =>
+  new Promise<boolean>((resolve) => {
+    openPermissionModal({
+      kind: "location",
+      purpose: "disclose",
+      onConfirm: () => resolve(true),
+      onCancel: () => resolve(false),
+    });
+  });
+
 const openSettingsAlert = () => {
   if (hasPromptedSettings) return;
   hasPromptedSettings = true;
 
   openPermissionModal({
     kind: "location",
+    purpose: "settings",
     onConfirm: () => {
       Linking.openSettings();
     },
@@ -33,7 +44,7 @@ const openSettingsAlert = () => {
 
 /**
  * 위치 권한 동기화.
- * - requestIfNeeded: 시스템 다이얼로그 요청 여부
+ * - requestIfNeeded: 미허용 시 인앱 공개 → (동의 시) 시스템 다이얼로그
  * - 설정에서 허용 후 복귀 시 request 없이 get만으로 반영
  */
 export const syncLocationPermission = async (
@@ -50,6 +61,13 @@ export const syncLocationPermission = async (
         requestIfNeeded &&
         permission.canAskAgain
       ) {
+        const consented = await promptForegroundDisclosure();
+        if (!consented) {
+          notify(false);
+          return false;
+        }
+
+        // 인앱 동의 직후 시스템 런타임 권한 요청
         permission = await Location.requestForegroundPermissionsAsync();
       }
 
@@ -95,7 +113,7 @@ export const useLocationPermission = () => {
     listeners.add(listener);
     setGranted(sharedGranted);
 
-    // 최초 1회: 필요하면 시스템 권한 팝업
+    // 최초 1회: 필요하면 인앱 공개 후 시스템 권한 팝업
     void syncLocationPermission(sharedGranted !== true);
 
     const subscription = AppState.addEventListener("change", (nextState) => {
@@ -113,5 +131,4 @@ export const useLocationPermission = () => {
   return granted;
 };
 
-export const requestLocationPermission = () =>
-  syncLocationPermission(true);
+export const requestLocationPermission = () => syncLocationPermission(true);

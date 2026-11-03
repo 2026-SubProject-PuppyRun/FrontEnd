@@ -1,5 +1,6 @@
 import {
   PermissionKind,
+  PermissionPurpose,
   usePermissionModalStore,
 } from "@/store/usePermissionModalStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,7 +28,43 @@ type PermissionCopy = {
   cancelText: string;
 };
 
-const COPY: Record<PermissionKind, PermissionCopy> = {
+const DISCLOSE_COPY: Record<PermissionKind, PermissionCopy> = {
+  location: {
+    icon: "location",
+    title: "위치 권한이 필요해요",
+    description:
+      "산책 경로와 주변 날씨를 정확하게 보여주려면 위치 정보가 필요해요. 허용을 누르면 바로 시스템 권한 요청이 표시됩니다.",
+    benefits: ["실시간 산책 경로 기록", "우리 동네 날씨·산책 점수"],
+    hint: "위치 정보는 산책·날씨 기능에만 사용되며, 원하시면 나중에 설정에서 언제든 끌 수 있어요.",
+    confirmText: "허용",
+    cancelText: "나중에",
+  },
+  notification: {
+    icon: "notifications",
+    title: "푸시 알림을 받아볼까요?",
+    description:
+      "산책 리마인드와 중요한 소식을 제때 받으려면 알림 허용이 필요해요.",
+    benefits: ["산책·일정 알림", "놓치기 쉬운 업데이트 안내"],
+    hint: "나중에 마이페이지에서 언제든 바꿀 수 있어요.",
+    confirmText: "허용",
+    cancelText: "허용 안 함",
+  },
+  backgroundLocation: {
+    icon: "navigate",
+    title: "항상 위치 허용이 필요해요",
+    description:
+      "화면을 끄거나 다른 앱을 쓰는 동안에도 산책 경로를 이어 기록하려면 ‘항상 허용’이 필요해요. 허용을 누르면 바로 시스템 권한 요청이 표시됩니다.",
+    benefits: ["백그라운드 경로 이어쓰기", "끊김 없는 산책 기록"],
+    hint: "위치 정보는 산책 경로 기록에만 사용되며, 원하시면 나중에 설정에서 언제든 끌 수 있어요.",
+    confirmText: "허용",
+    cancelText: "나중에",
+  },
+};
+
+const SETTINGS_COPY: Record<
+  Exclude<PermissionKind, "notification">,
+  PermissionCopy
+> = {
   location: {
     icon: "location",
     title: "위치 권한이 필요해요",
@@ -41,16 +78,6 @@ const COPY: Record<PermissionKind, PermissionCopy> = {
     })!,
     confirmText: "설정으로 이동",
     cancelText: "나중에",
-  },
-  notification: {
-    icon: "notifications",
-    title: "푸시 알림을 받아볼까요?",
-    description:
-      "산책 리마인드와 중요한 소식을 제때 받으려면 알림 허용이 필요해요.",
-    benefits: ["산책·일정 알림", "놓치기 쉬운 업데이트 안내"],
-    hint: "나중에 마이페이지에서 언제든 바꿀 수 있어요.",
-    confirmText: "허용",
-    cancelText: "허용 안 함",
   },
   backgroundLocation: {
     icon: "navigate",
@@ -68,14 +95,26 @@ const COPY: Record<PermissionKind, PermissionCopy> = {
   },
 };
 
+const resolveCopy = (
+  kind: PermissionKind | null,
+  purpose: PermissionPurpose,
+): PermissionCopy | null => {
+  if (!kind) return null;
+  if (purpose === "settings" && kind !== "notification") {
+    return SETTINGS_COPY[kind];
+  }
+  return DISCLOSE_COPY[kind];
+};
+
 const PermissionAlert = () => {
   const visible = usePermissionModalStore((s) => s.visible);
   const kind = usePermissionModalStore((s) => s.kind);
+  const purpose = usePermissionModalStore((s) => s.purpose);
   const onConfirm = usePermissionModalStore((s) => s.onConfirm);
   const onCancel = usePermissionModalStore((s) => s.onCancel);
   const close = usePermissionModalStore((s) => s.close);
 
-  const copy = useMemo(() => (kind ? COPY[kind] : null), [kind]);
+  const copy = useMemo(() => resolveCopy(kind, purpose), [kind, purpose]);
   const lastCopyRef = useRef(copy);
   if (copy) lastCopyRef.current = copy;
   const displayCopy = copy ?? lastCopyRef.current;
@@ -94,79 +133,83 @@ const PermissionAlert = () => {
     <AlertDialog isOpen={visible} onClose={handleClose}>
       {displayCopy ? (
         <>
-      <AlertDialogBackdrop className="bg-[#0D0F1B]/45" />
-      <AlertDialogContent
-        className="mx-6 w-full max-w-[380px] rounded-3xl border-0 px-5 pb-5 pt-5 shadow-sm"
-        style={{ backgroundColor: "#FFFFFF" }}
-      >
-        <AlertDialogHeader className="mb-1 items-start justify-end">
-          <Pressable
-            onPress={handleClose}
-            className="h-8 w-8 items-center justify-center rounded-full bg-[#F7F7F7]"
-            style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
-            accessibilityRole="button"
-            accessibilityLabel="닫기"
+          <AlertDialogBackdrop className="bg-[#0D0F1B]/45" />
+          <AlertDialogContent
+            className="mx-6 w-full max-w-[380px] rounded-3xl border-0 px-5 pb-5 pt-5 shadow-sm"
+            style={{ backgroundColor: "#FFFFFF" }}
           >
-            <Icon as={CloseIcon} size="sm" className="text-gray-500" />
-          </Pressable>
-        </AlertDialogHeader>
-
-        <View className="mb-4 items-center">
-          <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-[#FFF0F0]">
-            <Ionicons name={displayCopy.icon} size={30} color="#F25857" />
-          </View>
-          <Text className="text-center text-xl font-bold text-[#0D0F1B]">
-            {displayCopy.title}
-          </Text>
-        </View>
-
-        <AlertDialogBody className="mb-5 px-0">
-          <Text className="mb-4 text-center text-sm leading-5 text-gray-500">
-            {displayCopy.description}
-          </Text>
-
-          <View className="mb-3 gap-2">
-            {displayCopy.benefits.map((benefit) => (
-              <View
-                key={benefit}
-                className="flex-row items-center gap-3 rounded-2xl bg-[#F7F7F7] px-3.5 py-3"
+            <AlertDialogHeader className="mb-1 items-start justify-end">
+              <Pressable
+                onPress={handleClose}
+                className="h-8 w-8 items-center justify-center rounded-full bg-[#F7F7F7]"
+                style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
+                accessibilityRole="button"
+                accessibilityLabel="닫기"
               >
-                <View className="h-7 w-7 items-center justify-center rounded-full bg-[#FFF0F0]">
-                  <Ionicons name="checkmark" size={14} color="#F25857" />
-                </View>
-                <Text className="flex-1 text-sm font-medium text-[#0D0F1B]">
-                  {benefit}
-                </Text>
+                <Icon as={CloseIcon} size="sm" className="text-gray-500" />
+              </Pressable>
+            </AlertDialogHeader>
+
+            <View className="mb-4 items-center">
+              <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-[#FFF0F0]">
+                <Ionicons name={displayCopy.icon} size={30} color="#F25857" />
               </View>
-            ))}
-          </View>
+              <Text className="text-center text-xl font-bold text-[#0D0F1B]">
+                {displayCopy.title}
+              </Text>
+            </View>
 
-          <Text className="px-1 text-center text-xs leading-4 text-gray-400">
-            {displayCopy.hint}
-          </Text>
-        </AlertDialogBody>
+            <AlertDialogBody className="mb-5 px-0">
+              <Text className="mb-4 text-center text-sm leading-5 text-gray-500">
+                {displayCopy.description}
+              </Text>
 
-        <AlertDialogFooter className="gap-2 px-0">
-          <Pressable
-            onPress={handleClose}
-            className="h-12 flex-1 items-center justify-center rounded-2xl border border-gray-200 bg-white"
-            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
-          >
-            <Text className="text-sm font-semibold text-[#0D0F1B]">
-              {displayCopy.cancelText}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={handleConfirm}
-            className="h-12 flex-1 items-center justify-center rounded-2xl bg-[#F25857]"
-            style={({ pressed }) => (pressed ? { opacity: 0.85 } : undefined)}
-          >
-            <Text className="text-sm font-semibold text-white">
-              {displayCopy.confirmText}
-            </Text>
-          </Pressable>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+              <View className="mb-3 gap-2">
+                {displayCopy.benefits.map((benefit) => (
+                  <View
+                    key={benefit}
+                    className="flex-row items-center gap-3 rounded-2xl bg-[#F7F7F7] px-3.5 py-3"
+                  >
+                    <View className="h-7 w-7 items-center justify-center rounded-full bg-[#FFF0F0]">
+                      <Ionicons name="checkmark" size={14} color="#F25857" />
+                    </View>
+                    <Text className="flex-1 text-sm font-medium text-[#0D0F1B]">
+                      {benefit}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <Text className="px-1 text-center text-xs leading-4 text-gray-400">
+                {displayCopy.hint}
+              </Text>
+            </AlertDialogBody>
+
+            <AlertDialogFooter className="gap-2 px-0">
+              <Pressable
+                onPress={handleClose}
+                className="h-12 flex-1 items-center justify-center rounded-2xl border border-gray-200 bg-white"
+                style={({ pressed }) =>
+                  pressed ? { opacity: 0.85 } : undefined
+                }
+              >
+                <Text className="text-sm font-semibold text-[#0D0F1B]">
+                  {displayCopy.cancelText}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handleConfirm}
+                className="h-12 flex-1 items-center justify-center rounded-2xl bg-[#F25857]"
+                style={({ pressed }) =>
+                  pressed ? { opacity: 0.85 } : undefined
+                }
+              >
+                <Text className="text-sm font-semibold text-white">
+                  {displayCopy.confirmText}
+                </Text>
+              </Pressable>
+            </AlertDialogFooter>
+          </AlertDialogContent>
         </>
       ) : null}
     </AlertDialog>

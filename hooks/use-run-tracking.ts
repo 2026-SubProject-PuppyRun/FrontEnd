@@ -1,8 +1,8 @@
 import { RUN_LOCATION_TRACKING } from "@/constants/locationTracking";
 import { requestLocationPermission } from "@/hooks/use-location-permission";
 import { openPermissionModal } from "@/store/usePermissionModalStore";
-import { LOCATION_TASK_NAME } from "@/tasks/backgroundLocationTask";
 import { useRunStore } from "@/store/useRunStore";
+import { LOCATION_TASK_NAME } from "@/tasks/backgroundLocationTask";
 import {
   bridgeLocationOnTransition,
   getTaskStopDelayMs,
@@ -30,9 +30,21 @@ const ensureForegroundPermission = async () => {
   return granted === true;
 };
 
+/** 시스템 백그라운드 권한 요청 직전 인앱 공개·동의 */
+const promptBackgroundDisclosure = () =>
+  new Promise<boolean>((resolve) => {
+    openPermissionModal({
+      kind: "backgroundLocation",
+      purpose: "disclose",
+      onConfirm: () => resolve(true),
+      onCancel: () => resolve(false),
+    });
+  });
+
 const promptBackgroundSettings = () => {
   openPermissionModal({
     kind: "backgroundLocation",
+    purpose: "settings",
     onConfirm: () => Linking.openSettings(),
     onCancel: () => {
       didPromptBackgroundThisSession = false;
@@ -62,6 +74,13 @@ export const ensureBackgroundPermission = async (
     return false;
   }
 
+  const consented = await promptBackgroundDisclosure();
+  if (!consented) {
+    didPromptBackgroundThisSession = false;
+    return false;
+  }
+
+  // 인앱 동의 직후 시스템 런타임 권한 요청
   const { status } = await Location.requestBackgroundPermissionsAsync();
   if (status === "granted") {
     didPromptBackgroundThisSession = false;
