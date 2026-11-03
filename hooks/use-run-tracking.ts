@@ -1,6 +1,10 @@
 import { RUN_LOCATION_TRACKING } from "@/constants/locationTracking";
 import { requestLocationPermission } from "@/hooks/use-location-permission";
-import { openPermissionModal } from "@/store/usePermissionModalStore";
+import {
+  beginSystemPermissionPrompt,
+  endSystemPermissionPrompt,
+  openPermissionModal,
+} from "@/store/usePermissionModalStore";
 import { useRunStore } from "@/store/useRunStore";
 import { LOCATION_TASK_NAME } from "@/tasks/backgroundLocationTask";
 import {
@@ -36,7 +40,10 @@ const promptBackgroundDisclosure = () =>
     openPermissionModal({
       kind: "backgroundLocation",
       purpose: "disclose",
-      onConfirm: () => resolve(true),
+      onConfirm: () => {
+        beginSystemPermissionPrompt();
+        resolve(true);
+      },
       onCancel: () => resolve(false),
     });
   });
@@ -80,11 +87,15 @@ export const ensureBackgroundPermission = async (
     return false;
   }
 
-  // 인앱 동의 직후 시스템 런타임 권한 요청
-  const { status } = await Location.requestBackgroundPermissionsAsync();
-  if (status === "granted") {
-    didPromptBackgroundThisSession = false;
-    return true;
+  try {
+    // 인앱 동의 직후 시스템 런타임 권한 요청
+    const { status } = await Location.requestBackgroundPermissionsAsync();
+    if (status === "granted") {
+      didPromptBackgroundThisSession = false;
+      return true;
+    }
+  } finally {
+    endSystemPermissionPrompt();
   }
 
   promptBackgroundSettings();

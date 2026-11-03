@@ -2,7 +2,11 @@ import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
 import { AppState, Linking } from "react-native";
 
-import { openPermissionModal } from "@/store/usePermissionModalStore";
+import {
+  beginSystemPermissionPrompt,
+  endSystemPermissionPrompt,
+  openPermissionModal,
+} from "@/store/usePermissionModalStore";
 
 type PermissionState = boolean | null;
 
@@ -21,7 +25,11 @@ const promptForegroundDisclosure = () =>
     openPermissionModal({
       kind: "location",
       purpose: "disclose",
-      onConfirm: () => resolve(true),
+      onConfirm: () => {
+        // close()가 다음 모달을 띄우기 전에 시스템 팝업 구간을 잠금
+        beginSystemPermissionPrompt();
+        resolve(true);
+      },
       onCancel: () => resolve(false),
     });
   });
@@ -53,6 +61,7 @@ export const syncLocationPermission = async (
   if (inFlight) return inFlight;
 
   inFlight = (async () => {
+    let holdingSystemPrompt = false;
     try {
       let permission = await Location.getForegroundPermissionsAsync();
 
@@ -67,8 +76,11 @@ export const syncLocationPermission = async (
           return false;
         }
 
+        holdingSystemPrompt = true;
         // 인앱 동의 직후 시스템 런타임 권한 요청
         permission = await Location.requestForegroundPermissionsAsync();
+        holdingSystemPrompt = false;
+        endSystemPermissionPrompt();
       }
 
       if (permission.status === "granted") {
@@ -90,6 +102,9 @@ export const syncLocationPermission = async (
       notify(false);
       return false;
     } finally {
+      if (holdingSystemPrompt) {
+        endSystemPermissionPrompt();
+      }
       inFlight = null;
     }
   })();
